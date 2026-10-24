@@ -1,9 +1,10 @@
 ﻿'use client'
 
 import { useEffect, useRef } from 'react'
-import { ArrowDown, ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
+import { InstallDropdown } from './install-dropdown'
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const range = (v: number, a: number, b: number) => clamp((v - a) / (b - a))
@@ -214,13 +215,7 @@ export function Hero() {
           </p>
 
           <div className="mt-6 flex items-center gap-2">
-            <a
-              href="#install"
-              className="inline-flex h-11 items-center gap-2 bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-signal-ink"
-            >
-              Install
-              <ArrowDown className="size-4" aria-hidden="true" />
-            </a>
+            <InstallDropdown />
             <a
               href={REPO_URL}
               target="_blank"
@@ -339,13 +334,7 @@ export function Hero() {
             hardware. Your data.
           </p>
           <div className="flex items-center gap-2">
-            <a
-              href="#install"
-              className="inline-flex h-11 items-center gap-2 bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-signal-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-              Install Evershade
-              <ArrowDown className="size-4" aria-hidden="true" />
-            </a>
+            <InstallDropdown />
             <a
               href={REPO_URL}
               target="_blank"
