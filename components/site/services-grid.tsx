@@ -1,15 +1,42 @@
-﻿import { Box, Cpu, Database, Eye, Lock, Server, Terminal, Wifi, Zap } from 'lucide-react'
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { Brain, Bug, Code2, Database, Eye, Lock, Network, Terminal, Webhook, Workflow } from 'lucide-react'
 import { SERVICES, TIER_LABEL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
-const TIER_ICON: Record<string, typeof Box> = {
-  orchestrator: Zap,
-  core: Server,
-  optional: Box,
-  client: Terminal,
+const SERVICE_ICON: Record<string, typeof Brain> = {
+  greenie: Workflow,    // orchestrator & API backend
+  slinker: Code2,        // code execution engine
+  trapper: Bug,          // web scraping & crawling
+  gobber: Database,      // persistent storage & knowledge graph
+  shrewd: Brain,          // LLM provider abstraction
+  sneaker: Eye,           // metrics, traces, logs
+  hider: Lock,            // encrypted secrets management
+  poltergeist: Webhook,   // notifications & async delivery
+  slammer: Network,       // React web dashboard
+  speedy: Terminal,       // CLI
 }
 
 export function ServicesGrid() {
+  const gridRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = gridRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('visible')
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.05 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section id="services" aria-labelledby="services-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
@@ -21,9 +48,9 @@ export function ServicesGrid() {
         lead="Each service has a single responsibility, a public API, and runs in its own container. Mix and match via compose profiles."
       />
 
-      <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:mt-24">
+      <div ref={gridRef} className="mt-16 stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:mt-24">
         {SERVICES.map((service) => {
-          const Icon = TIER_ICON[service.tier] || Box
+          const Icon = SERVICE_ICON[service.id] || Workflow
           return (
             <div
               key={service.id}

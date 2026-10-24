@@ -176,6 +176,53 @@
   transform: translateY(0);
 }
 
+/* Staggered children animation — triggered by parent .reveal.visible or own .visible */
+.stagger > *,
+.reveal.visible .stagger > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.stagger.visible > *:nth-child(1),
+.reveal.visible .stagger > *:nth-child(1) { transition-delay: 0.05s; }
+.stagger.visible > *:nth-child(2),
+.reveal.visible .stagger > *:nth-child(2) { transition-delay: 0.1s; }
+.stagger.visible > *:nth-child(3),
+.reveal.visible .stagger > *:nth-child(3) { transition-delay: 0.15s; }
+.stagger.visible > *:nth-child(4),
+.reveal.visible .stagger > *:nth-child(4) { transition-delay: 0.2s; }
+.stagger.visible > *:nth-child(5),
+.reveal.visible .stagger > *:nth-child(5) { transition-delay: 0.25s; }
+.stagger.visible > *:nth-child(6),
+.reveal.visible .stagger > *:nth-child(6) { transition-delay: 0.3s; }
+.stagger.visible > *:nth-child(7),
+.reveal.visible .stagger > *:nth-child(7) { transition-delay: 0.35s; }
+.stagger.visible > *:nth-child(8),
+.reveal.visible .stagger > *:nth-child(8) { transition-delay: 0.4s; }
+.stagger.visible > *:nth-child(9),
+.reveal.visible .stagger > *:nth-child(9) { transition-delay: 0.45s; }
+.stagger.visible > *:nth-child(10),
+.reveal.visible .stagger > *:nth-child(10) { transition-delay: 0.5s; }
+.stagger.visible > *:nth-child(11),
+.reveal.visible .stagger > *:nth-child(11) { transition-delay: 0.55s; }
+.stagger.visible > *:nth-child(12),
+.reveal.visible .stagger > *:nth-child(12) { transition-delay: 0.6s; }
+.stagger.visible > *:nth-child(13),
+.reveal.visible .stagger > *:nth-child(13) { transition-delay: 0.65s; }
+.stagger.visible > *:nth-child(14),
+.reveal.visible .stagger > *:nth-child(14) { transition-delay: 0.7s; }
+.stagger.visible > *:nth-child(15),
+.reveal.visible .stagger > *:nth-child(15) { transition-delay: 0.75s; }
+.stagger.visible > *:nth-child(16),
+.reveal.visible .stagger > *:nth-child(16) { transition-delay: 0.8s; }
+
+.stagger.visible > *,
+.reveal.visible .stagger > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -191,9 +238,24 @@
     opacity: 1;
     transform: none;
   }
+  .stagger > * {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (max-width: 767px) {
+  /* Safe area padding for notched phones */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Fixed header needs safe area top */
+  header {
+    padding-top: env(safe-area-inset-top);
+  }
   /* Better touch targets on mobile */
   a, button {
     min-height: 44px;

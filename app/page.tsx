@@ -29,6 +29,7 @@ import { SectionReveal } from '@/components/site/section-reveal'
 import { Security } from '@/components/site/security'
 import { ServicesGrid } from '@/components/site/services-grid'
 import { SlammerPreview } from '@/components/site/slammer-preview'
+import { SystemRequirements } from '@/components/site/system-requirements'
 import { TryIt } from '@/components/site/try-it'
 import { UseCases } from '@/components/site/use-cases'
 
@@ -65,6 +66,7 @@ export default function Page() {
         {/* 04 — Get Started */}
         <SectionDivider index="04" label="Get Started" id="get-started" />
         <SectionReveal><Download /></SectionReveal>
+        <SectionReveal><SystemRequirements /></SectionReveal>
         <SectionReveal><TryIt /></SectionReveal>
         <SectionReveal><DockerCompose /></SectionReveal>
         <SectionReveal><Cli /></SectionReveal>

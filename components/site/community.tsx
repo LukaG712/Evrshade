@@ -44,7 +44,7 @@ export function Community() {
         lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service - every pull request is welcome."
       />
 
-      <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-2">
+      <div className="mt-12 stagger grid gap-4 md:mt-16 md:grid-cols-2">
         {CONTRIBUTING_PATHS.map((path) => {
           const Icon = path.icon
           return (

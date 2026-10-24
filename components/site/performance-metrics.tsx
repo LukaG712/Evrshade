@@ -46,7 +46,7 @@ export function PerformanceMetrics() {
         lead="Evershade is designed to run locally, stay fast, and keep costs low. These are the principles that guide every architectural decision."
       />
 
-      <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
+      <div className="mt-16 stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
         {GOALS.map((goal) => {
           const Icon = goal.icon
           return (

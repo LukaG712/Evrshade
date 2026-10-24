@@ -6,6 +6,7 @@ import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Ser
 import { cn } from '@/lib/utils'
 import { InstallDropdown } from './install-dropdown'
 import { DownloadDropdown } from './download-dropdown'
+import { StarCount } from './star-count'
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const range = (v: number, a: number, b: number) => clamp((v - a) / (b - a))
@@ -190,6 +191,7 @@ export function Hero() {
   if (isMobile) {
     return (
       <section id="hero-scroll" className="blueprint relative pb-10 pt-14 sm:pb-16 sm:pt-20">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/0 via-background/30 to-background/80" aria-hidden="true" />
         <div className="absolute inset-x-3 top-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inset-x-4 sm:top-4 sm:text-[11px]">
           <span className="flex items-center gap-2">
             <span className="relative flex size-1.5">
@@ -215,18 +217,23 @@ export function Hero() {
             hardware. Your data.
           </p>
 
-          <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:items-center">
+          <div className="mt-4 flex flex-col gap-2.5">
             <InstallDropdown />
-            <DownloadDropdown />
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
-            >
-              GitHub
-              <ArrowUpRight className="size-4" aria-hidden="true" />
-            </a>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+              <DownloadDropdown />
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background active:scale-[0.98]"
+              >
+                GitHub
+                <ArrowUpRight className="size-4" aria-hidden="true" />
+              </a>
+            </div>
+          </div>
+          <div className="mt-3">
+            <StarCount />
           </div>
 
           <div className="mt-6 border border-border p-4 sm:mt-8">
@@ -261,13 +268,17 @@ export function Hero() {
   return (
     <section ref={wrapRef} id="hero-scroll" aria-labelledby="hero-title" className="relative h-[300vh] md:h-[380vh]">
       <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/0 via-background/40 to-background/90" aria-hidden="true" />
         <CornerMarks />
 
         <div
           ref={hudRef}
           className="z-20 absolute inset-x-4 top-[72px] flex items-start justify-end sm:justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground md:inset-x-[max(24px,3vw)]"
         >
-          <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
+            <StarCount />
+          </div>
           <span className="flex items-center gap-2">
             <span className="relative flex size-1.5">
               <span className="animate-pulse-ring absolute inset-0 bg-signal" />

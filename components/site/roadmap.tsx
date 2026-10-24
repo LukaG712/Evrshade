@@ -60,7 +60,7 @@ export function Roadmap() {
         </a>
       </div>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 md:mt-24 lg:grid-cols-4">
+      <div className="mt-12 stagger grid gap-4 sm:grid-cols-2 md:mt-24 lg:grid-cols-4">
         {FOCUS_AREAS.map((area) => (
           <div key={area.title} className="border border-border p-5">
             <p className="font-semibold tracking-tight">{area.title}</p>

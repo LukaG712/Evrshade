@@ -17,7 +17,7 @@ export function Integrations() {
         lead="Each integration lives behind exactly one service, so swapping a provider never ripples through the platform. Ollama keeps everything on your machine."
       />
 
-      <ul className="mt-16 grid border-t border-l border-foreground md:mt-16 md:grid-cols-2 xl:grid-cols-3">
+      <ul className="mt-16 stagger grid border-t border-l border-foreground md:mt-16 md:grid-cols-2 xl:grid-cols-3">
         {INTEGRATIONS.map((g, gi) => (
           <li key={g.group} className="flex flex-col border-r border-b border-foreground p-6 md:p-8">
             <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-wider">

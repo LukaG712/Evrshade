@@ -22,7 +22,7 @@ export function DownloadDropdown() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
-          <div className="absolute right-0 top-full z-50 mt-2 w-[300px] border border-foreground bg-background p-2 shadow-lg">
+          <div className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-[300px] border border-foreground bg-background p-2 shadow-lg">
             {INSTALLERS.map((item) => {
               const Icon = item.icon
               return (

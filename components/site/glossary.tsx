@@ -22,7 +22,7 @@ export function Glossary() {
         lead="Evershade uses specific terms for its concepts. Here's what they mean."
       />
 
-      <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
+      <div className="mt-16 stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
         {GLOSSARY.map((item) => (
           <div
             key={item.term}

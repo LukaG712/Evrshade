@@ -49,7 +49,7 @@ export function Comparison() {
         lead="Evershade is a self-hosted AI agent platform where you control the infrastructure, the data, and the autonomy. Here's how it compares to the alternatives."
       />
 
-      <div className="mt-12 grid gap-6 md:mt-16 md:grid-cols-2">
+      <div className="mt-12 stagger grid gap-6 md:mt-16 md:grid-cols-2">
         {WHY_POINTS.map((point) => (
           <div key={point.title} className="border-t border-foreground pt-6">
             <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{point.title}</h3>

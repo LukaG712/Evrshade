@@ -39,20 +39,18 @@ export function Header() {
             ))}
           </ul>
         </nav>
-        <div className="flex items-center gap-2">
-          <MobileNav />
-          <div className="flex items-center gap-2">
-            <ThemeToggle className="hidden lg:flex" />
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden lg:inline-flex h-8 items-center gap-1.5 rounded-sm border border-foreground px-3.5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-              GitHub
-              <ArrowUpRight className="size-3.5" aria-hidden="true" />
-            </a>
-          </div>
+        <MobileNav />
+        <div className="hidden items-center gap-2 lg:flex">
+          <ThemeToggle />
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-foreground px-3.5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            GitHub
+            <ArrowUpRight className="size-3.5" aria-hidden="true" />
+          </a>
         </div>
       </div>
     </header>
