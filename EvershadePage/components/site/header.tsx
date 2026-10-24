@@ -14,6 +14,9 @@ const NAV = [
   { href: '#changelog', label: 'Changelog', index: '11' },
   { href: '#roadmap', label: 'Roadmap', index: '12' },
   { href: '#api', label: 'API', index: '13' },
+  { href: '#why', label: 'Why', index: '14' },
+  { href: '#use-cases', label: 'Use cases', index: '15' },
+  { href: '#slammer', label: 'Slammer', index: '16' },
 ]
 
 export function Header() {
