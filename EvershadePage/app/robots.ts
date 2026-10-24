@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://evershade.netlify.app/sitemap.xml',
+    sitemap: 'https://evrshade.netlify.app/sitemap.xml',
   }
 }
