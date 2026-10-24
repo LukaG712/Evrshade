@@ -1,39 +1,36 @@
-import { dynamic } from 'next/dynamic'
 import { ApiReference } from '@/components/site/api-reference'
 import { Architecture } from '@/components/site/architecture'
+import { BackToTop } from '@/components/site/back-to-top'
 import { ChangelogTicker } from '@/components/site/changelog-ticker'
+import { Cli } from '@/components/site/cli'
 import { Community } from '@/components/site/community'
 import { Comparison } from '@/components/site/comparison'
 import { ConfigReference } from '@/components/site/config-reference'
 import { DockerCompose } from '@/components/site/docker-compose'
+import { Download } from '@/components/site/download'
+import { Faq } from '@/components/site/faq'
 import { Footer } from '@/components/site/footer'
 import { Glossary } from '@/components/site/glossary'
 import { Harness } from '@/components/site/harness'
 import { Header } from '@/components/site/header'
 import { Hero } from '@/components/site/hero'
+import { Install } from '@/components/site/install'
 import { Integrations } from '@/components/site/integrations'
 import { KnowledgeGraph } from '@/components/site/knowledge-graph'
+import { MissionConsole } from '@/components/site/mission-console'
 import { MissionControl } from '@/components/site/mission-control'
 import { PerformanceMetrics } from '@/components/site/performance-metrics'
 import { ProjectLayout } from '@/components/site/project-layout'
 import { RequestTrace } from '@/components/site/request-trace'
 import { Roadmap } from '@/components/site/roadmap'
+import { ScrollProgress } from '@/components/site/scroll-progress'
 import { SectionDivider } from '@/components/site/section-divider'
+import { SectionReveal } from '@/components/site/section-reveal'
 import { Security } from '@/components/site/security'
 import { ServicesGrid } from '@/components/site/services-grid'
 import { SlammerPreview } from '@/components/site/slammer-preview'
 import { TryIt } from '@/components/site/try-it'
 import { UseCases } from '@/components/site/use-cases'
-
-// Lazy-load heavy interactive components that are below the fold
-const BackToTop = dynamic(() => import('@/components/site/back-to-top').then(m => ({ default: m.BackToTop })), { ssr: false })
-const Cli = dynamic(() => import('@/components/site/cli').then(m => ({ default: m.Cli })), { ssr: false })
-const Faq = dynamic(() => import('@/components/site/faq').then(m => ({ default: m.Faq })), { ssr: false })
-const Install = dynamic(() => import('@/components/site/install').then(m => ({ default: m.Install })), { ssr: false })
-const MissionConsole = dynamic(() => import('@/components/site/mission-console').then(m => ({ default: m.MissionConsole })), { ssr: false })
-const ScrollProgress = dynamic(() => import('@/components/site/scroll-progress').then(m => ({ default: m.ScrollProgress })), { ssr: false })
-const Download = dynamic(() => import('@/components/site/download').then(m => ({ default: m.Download })), { ssr: false })
-const SectionReveal = dynamic(() => import('@/components/site/section-reveal').then(m => ({ default: m.SectionReveal })), { ssr: false })
 
 export default function Page() {
   return (
