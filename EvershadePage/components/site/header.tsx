@@ -4,10 +4,14 @@ import { REPO_URL } from '@/lib/evershade'
 const NAV = [
   { href: '#console', label: 'Console', index: '02' },
   { href: '#missions', label: 'Missions', index: '03' },
+  { href: '#trace', label: 'Trace', index: '04' },
   { href: '#harness', label: 'Harness', index: '05' },
   { href: '#security', label: 'Trust', index: '06' },
   { href: '#architecture', label: 'Architecture', index: '07' },
+  { href: '#integrations', label: 'Integrations', index: '08' },
+  { href: '#cli', label: 'CLI', index: '09' },
   { href: '#install', label: 'Install', index: '10' },
+  { href: '#roadmap', label: 'Roadmap', index: '11' },
 ]
 
 export function Header() {
