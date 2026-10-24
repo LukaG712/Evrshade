@@ -7,6 +7,7 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://evrshade.netlify.app'),
   title: 'Evershade: Self-hosted AI agent platform',
   description:
     'Evershade is a self-hosted AI agent platform built as a collection of specialized microservices. Orchestrate agents, run missions, and own your data.',
