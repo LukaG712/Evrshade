@@ -45,7 +45,6 @@ export function Community() {
     <section id="community" aria-labelledby="community-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="community-title"
-        index="18"
         label="Community"
         title={<>Build <span className="text-signal">together.</span></>}
         lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service — every pull request is welcome."

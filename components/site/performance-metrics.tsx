@@ -52,7 +52,6 @@ export function PerformanceMetrics() {
     <section id="metrics" aria-labelledby="metrics-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="metrics-title"
-        index="19"
         label="Performance"
         title={<>Real <span className="text-signal">numbers.</span></>}
         lead="Evershade is designed to run on developer hardware. These metrics are collected from self-hosted instances via the Sneaker observability service."

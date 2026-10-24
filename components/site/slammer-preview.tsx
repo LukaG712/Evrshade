@@ -62,7 +62,6 @@ export function SlammerPreview() {
     <section id="slammer" aria-labelledby="slammer-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="slammer-title"
-        index="16"
         label="Slammer"
         title={
           <>

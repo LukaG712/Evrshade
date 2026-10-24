@@ -14,7 +14,7 @@ export function ChangelogTicker() {
     <section id="changelog" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <div className="grid gap-10 md:grid-cols-12">
         <div className="md:col-span-7">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'11 — Latest release'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Latest release'}</p>
           <h2 className="mt-4 text-4xl font-semibold leading-[0.9] tracking-[-0.05em] text-balance md:text-6xl lg:text-7xl">
             Always moving
             <span className="text-signal">.</span>

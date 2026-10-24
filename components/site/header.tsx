@@ -4,12 +4,12 @@ import { MobileNav } from './mobile-nav'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
-  { href: '#console', label: 'Console', index: '02' },
-  { href: '#missions', label: 'Missions', index: '03' },
-  { href: '#architecture', label: 'Architecture', index: '07' },
-  { href: '#cli', label: 'CLI', index: '09' },
-  { href: '#install', label: 'Install', index: '10' },
-  { href: '#community', label: 'Community', index: '19' },
+  { href: '#overview', label: 'Overview', index: '01' },
+  { href: '#how-it-works', label: 'How It Works', index: '02' },
+  { href: '#platform', label: 'Platform', index: '03' },
+  { href: '#get-started', label: 'Get Started', index: '04' },
+  { href: '#about', label: 'About', index: '05' },
+  { href: '#roadmap', label: 'Roadmap', index: '06' },
 ]
 
 export function Header() {

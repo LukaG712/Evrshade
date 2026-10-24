@@ -54,7 +54,6 @@ export function KnowledgeGraph() {
     <section id="knowledge-graph" aria-labelledby="kg-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="kg-title"
-        index="17"
         label="Knowledge Graph"
         title={<>Gobber<span className="text-signal">'s</span> memory.</>}
         lead="Every query enriches the system's memory. Gobber combines keyword search, vector embeddings, and graph relationships to surface context that no single method could find alone."

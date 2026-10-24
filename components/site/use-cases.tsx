@@ -61,7 +61,6 @@ export function UseCases() {
     <section id="use-cases" aria-labelledby="use-cases-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="use-cases-title"
-        index="15"
         label="Use cases"
         title={
           <>

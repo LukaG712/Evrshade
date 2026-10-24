@@ -44,7 +44,6 @@ export function Comparison() {
     <section id="why" aria-labelledby="why-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="why-title"
-        index="14"
         label="Why Evershade"
         title={
           <>

@@ -51,7 +51,6 @@ export function Harness() {
     <section id="harness" aria-labelledby="harness-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="harness-title"
-        index="05"
         label="Agent Harness"
         title={
           <>

@@ -22,7 +22,6 @@ export function Security() {
     <section id="security" aria-labelledby="security-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="security-title"
-        index="06"
         label="Trust & control"
         title={
           <>

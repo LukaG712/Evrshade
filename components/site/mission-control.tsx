@@ -42,7 +42,6 @@ export function MissionControl() {
       <div className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
         <SectionHeading
           id="missions-title"
-          index="03"
           label="Mission Control"
           title={
             <>

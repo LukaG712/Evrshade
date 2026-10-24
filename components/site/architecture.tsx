@@ -21,7 +21,6 @@ export function Architecture() {
     <section id="architecture" aria-labelledby="architecture-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="architecture-title"
-        index="07"
         label="Architecture"
         title={
           <>

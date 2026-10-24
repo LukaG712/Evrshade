@@ -7,7 +7,6 @@ export function Roadmap() {
     <section id="roadmap" aria-labelledby="roadmap-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="roadmap-title"
-        index="12"
         label="Status"
         title={
           <>

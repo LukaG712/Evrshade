@@ -7,7 +7,6 @@ export function Integrations() {
     <section id="integrations" aria-labelledby="integrations-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="integrations-title"
-        index="08"
         label="Integrations"
         title={
           <>

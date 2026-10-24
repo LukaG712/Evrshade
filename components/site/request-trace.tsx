@@ -52,7 +52,6 @@ export function RequestTrace() {
     <section id="trace" aria-labelledby="trace-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="trace-title"
-        index="04"
         label="Anatomy of a feature"
         title={
           <>

@@ -41,7 +41,6 @@ export function ApiReference() {
     <section id="api" aria-labelledby="api-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="api-title"
-        index="13"
         label="API Reference"
         title={
           <>

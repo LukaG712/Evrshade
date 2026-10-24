@@ -115,7 +115,6 @@ export function MissionConsole() {
     <section id="console" aria-labelledby="console-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="console-title"
-        index="02"
         label="Mission Console"
         title={
           <>
