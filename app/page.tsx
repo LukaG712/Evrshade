@@ -32,6 +32,7 @@ const Faq = dynamic(() => import('@/components/site/faq').then(m => ({ default: 
 const Install = dynamic(() => import('@/components/site/install').then(m => ({ default: m.Install })), { ssr: false })
 const MissionConsole = dynamic(() => import('@/components/site/mission-console').then(m => ({ default: m.MissionConsole })), { ssr: false })
 const ScrollProgress = dynamic(() => import('@/components/site/scroll-progress').then(m => ({ default: m.ScrollProgress })), { ssr: false })
+const Download = dynamic(() => import('@/components/site/download').then(m => ({ default: m.Download })), { ssr: false })
 const SectionReveal = dynamic(() => import('@/components/site/section-reveal').then(m => ({ default: m.SectionReveal })), { ssr: false })
 
 export default function Page() {
@@ -66,6 +67,7 @@ export default function Page() {
 
         {/* 04 — Get Started */}
         <SectionDivider index="04" label="Get Started" id="get-started" />
+        <SectionReveal><Download /></SectionReveal>
         <SectionReveal><TryIt /></SectionReveal>
         <SectionReveal><DockerCompose /></SectionReveal>
         <SectionReveal><Cli /></SectionReveal>

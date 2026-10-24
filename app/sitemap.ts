@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/#slammer',
     '/#config-reference',
     '/#get-started',
+    '/#download',
     '/#try-it',
     '/#docker-compose',
     '/#cli',
