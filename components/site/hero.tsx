@@ -196,7 +196,7 @@ export function Hero() {
 
         <div
           ref={hudRef}
-          className="absolute inset-x-4 top-[72px] flex items-start justify-end sm:justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground md:inset-x-[max(24px,3vw)]"
+          className="z-20 absolute inset-x-4 top-[72px] flex items-start justify-end sm:justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground md:inset-x-[max(24px,3vw)]"
         >
           <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
           <span className="flex items-center gap-2">
@@ -235,7 +235,7 @@ export function Hero() {
           </g>
         </svg>
 
-        <ul aria-label="Evershade services">
+        <ul className="z-10" aria-label="Evershade services">
           {SERVICES.map((svc, i) => (
             <ServiceNode
               key={svc.id}
@@ -253,7 +253,7 @@ export function Hero() {
 
         <div
           ref={titleRef}
-          className="absolute right-4 left-4 opacity-0 md:left-auto md:right-[max(24px,3vw)] md:w-[40%] md:max-w-xl"
+          className="z-10 absolute right-4 left-4 opacity-0 md:left-auto md:right-[max(24px,3vw)] md:w-[40%] md:max-w-xl"
         >
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'01 — Modular services'}</p>
           <p className="mt-3 text-pretty text-lg leading-snug tracking-tight md:text-2xl">
