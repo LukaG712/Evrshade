@@ -186,3 +186,22 @@
     transform: none;
   }
 }
+
+@media (max-width: 767px) {
+  /* Better touch targets on mobile */
+  a, button {
+    min-height: 44px;
+  }
+  /* Improve table scroll on mobile */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+  /* Reduce giant footer text on very small screens */
+  footer p[aria-hidden="true"] {
+    margin-top: 8rem !important;
+  }
+}

@@ -38,7 +38,7 @@ const ENV_VARS = [
 
 export function ConfigReference() {
   return (
-    <section id="config-reference" aria-labelledby="config-reference-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="config-reference" aria-labelledby="config-reference-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="config-reference-title"
         label="Config"

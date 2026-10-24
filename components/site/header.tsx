@@ -44,7 +44,7 @@ export function Header() {
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-8 items-center gap-1.5 border border-foreground px-3 font-mono text-[11px] uppercase tracking-wider transition-colors hover:bg-foreground hover:text-background"
+            className="hidden lg:inline-flex h-8 items-center gap-1.5 border border-foreground px-3 font-mono text-[11px] uppercase tracking-wider transition-colors hover:bg-foreground hover:text-background"
           >
             GitHub
             <ArrowUpRight className="size-3.5" aria-hidden="true" />

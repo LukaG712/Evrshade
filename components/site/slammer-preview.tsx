@@ -59,7 +59,7 @@ function statusIcon(status: string) {
 
 export function SlammerPreview() {
   return (
-    <section id="slammer" aria-labelledby="slammer-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="slammer" aria-labelledby="slammer-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="slammer-title"
         label="Slammer"

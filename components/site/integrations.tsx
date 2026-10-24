@@ -4,7 +4,7 @@ import { SectionHeading } from './section-heading'
 
 export function Integrations() {
   return (
-    <section id="integrations" aria-labelledby="integrations-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="integrations" aria-labelledby="integrations-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="integrations-title"
         label="Integrations"

@@ -42,7 +42,7 @@ const STATS = [
 
 export function Community() {
   return (
-    <section id="community" aria-labelledby="community-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="community" aria-labelledby="community-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="community-title"
         label="Community"

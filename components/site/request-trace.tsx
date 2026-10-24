@@ -49,7 +49,7 @@ export function RequestTrace() {
   const N = LANES.length
 
   return (
-    <section id="trace" aria-labelledby="trace-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="trace" aria-labelledby="trace-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="trace-title"
         label="Anatomy of a feature"

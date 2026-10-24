@@ -11,7 +11,7 @@ const LATEST_CHANGES = [
 
 export function ChangelogTicker() {
   return (
-    <section id="changelog" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="changelog" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <div className="grid gap-10 md:grid-cols-12">
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Latest release'}</p>

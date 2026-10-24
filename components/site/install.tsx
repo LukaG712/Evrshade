@@ -28,7 +28,7 @@ export function Install() {
   }
 
   return (
-    <section id="install" aria-labelledby="install-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="install" aria-labelledby="install-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="install-title"
         label="Install"

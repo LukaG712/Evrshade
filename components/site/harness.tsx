@@ -48,7 +48,7 @@ const PERSISTENCE = [
 
 export function Harness() {
   return (
-    <section id="harness" aria-labelledby="harness-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="harness" aria-labelledby="harness-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="harness-title"
         label="Agent Harness"

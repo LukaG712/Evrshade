@@ -36,7 +36,7 @@ const GOALS = [
 
 export function PerformanceMetrics() {
   return (
-    <section id="metrics" aria-labelledby="metrics-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="metrics" aria-labelledby="metrics-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="metrics-title"
         label="Design goals"

@@ -4,7 +4,7 @@ import { SectionHeading } from './section-heading'
 
 export function DockerCompose() {
   return (
-    <section id="docker-compose" aria-labelledby="docker-compose-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="docker-compose" aria-labelledby="docker-compose-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="docker-compose-title"
         label="Setup"

@@ -190,7 +190,7 @@ export function Hero() {
   }, [])
 
   return (
-    <section ref={wrapRef} aria-labelledby="hero-title" className="relative h-[380vh]">
+    <section ref={wrapRef} id="hero-scroll" aria-labelledby="hero-title" className="relative h-[300vh] md:h-[380vh]">
       <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden">
         <CornerMarks />
 

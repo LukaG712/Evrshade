@@ -19,7 +19,7 @@ const needsGate = (level: AutonomyId, sensitive: boolean) =>
 
 export function Security() {
   return (
-    <section id="security" aria-labelledby="security-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
+    <section id="security" aria-labelledby="security-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="security-title"
         label="Trust & control"
