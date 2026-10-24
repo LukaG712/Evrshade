@@ -254,4 +254,3 @@ export const INTEGRATIONS: { group: string; via: string; detail: string; items: 
 ]
 
 
-export const OPEN_ITEMS = ['Sneaker: SQLite persistence for metrics, traces and logs'] as const

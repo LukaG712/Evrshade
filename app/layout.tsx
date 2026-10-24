@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { I18nProvider } from '@/lib/i18n'
 import { ServiceWorkerRegister } from '@/components/site/service-worker-register'
+import { PlausibleAnalytics } from '@/components/site/plausible-analytics'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
@@ -57,6 +60,13 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   manifest: '/site.webmanifest',
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        { url: '/api/releases', title: 'Evershade Release Feed' },
+      ],
+    },
+  },
 }
 
 export const viewport: Viewport = {
@@ -67,16 +77,56 @@ export const viewport: Viewport = {
   themeColor: [{ media: '(prefers-color-scheme: light)', color: '#fcfcfa' }, { media: '(prefers-color-scheme: dark)', color: '#1a1a2e' }],
 }
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Evershade',
+  description: 'Self-hosted AI agent platform built as a collection of specialized microservices. Orchestrate agents, run missions, and own your data.',
+  url: 'https://evrshade.netlify.app',
+  image: 'https://evrshade.netlify.app/og.png',
+  softwareVersion: '0.1.0',
+  operatingSystem: 'Linux, macOS, Windows',
+  applicationCategory: 'DeveloperApplication',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  license: 'https://opensource.org/licenses/MIT',
+  author: {
+    '@type': 'Person',
+    name: 'LukaG712',
+    url: 'https://github.com/LukaG712',
+  },
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const plausibleDomain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
+      <head>
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          strategy="afterInteractive"
+        >
+          {JSON.stringify(jsonLd)}
+        </Script>
+      </head>
       <body className="antialiased">
-        {children}
+        <I18nProvider>
+          {children}
+        </I18nProvider>
         <ServiceWorkerRegister />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#fcfcfa" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        {plausibleDomain && <PlausibleAnalytics domain={plausibleDomain} />}
       </body>
     </html>
   )

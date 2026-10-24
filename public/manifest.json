@@ -1,0 +1,21 @@
+{
+  "name": "Evershade - Self-hosted AI Agent Platform",
+  "short_name": "Evershade",
+  "description": "Self-hosted AI agent platform built as a collection of specialized microservices. Orchestrate agents, run missions, and own your data.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfcfa",
+  "theme_color": "#fcfcfa",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/og.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["developer tools", "productivity"],
+  "lang": "en",
+  "dir": "ltr"
+}

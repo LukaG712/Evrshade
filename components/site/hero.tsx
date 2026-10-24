@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
+import { useI18n } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { InstallDropdown } from './install-dropdown'
 import { DownloadDropdown } from './download-dropdown'
@@ -23,6 +24,7 @@ const DOT_SIZE: Record<Service['tier'], number> = {
 type Point = { x: number; y: number }
 
 export function Hero() {
+  const { t } = useI18n()
   const wrapRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const headRef = useRef<HTMLHeadingElement>(null)
@@ -200,7 +202,7 @@ export function Hero() {
             </span>
             {`v${VERSION}`}
           </span>
-          <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
+          <span className="hidden sm:inline">{t('hero.tagline')}</span>
         </div>
 
         <div className="relative px-3 sm:px-4">
@@ -213,8 +215,7 @@ export function Hero() {
           </h1>
 
           <p className="mt-3 max-w-md text-pretty text-sm leading-snug sm:mt-4 sm:text-base">
-            A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
-            hardware. Your data.
+            {t('hero.description')}
           </p>
 
           <div className="mt-4 flex flex-col gap-2.5">
@@ -227,7 +228,7 @@ export function Hero() {
                 rel="noreferrer"
                 className="inline-flex h-11 flex-1 items-center justify-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background active:scale-[0.98]"
               >
-                GitHub
+                {t('hero.github')}
                 <ArrowUpRight className="size-4" aria-hidden="true" />
               </a>
             </div>
@@ -237,7 +238,7 @@ export function Hero() {
           </div>
 
           <div className="mt-6 border border-border p-4 sm:mt-8">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{'10 microservices'}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{t('hero.services-label')}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {SERVICES.filter(s => s.tier === 'orchestrator' || s.tier === 'core').map(svc => (
                 <span
@@ -249,7 +250,7 @@ export function Hero() {
                 </span>
               ))}
               <span className="inline-flex items-center px-2 py-1 font-mono text-[10px] text-muted-foreground">
-                +{SERVICES.filter(s => s.tier !== 'orchestrator' && s.tier !== 'core').length} more
+                +{SERVICES.filter(s => s.tier !== 'orchestrator' && s.tier !== 'core').length} {t('hero.more-services')}
               </span>
             </div>
           </div>
@@ -258,7 +259,7 @@ export function Hero() {
             href="#overview"
             className="mt-4 flex items-center gap-2 font-mono text-sm text-signal-ink underline underline-offset-4 sm:mt-8"
           >
-            Explore all services ↓
+            {t('hero.explore')}
           </a>
         </div>
       </section>
@@ -276,7 +277,7 @@ export function Hero() {
           className="z-20 absolute inset-x-4 top-[72px] flex items-start justify-end sm:justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground md:inset-x-[max(24px,3vw)]"
         >
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
+            <span className="hidden sm:inline">{t('hero.tagline')}</span>
             <StarCount />
           </div>
           <span className="flex items-center gap-2">
@@ -335,10 +336,9 @@ export function Hero() {
           ref={titleRef}
           className="z-15 absolute right-4 left-4 opacity-0 md:left-auto md:right-[max(24px,3vw)] md:w-[40%] md:max-w-xl"
         >
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'01 - Modular services'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{t('hero.modular-services')}</p>
           <p className="mt-3 text-pretty text-lg leading-snug tracking-tight md:text-2xl">
-            Ten specialized microservices. Each has a single responsibility, talks over HTTP, and can run on its own
-            while contributing to one platform.
+            {t('hero.modular-description')}
           </p>
         </div>
 
@@ -348,8 +348,7 @@ export function Hero() {
           style={{ bottom: 'calc(var(--head-h, 20vw) + max(16px, 3vw) + 24px)' }}
         >
           <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
-            A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
-            hardware. Your data.
+            {t('hero.description')}
           </p>
           <div className="flex items-center gap-2">
             <InstallDropdown />
@@ -360,7 +359,7 @@ export function Hero() {
               rel="noreferrer"
               className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              GitHub
+              {t('hero.github')}
               <ArrowUpRight className="size-4" aria-hidden="true" />
             </a>
           </div>

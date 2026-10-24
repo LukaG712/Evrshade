@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -8,9 +8,28 @@ export function ThemeToggle({ className }: { className?: string } = {}) {
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as 'light' | 'dark' | null
-    const initial = stored || 'light'
-    applyTheme(initial)
-    setTheme(initial)
+    if (stored) {
+      applyTheme(stored)
+      setTheme(stored)
+    } else {
+      // Auto-detect system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const initial = prefersDark ? 'dark' : 'light'
+      applyTheme(initial)
+      setTheme(initial)
+    }
+
+    // Listen for system preference changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('theme')) {
+        const next = e.matches ? 'dark' : 'light'
+        applyTheme(next)
+        setTheme(next)
+      }
+    }
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
   }, [])
 
   const toggle = () => {

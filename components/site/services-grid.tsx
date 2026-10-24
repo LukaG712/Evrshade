@@ -54,7 +54,7 @@ export function ServicesGrid() {
           return (
             <div
               key={service.id}
-              className="group border border-border p-5 transition-colors hover:border-signal"
+              className="group border border-border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-signal hover:shadow-md"
             >
               <div className="flex items-center gap-2">
                 <span className="flex size-8 items-center justify-center border border-foreground/40 group-hover:border-signal">

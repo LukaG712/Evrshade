@@ -98,11 +98,42 @@
   }
 }
 
+/* Smooth scroll offset — prevents fixed header from hiding section headings */
+#overview,
+#how-it-works,
+#platform,
+#get-started,
+#about,
+#roadmap {
+  scroll-margin-top: 64px;
+}
+
+@media (min-width: 768px) {
+  #overview,
+  #how-it-works,
+  #platform,
+  #get-started,
+  #about,
+  #roadmap {
+    scroll-margin-top: 64px;
+  }
+}
+
+@keyframes blueprint-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 80px 80px;
+  }
+}
+
 @utility blueprint {
   background-image:
     linear-gradient(to right, oklch(0.15 0 0 / 6%) 1px, transparent 1px),
     linear-gradient(to bottom, oklch(0.15 0 0 / 6%) 1px, transparent 1px);
   background-size: 80px 80px;
+  animation: blueprint-drift 20s linear infinite;
 }
 
 .dark .blueprint {

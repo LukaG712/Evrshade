@@ -1,20 +1,27 @@
+'use client'
+
 import { ArrowUpRight } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
+import { useI18n } from '@/lib/i18n'
+import { BuildStatus } from './build-status'
 
 const NAV_LINKS = [
-  { href: '#overview', label: 'Overview' },
-  { href: '#how-it-works', label: 'How It Works' },
-  { href: '#platform', label: 'Platform' },
-  { href: '#get-started', label: 'Get Started' },
-  { href: '#about', label: 'About' },
-  { href: '#roadmap', label: 'Roadmap' },
+  { href: '#overview', label: 'nav.overview' },
+  { href: '#how-it-works', label: 'nav.how-it-works' },
+  { href: '#platform', label: 'nav.platform' },
+  { href: '#get-started', label: 'nav.get-started' },
+  { href: '/compare', label: 'nav.compare' },
+  { href: '#about', label: 'nav.about' },
+  { href: '#roadmap', label: 'nav.roadmap' },
 ]
 
 const RESOURCE_LINKS = [
-  { label: 'Repository', href: REPO_URL, external: true },
-  { label: 'Documentation', href: `${REPO_URL}/tree/master/docs`, external: true },
-  { label: 'Changelog', href: `${REPO_URL}/blob/master/CHANGELOG.md`, external: true },
-  { label: 'Roadmap', href: `${REPO_URL}/blob/master/ROADMAP.md`, external: true },
+  { label: 'footer.repository', href: REPO_URL, external: true },
+  { label: 'footer.documentation', href: `${REPO_URL}/tree/master/docs`, external: true },
+  { label: 'footer.changelog', href: `${REPO_URL}/blob/master/CHANGELOG.md`, external: true },
+  { label: 'footer.roadmap', href: `${REPO_URL}/blob/master/ROADMAP.md`, external: true },
+  { label: 'footer.pricing', href: '#pricing', external: false },
+  { label: 'footer.release-feed', href: '/api/releases', external: false },
 ]
 
 const PLATFORM_LINKS = [
@@ -27,8 +34,9 @@ const PLATFORM_LINKS = [
 ]
 
 export function Footer() {
+  const { t } = useI18n()
   return (
-    <footer className="mt-24 border-t border-border px-4 pt-16 md:mt-48 md:px-[max(24px,3vw)]">
+    <footer className="mt-24 border-t border-border px-4 pt-16 pb-20 md:mt-48 md:pb-16 md:px-[max(24px,3vw)]">
       <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-12 lg:gap-12">
         {/* Brand column */}
         <div className="sm:col-span-2 md:col-span-4">
@@ -42,18 +50,18 @@ export function Footer() {
             <span className="text-sm font-semibold tracking-tight">Evershade</span>
           </a>
           <p className="mt-4 max-w-xs text-pretty text-sm leading-relaxed text-muted-foreground">
-            A self-hosted AI agent platform. Your agents. Your hardware. Your data.
+            {t('footer.tagline')}
           </p>
         </div>
 
         {/* Navigation */}
         <div className="sm:col-span-1 md:col-span-2">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{'Navigation'}</p>
+          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{t('footer.navigation')}</p>
           <ul className="mt-4 space-y-2.5">
             {NAV_LINKS.map((item) => (
               <li key={item.href}>
                 <a href={item.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  {item.label}
+                  {t(item.label)}
                 </a>
               </li>
             ))}
@@ -62,7 +70,7 @@ export function Footer() {
 
         {/* Resources */}
         <div className="sm:col-span-1 md:col-span-2">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{'Resources'}</p>
+          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{t('footer.resources')}</p>
           <ul className="mt-4 space-y-2.5">
             {RESOURCE_LINKS.map((item) => (
               <li key={item.label}>
@@ -71,7 +79,7 @@ export function Footer() {
                   { ...(item.external ? { target: '_blank' as const, rel: 'noreferrer' } : {}) }
                   className="group inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  {item.label}
+                  {t(item.label)}
                   {item.external && (
                     <ArrowUpRight className="size-3 opacity-40 transition-opacity group-hover:opacity-100" aria-hidden="true" />
                   )}
@@ -83,7 +91,7 @@ export function Footer() {
 
         {/* Platform */}
         <div className="sm:col-span-2 md:col-span-4">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{'Platform'}</p>
+          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{t('footer.platform')}</p>
           <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5">
             {PLATFORM_LINKS.map((item) => (
               <li key={item.label}>
@@ -101,9 +109,12 @@ export function Footer() {
         <p className="text-xs text-muted-foreground">
           {new Date().getFullYear()} Evershade. MIT License.
         </p>
-        <p className="text-xs text-muted-foreground">
-          Self-hosted &middot; Docker &middot; Open source
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <BuildStatus />
+          <p className="text-xs text-muted-foreground">
+            {t('footer.self-hosted')}
+          </p>
+        </div>
       </div>
 
       {/* Background watermark */}

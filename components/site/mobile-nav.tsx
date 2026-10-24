@@ -3,19 +3,23 @@
 import { useEffect, useState } from 'react'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
+import { useI18n } from '@/lib/i18n'
+import { LanguageSelector } from './language-selector'
 import { ThemeToggle } from './theme-toggle'
 
-const NAV = [
-  { href: '#overview', label: 'Overview' },
-  { href: '#how-it-works', label: 'How It Works' },
-  { href: '#platform', label: 'Platform' },
-  { href: '#get-started', label: 'Get Started' },
-  { href: '#about', label: 'About' },
-  { href: '#roadmap', label: 'Roadmap' },
+const NAV_KEYS = [
+  { href: '#overview', key: 'nav.overview' },
+  { href: '#how-it-works', key: 'nav.how-it-works' },
+  { href: '#platform', key: 'nav.platform' },
+  { href: '#get-started', key: 'nav.get-started' },
+  { href: '/compare', key: 'nav.compare' },
+  { href: '#about', key: 'nav.about' },
+  { href: '#roadmap', key: 'nav.roadmap' },
 ]
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
+  const { t } = useI18n()
 
   useEffect(() => {
     if (open) {
@@ -32,7 +36,7 @@ export function MobileNav() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-foreground transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
-        aria-label="Toggle menu"
+        aria-label={t('header.toggle-menu')}
         aria-expanded={open}
       >
         {open ? <X className="size-4" /> : <Menu className="size-4" />}
@@ -45,14 +49,14 @@ export function MobileNav() {
       >
         <nav aria-label="Mobile" className="px-4 py-4">
           <ul className="space-y-2">
-            {NAV.map((item) => (
+            {NAV_KEYS.map((item) => (
               <li key={item.href}>
                 <a
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className="block rounded-lg px-3 py-3 text-base font-medium text-foreground transition-colors hover:bg-muted"
                 >
-                  {item.label}
+                  {t(item.key)}
                 </a>
               </li>
             ))}
@@ -65,9 +69,10 @@ export function MobileNav() {
               onClick={() => setOpen(false)}
               className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-sm border border-foreground px-3 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              GitHub
+              {t('hero.github')}
               <ArrowUpRight className="size-3.5" aria-hidden="true" />
             </a>
+            <LanguageSelector />
             <ThemeToggle />
           </div>
         </nav>
