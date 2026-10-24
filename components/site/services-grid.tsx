@@ -4,6 +4,7 @@ import {
 } from 'lucide-react'
 import { SERVICES, TIER_LABEL, type Service } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
+import { Counter } from './counter'
 
 const ICONS: Record<string, React.ElementType> = {
   greenie: Workflow,
@@ -71,6 +72,28 @@ export function ServicesGrid() {
             </div>
           )
         })}
+      </div>
+
+      {/* Animated stats bar */}
+      <div className="mt-16 grid grid-cols-3 gap-8 border-t border-foreground pt-8">
+        <div className="text-center">
+          <p className="text-4xl font-semibold tracking-tight text-signal md:text-5xl">
+            <Counter end={10} suffix="+" />
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Microservices</p>
+        </div>
+        <div className="text-center">
+          <p className="text-4xl font-semibold tracking-tight text-signal md:text-5xl">
+            $<Counter end={0} />
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Total cost</p>
+        </div>
+        <div className="text-center">
+          <p className="text-4xl font-semibold tracking-tight text-signal md:text-5xl">
+            <Counter end={1} />
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Platform</p>
+        </div>
       </div>
     </section>
   )

@@ -6,6 +6,7 @@ import { Hero } from '@/components/site/hero'
 import { MobileToc } from '@/components/site/mobile-toc'
 import { SectionDivider } from '@/components/site/section-divider'
 import { SectionReveal } from '@/components/site/section-reveal'
+import { SwipeNavigation } from '@/components/site/swipe-navigation'
 
 // Always-visible: load immediately
 const ServicesGrid = dynamic(() => import('@/components/site/services-grid').then(m => ({ default: m.ServicesGrid })))
@@ -47,6 +48,7 @@ export default function Page() {
       <Header />
       <MobileToc />
       <BackToTop />
+      <SwipeNavigation />
       <main id="top">
         <Hero />
 

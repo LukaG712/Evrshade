@@ -362,6 +362,8 @@ function ServiceNode({
 }) {
   const filled = svc.tier === 'core'
   const orchestrator = svc.tier === 'orchestrator'
+  // Core services get green fill; orchestrator is green; others are black or empty
+  const dotColor = orchestrator || filled ? 'bg-signal' : filled ? 'bg-foreground' : 'bg-transparent'
 
   return (
     <li>
@@ -377,7 +379,7 @@ function ServiceNode({
           )}
         />
         <div
-          className={cn('absolute inset-0', orchestrator ? 'bg-signal' : filled ? 'bg-foreground' : 'bg-transparent')}
+          className={cn('absolute inset-0', dotColor)}
           style={{ opacity: 'max(0, 1 - var(--g) * 4)' }}
         />
         {orchestrator ? (
@@ -405,7 +407,7 @@ function ServiceNode({
               <span
                 className={cn(
                   'size-1.5',
-                  orchestrator ? 'bg-signal' : filled ? 'bg-foreground' : 'border border-foreground',
+                  orchestrator || filled ? 'bg-signal' : 'border border-foreground',
                 )}
               />
               {String(index + 1).padStart(2, '0')}
