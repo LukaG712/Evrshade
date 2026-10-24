@@ -11,7 +11,7 @@ const LINKS = [
 export function Footer() {
   return (
     <footer className="mt-24 overflow-hidden border-t border-foreground px-4 pt-8 md:mt-48 md:px-[max(24px,3vw)]">
-      <div className="grid gap-6 md:grid-cols-12">
+      <div className="relative z-10 grid gap-6 md:grid-cols-12">
         <p className="max-w-sm text-pretty text-base leading-snug md:col-span-5 md:text-lg">
           You own everything. Nothing leaves your machine unless you explicitly connect an external AI provider.
         </p>
@@ -32,7 +32,7 @@ export function Footer() {
       </div>
       <p
         aria-hidden="true"
-        className="mt-16 select-none font-semibold leading-[0.75] tracking-[-0.075em] text-foreground"
+        className="relative -z-10 mt-16 select-none font-semibold leading-[0.75] tracking-[-0.075em] text-foreground"
         style={{ fontSize: 'clamp(4.5rem, 21.5vw, 26rem)' }}
       >
         Evershade<span className="text-signal">.</span>
