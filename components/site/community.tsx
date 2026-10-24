@@ -47,14 +47,7 @@ export function Community() {
         id="community-title"
         index="18"
         label="Community"
-        {
-          /* eslint-disable react/jsx-one-expression-per-line */
-          <>
-            Build
-            <span className="text-signal"> together.</span>
-          </>
-          /* eslint-enable react/jsx-one-expression-per-line */
-        }
+        title={<>Build <span className="text-signal">together.</span></>}
         lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service — every pull request is welcome."
       />
 

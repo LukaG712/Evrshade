@@ -54,14 +54,7 @@ export function PerformanceMetrics() {
         id="metrics-title"
         index="19"
         label="Performance"
-        {
-          /* eslint-disable react/jsx-one-expression-per-line */
-          <>
-            Real
-            <span className="text-signal"> numbers.</span>
-          </>
-          /* eslint-enable react/jsx-one-expression-per-line */
-        }
+        title={<>Real <span className="text-signal">numbers.</span></>}
         lead="Evershade is designed to run on developer hardware. These metrics are collected from self-hosted instances via the Sneaker observability service."
       />
 

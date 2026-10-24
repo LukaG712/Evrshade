@@ -56,14 +56,7 @@ export function KnowledgeGraph() {
         id="kg-title"
         index="17"
         label="Knowledge Graph"
-        {
-          /* eslint-disable react/jsx-one-expression-per-line */
-          <>
-            Gobber's
-            <span className="text-signal"> memory.</span>
-          </>
-          /* eslint-enable react/jsx-one-expression-per-line */
-        }
+        title={<>Gobber<span className="text-signal">'s</span> memory.</>}
         lead="Every query enriches the system's memory. Gobber combines keyword search, vector embeddings, and graph relationships to surface context that no single method could find alone."
       />
 
