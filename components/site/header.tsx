@@ -6,21 +6,9 @@ import { ThemeToggle } from './theme-toggle'
 const NAV = [
   { href: '#console', label: 'Console', index: '02' },
   { href: '#missions', label: 'Missions', index: '03' },
-  { href: '#trace', label: 'Trace', index: '04' },
-  { href: '#harness', label: 'Harness', index: '05' },
-  { href: '#security', label: 'Trust', index: '06' },
   { href: '#architecture', label: 'Architecture', index: '07' },
-  { href: '#integrations', label: 'Integrations', index: '08' },
   { href: '#cli', label: 'CLI', index: '09' },
   { href: '#install', label: 'Install', index: '10' },
-  { href: '#changelog', label: 'Changelog', index: '11' },
-  { href: '#roadmap', label: 'Roadmap', index: '12' },
-  { href: '#api', label: 'API', index: '13' },
-  { href: '#why', label: 'Why', index: '14' },
-  { href: '#use-cases', label: 'Use cases', index: '15' },
-  { href: '#slammer', label: 'Slammer', index: '16' },
-  { href: '#knowledge-graph', label: 'Graph', index: '17' },
-  { href: '#metrics', label: 'Metrics', index: '18' },
   { href: '#community', label: 'Community', index: '19' },
 ]
 
