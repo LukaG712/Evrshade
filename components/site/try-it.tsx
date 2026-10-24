@@ -1,4 +1,4 @@
-import { Play, Terminal } from 'lucide-react'
+﻿import { Play, Terminal } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 export function TryIt() {
@@ -39,10 +39,10 @@ export function TryIt() {
             <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'What you get'}</p>
             <ul className="mt-4 space-y-3">
               {[
-                'Greenie orchestrator on port 8080 — the main API entry point',
-                'Slinker code execution on port 8000 — runs tests, lint, type checks',
-                'Trapper web scraper on port 3000 — fetches and parses web content',
-                'Gobber knowledge graph on port 8085 — stores and searches project memory',
+                'Greenie orchestrator on port 8080 - the main API entry point',
+                'Slinker code execution on port 8000 - runs tests, lint, type checks',
+                'Trapper web scraper on port 3000 - fetches and parses web content',
+                'Gobber knowledge graph on port 8085 - stores and searches project memory',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm leading-snug text-muted-foreground">
                   <span className="mt-1.5 size-1 shrink-0 rounded-full bg-signal" aria-hidden="true" />

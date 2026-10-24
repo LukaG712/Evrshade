@@ -1,4 +1,4 @@
-export function SectionDivider({
+﻿export function SectionDivider({
   index,
   label,
   id,

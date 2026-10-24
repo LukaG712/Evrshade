@@ -1,4 +1,4 @@
-import { Brain, Database, Search, GitGraph, ArrowRight, Cpu, FileText, Network } from 'lucide-react'
+﻿import { Brain, Database, Search, GitGraph, ArrowRight, Cpu, FileText, Network } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const PIPELINE_STEPS = [
@@ -60,7 +60,7 @@ export function KnowledgeGraph() {
       />
 
       <div className="mt-12 md:mt-24">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.1 — Query pipeline'}</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.1: Query pipeline'}</p>
         <ol className="mt-8 grid gap-0 border-t border-foreground">
           {PIPELINE_STEPS.map((step, i) => {
             const Icon = step.icon
@@ -88,7 +88,7 @@ export function KnowledgeGraph() {
 
       <div className="mt-24 grid gap-6 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.2 — Graph entities'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.2: Graph entities'}</p>
           <ul className="mt-6 grid gap-3 border-t border-foreground sm:grid-cols-2">
             {GRAPH_ENTITIES.map((entity) => (
               <li
@@ -112,7 +112,7 @@ export function KnowledgeGraph() {
         </div>
 
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.3 — Why hybrid?'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.3: Why hybrid?'}</p>
           <dl className="mt-6 space-y-4 border-t border-foreground pt-6">
             <div>
               <dt className="font-semibold tracking-tight">Keyword (BM25)</dt>

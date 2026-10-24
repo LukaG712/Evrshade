@@ -1,4 +1,4 @@
-import { INTEGRATIONS } from '@/lib/evershade'
+﻿import { INTEGRATIONS } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
 import { SectionHeading } from './section-heading'
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, CircleDashed, Loader, Lock, Pause, Play, RotateCcw, ShieldCheck, X } from 'lucide-react'

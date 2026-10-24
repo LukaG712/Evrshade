@@ -1,4 +1,4 @@
-export function SectionHeading({
+﻿export function SectionHeading({
   label,
   title,
   lead,

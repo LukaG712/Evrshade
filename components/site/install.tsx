@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Check, Copy } from 'lucide-react'
@@ -82,7 +82,7 @@ export function Install() {
         </div>
 
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'10.1 — Profiles'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'10.1: Profiles'}</p>
           <ul className="mt-6 border-t border-foreground">
             {PROFILES.map((profile) => (
               <li key={profile.name} className="border-b border-border py-4">

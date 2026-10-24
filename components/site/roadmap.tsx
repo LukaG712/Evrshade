@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react'
+﻿import { ArrowUpRight } from 'lucide-react'
 import { OPEN_ITEMS, REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
@@ -50,7 +50,7 @@ export function Roadmap() {
             <span className="text-signal"> construction.</span>
           </>
         }
-        lead="Evershade is actively developed. These are the current focus areas and open items — not a list of finished features."
+        lead="Evershade is actively developed. These are the current focus areas and open items - not a list of finished features."
       />
 
       <div className="mt-12 grid gap-4 sm:grid-cols-2 md:mt-24 lg:grid-cols-4">

@@ -1,11 +1,11 @@
-import { Box, Cpu, Layers, Lock, Server, Terminal, Zap } from 'lucide-react'
+﻿import { Box, Cpu, Layers, Lock, Server, Terminal, Zap } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const GOALS = [
   {
     icon: Zap,
     label: 'Fast validation',
-    description: 'Deterministic checks — tests, lint, type — run in parallel. Security review adds a diff-based pass on top.',
+    description: 'Deterministic checks - tests, lint, type - run in parallel. Security review adds a diff-based pass on top.',
   },
   {
     icon: Server,

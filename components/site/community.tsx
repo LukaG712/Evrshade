@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpen, Code2, GitBranch, Heart, MessageCircle, Users } from 'lucide-react'
+﻿import { ArrowUpRight, BookOpen, Code2, GitBranch, Heart, MessageCircle, Users } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
@@ -47,7 +47,7 @@ export function Community() {
         id="community-title"
         label="Community"
         title={<>Build <span className="text-signal">together.</span></>}
-        lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service — every pull request is welcome."
+        lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service - every pull request is welcome."
       />
 
       <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-2">
@@ -81,7 +81,7 @@ export function Community() {
 
       <div className="mt-24 grid gap-8 border-t border-foreground pt-12 md:grid-cols-12">
         <div className="md:col-span-5">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.1 — By the numbers'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.1: By the numbers'}</p>
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {STATS.map((stat) => (
               <div key={stat.label} className="border border-border p-4">
@@ -93,7 +93,7 @@ export function Community() {
         </div>
 
         <div className="md:col-span-5 md:col-start-7">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.2 — How to contribute'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.2: How to contribute'}</p>
           <ol className="mt-6 space-y-3 border-t border-foreground pt-6">
             {[
               'Fork the repository and clone it locally.',

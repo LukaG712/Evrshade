@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -126,7 +126,7 @@ export function Cli() {
 
         <div className="flex min-h-[22rem] flex-col bg-foreground text-background lg:col-span-8">
           <div className="flex items-center justify-between border-b border-background/15 px-5 py-2.5 font-mono text-[10px] uppercase tracking-wider opacity-60">
-            <span>{'~/evershade — zsh'}</span>
+            <span>{'~/evershade - zsh'}</span>
             <span>{'Example output'}</span>
           </div>
           <pre className="flex-1 overflow-x-auto p-5 font-mono text-[12px] leading-relaxed md:p-6 md:text-[13px]" aria-live="polite">

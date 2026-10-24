@@ -1,4 +1,4 @@
-import { Box, Check, ChevronRight, Settings, Terminal } from 'lucide-react'
+﻿import { Box, Check, ChevronRight, Settings, Terminal } from 'lucide-react'
 import { PROFILES } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 

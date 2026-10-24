@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react'
+﻿import { Check, X } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const COMPARISON = [
@@ -23,7 +23,7 @@ const COMPARISON = [
 const WHY_POINTS = [
   {
     title: 'You own everything',
-    body: 'Your code, your data, your secrets — all stored locally. No cloud vendor, no telemetry, no surprise API bills.',
+    body: 'Your code, your data, your secrets - all stored locally. No cloud vendor, no telemetry, no surprise API bills.',
   },
   {
     title: 'Modular by design',
@@ -31,7 +31,7 @@ const WHY_POINTS = [
   },
   {
     title: 'Built for trust',
-    body: 'Approval gates, sandboxed execution, encrypted secrets, and prompt injection defense — security is the default, not an afterthought.',
+    body: 'Approval gates, sandboxed execution, encrypted secrets, and prompt injection defense - security is the default, not an afterthought.',
   },
   {
     title: 'Lightweight infra',
@@ -106,7 +106,7 @@ export function Comparison() {
 
       {/* Desktop: full comparison table */}
       <div className="hidden mt-16 md:block md:mt-32">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'14.1 — Feature comparison'}</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'14.1: Feature comparison'}</p>
         <div className="mt-6 overflow-x-auto border-t border-foreground">
           <table className="w-full min-w-[640px] text-sm">
             <thead>

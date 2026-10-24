@@ -1,4 +1,4 @@
-import { BookOpen } from 'lucide-react'
+﻿import { BookOpen } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const GLOSSARY = [
@@ -10,7 +10,7 @@ const GLOSSARY = [
   { term: 'Workstation', def: 'A full VM isolation environment for untrusted code. More isolated than a container, slower to start.' },
   { term: 'Harness', def: 'The framework that manages droids, skills, and workstations. It handles scheduling, isolation, and recovery.' },
   { term: 'Spec mode', def: 'A mode where the droid works from a specification document rather than direct instructions.' },
-  { term: 'Hook', def: 'A callback triggered at lifecycle events — before execution, after validation, on failure, etc.' },
+  { term: 'Hook', def: 'A callback triggered at lifecycle events - before execution, after validation, on failure, etc.' },
   { term: 'Approval gate', def: 'A pause point where human review is required before a sensitive operation proceeds.' },
   { term: 'Fix-revalidate', def: 'The automatic loop where failed checks become fix features, are re-run, and re-validated.' },
   { term: 'SSE', def: 'Server-Sent Events. Real-time log streaming from running missions to the dashboard or CLI.' },

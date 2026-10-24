@@ -1,4 +1,4 @@
-import { SectionHeading } from './section-heading'
+﻿import { SectionHeading } from './section-heading'
 
 const HARNESS = [
   {
@@ -84,7 +84,7 @@ export function Harness() {
 
       <div className="mt-24 grid gap-10 md:mt-32 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-4">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'05.1 — Workstations'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'05.1: Workstations'}</p>
           <h3 className="mt-4 text-balance text-4xl font-semibold leading-[0.95] tracking-[-0.04em] md:text-5xl">
             A computer for every agent.
           </h3>

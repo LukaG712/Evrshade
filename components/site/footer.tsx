@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react'
+﻿import { ArrowUpRight } from 'lucide-react'
 import { REPO_URL, VERSION } from '@/lib/evershade'
 
 const LINKS = [

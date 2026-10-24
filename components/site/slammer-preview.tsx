@@ -1,4 +1,4 @@
-import { Activity, CheckCircle, Clock, AlertTriangle, Terminal, BarChart3, Shield, Play, Pause } from 'lucide-react'
+﻿import { Activity, CheckCircle, Clock, AlertTriangle, Terminal, BarChart3, Shield, Play, Pause } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const DASHBOARD_PANELS = [
@@ -70,7 +70,7 @@ export function SlammerPreview() {
             <span className="text-muted-foreground">Control everything.</span>
           </>
         }
-        lead="Slammer is the React web dashboard. Monitor missions, approve sensitive operations, watch agents work, and review logs — all from a single interface."
+        lead="Slammer is the React web dashboard. Monitor missions, approve sensitive operations, watch agents work, and review logs - all from a single interface."
       />
 
       {/* Dashboard mockup */}
@@ -83,7 +83,7 @@ export function SlammerPreview() {
               <span className="size-2.5 rounded-full border border-foreground/30" />
               <span className="size-2.5 rounded-full border border-foreground/30" />
             </div>
-            <span className="ml-3 font-mono text-[11px] text-muted-foreground">Slammer — Evershade Dashboard</span>
+            <span className="ml-3 font-mono text-[11px] text-muted-foreground">Slammer - Evershade Dashboard</span>
           </div>
 
           {/* Top bar */}
@@ -206,7 +206,7 @@ export function SlammerPreview() {
           },
           {
             title: 'Approval queue',
-            body: 'Sensitive operations wait here. Review the concrete action — not model-written justification — and approve or deny with one click.',
+            body: 'Sensitive operations wait here. Review the concrete action - not model-written justification - and approve or deny with one click.',
           },
           {
             title: 'Live logs',
