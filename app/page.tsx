@@ -1,45 +1,50 @@
 'use client'
 
-import { ApiReference } from '@/components/site/api-reference'
-import { Architecture } from '@/components/site/architecture'
-import { BackToTop } from '@/components/site/back-to-top'
-import { Changelog } from '@/components/site/changelog'
-import { MobileToc } from '@/components/site/mobile-toc'
-import { Cli } from '@/components/site/cli'
-import { Community } from '@/components/site/community'
-import { Comparison } from '@/components/site/comparison'
-import { ConfigReference } from '@/components/site/config-reference'
-import { Contributing } from '@/components/site/contributing'
-import { DockerCompose } from '@/components/site/docker-compose'
-import { Download } from '@/components/site/download'
-import { Faq } from '@/components/site/faq'
-import { Footer } from '@/components/site/footer'
-import { Glossary } from '@/components/site/glossary'
-import { Harness } from '@/components/site/harness'
-import { Header } from '@/components/site/header'
-import { Hero } from '@/components/site/hero'
-import { Install } from '@/components/site/install'
-import { Integrations } from '@/components/site/integrations'
-import { KnowledgeGraph } from '@/components/site/knowledge-graph'
-import { MigrationGuide } from '@/components/site/migration-guide'
-import { Pricing } from '@/components/site/pricing'
-import { MissionConsole } from '@/components/site/mission-console'
-import { MissionControl } from '@/components/site/mission-control'
-import { PerformanceMetrics } from '@/components/site/performance-metrics'
-import { ProjectLayout } from '@/components/site/project-layout'
-import { RequestTrace } from '@/components/site/request-trace'
-import { Roadmap } from '@/components/site/roadmap'
-import { ScrollProgress } from '@/components/site/scroll-progress'
+import dynamic from 'next/dynamic'
 import { SectionDivider } from '@/components/site/section-divider'
-import { SectionReveal } from '@/components/site/section-reveal'
-import { Security } from '@/components/site/security'
-import { ServicesGrid } from '@/components/site/services-grid'
-import { SlammerPreview } from '@/components/site/slammer-preview'
-import { SystemRequirements } from '@/components/site/system-requirements'
-import { Testimonials } from '@/components/site/testimonials'
-import { TryIt } from '@/components/site/try-it'
-import { UseCases } from '@/components/site/use-cases'
 import { useI18n } from '@/lib/i18n'
+
+// Always-visible: load immediately
+const ScrollProgress = dynamic(() => import('@/components/site/scroll-progress').then(m => ({ default: m.ScrollProgress })))
+const BackToTop = dynamic(() => import('@/components/site/back-to-top').then(m => ({ default: m.BackToTop })))
+const MobileToc = dynamic(() => import('@/components/site/mobile-toc').then(m => ({ default: m.MobileToc })))
+const Header = dynamic(() => import('@/components/site/header').then(m => ({ default: m.Header })))
+const Hero = dynamic(() => import('@/components/site/hero').then(m => ({ default: m.Hero })))
+const SectionReveal = dynamic(() => import('@/components/site/section-reveal').then(m => ({ default: m.SectionReveal })))
+const Footer = dynamic(() => import('@/components/site/footer').then(m => ({ default: m.Footer })))
+
+// Below-the-fold: lazy-load only when scrolled into view
+const ServicesGrid = dynamic(() => import('@/components/site/services-grid').then(m => ({ default: m.ServicesGrid })))
+const MissionConsole = dynamic(() => import('@/components/site/mission-console').then(m => ({ default: m.MissionConsole })))
+const MissionControl = dynamic(() => import('@/components/site/mission-control').then(m => ({ default: m.MissionControl })))
+const RequestTrace = dynamic(() => import('@/components/site/request-trace').then(m => ({ default: m.RequestTrace })))
+const Architecture = dynamic(() => import('@/components/site/architecture').then(m => ({ default: m.Architecture })))
+const KnowledgeGraph = dynamic(() => import('@/components/site/knowledge-graph').then(m => ({ default: m.KnowledgeGraph })))
+const ProjectLayout = dynamic(() => import('@/components/site/project-layout').then(m => ({ default: m.ProjectLayout })))
+const Harness = dynamic(() => import('@/components/site/harness').then(m => ({ default: m.Harness })))
+const Security = dynamic(() => import('@/components/site/security').then(m => ({ default: m.Security })))
+const Integrations = dynamic(() => import('@/components/site/integrations').then(m => ({ default: m.Integrations })))
+const SlammerPreview = dynamic(() => import('@/components/site/slammer-preview').then(m => ({ default: m.SlammerPreview })))
+const ConfigReference = dynamic(() => import('@/components/site/config-reference').then(m => ({ default: m.ConfigReference })))
+const Download = dynamic(() => import('@/components/site/download').then(m => ({ default: m.Download })))
+const SystemRequirements = dynamic(() => import('@/components/site/system-requirements').then(m => ({ default: m.SystemRequirements })))
+const TryIt = dynamic(() => import('@/components/site/try-it').then(m => ({ default: m.TryIt })))
+const DockerCompose = dynamic(() => import('@/components/site/docker-compose').then(m => ({ default: m.DockerCompose })))
+const Cli = dynamic(() => import('@/components/site/cli').then(m => ({ default: m.Cli })))
+const Install = dynamic(() => import('@/components/site/install').then(m => ({ default: m.Install })))
+const UseCases = dynamic(() => import('@/components/site/use-cases').then(m => ({ default: m.UseCases })))
+const Comparison = dynamic(() => import('@/components/site/comparison').then(m => ({ default: m.Comparison })))
+const MigrationGuide = dynamic(() => import('@/components/site/migration-guide').then(m => ({ default: m.MigrationGuide })))
+const Pricing = dynamic(() => import('@/components/site/pricing').then(m => ({ default: m.Pricing })))
+const PerformanceMetrics = dynamic(() => import('@/components/site/performance-metrics').then(m => ({ default: m.PerformanceMetrics })))
+const ApiReference = dynamic(() => import('@/components/site/api-reference').then(m => ({ default: m.ApiReference })))
+const Glossary = dynamic(() => import('@/components/site/glossary').then(m => ({ default: m.Glossary })))
+const Faq = dynamic(() => import('@/components/site/faq').then(m => ({ default: m.Faq })))
+const Testimonials = dynamic(() => import('@/components/site/testimonials').then(m => ({ default: m.Testimonials })))
+const Changelog = dynamic(() => import('@/components/site/changelog').then(m => ({ default: m.Changelog })))
+const Roadmap = dynamic(() => import('@/components/site/roadmap').then(m => ({ default: m.Roadmap })))
+const Contributing = dynamic(() => import('@/components/site/contributing').then(m => ({ default: m.Contributing })))
+const Community = dynamic(() => import('@/components/site/community').then(m => ({ default: m.Community })))
 
 export default function Page() {
   const { t } = useI18n()
