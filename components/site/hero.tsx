@@ -253,7 +253,7 @@ export function Hero() {
 
         <div
           ref={titleRef}
-          className="z-10 absolute right-4 left-4 opacity-0 md:left-auto md:right-[max(24px,3vw)] md:w-[40%] md:max-w-xl"
+          className="z-15 absolute right-4 left-4 opacity-0 md:left-auto md:right-[max(24px,3vw)] md:w-[40%] md:max-w-xl"
         >
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'01 — Modular services'}</p>
           <p className="mt-3 text-pretty text-lg leading-snug tracking-tight md:text-2xl">
