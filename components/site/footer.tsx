@@ -26,11 +26,12 @@ export function Footer() {
         <div className="md:col-span-2">
           <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Navigation</p>
           <ul className="mt-4 space-y-2">
-            {['Overview', 'How It Works', 'Platform', 'Get Started', 'About', 'Roadmap'].map((label) => {
-              const id = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')
+            {['Overview', 'How It Works', 'Platform', 'Get Started', 'About', 'Roadmap', 'Blog', 'Compare'].map((label) => {
+              const isPage = label === 'Blog' || label === 'Compare'
+              const href = isPage ? `/${label.toLowerCase()}` : `#${label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')}`
               return (
                 <li key={label}>
-                  <a href={`#${id}`} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <a href={href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                     {label}
                   </a>
                 </li>
