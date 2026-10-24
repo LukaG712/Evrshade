@@ -8,6 +8,17 @@ const LINKS = [
   ['Documentation', `${REPO_URL}/tree/main/docs`],
 ]
 
+const SUBPAGES = [
+  ['Install', '/subpage/docs/install'],
+  ['Configuration', '/subpage/docs/configuration'],
+  ['Architecture', '/subpage/docs/architecture'],
+  ['Security', '/subpage/docs/security'],
+  ['Services', '/subpage/services'],
+  ['Compare', '/subpage/compare'],
+  ['Pricing', '/subpage/pricing'],
+  ['Community', '/subpage/community'],
+]
+
 export function Footer() {
   return (
     <footer className="mt-32 overflow-hidden border-t border-foreground px-4 pt-10 pb-20 md:mt-48 md:pb-16 md:px-[max(24px,3vw)]">
@@ -15,7 +26,16 @@ export function Footer() {
         <p className="max-w-sm text-pretty text-lg leading-snug md:col-span-5">
           You own everything. Nothing leaves your machine unless you explicitly connect an external AI provider.
         </p>
-        <ul className="grid grid-cols-2 gap-x-8 gap-y-3 md:col-span-4 md:col-start-7">
+        <ul className="grid grid-cols-2 gap-x-8 gap-y-3 md:col-span-3 md:col-start-7">
+          {SUBPAGES.map(([label, href]) => (
+            <li key={label}>
+              <a href={href} className="text-sm transition-colors hover:text-signal-ink">
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <ul className="grid grid-cols-2 gap-x-8 gap-y-3 md:col-span-2">
           {LINKS.map(([label, href]) => (
             <li key={label}>
               <a href={href} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-1 text-sm hover:text-signal-ink">
