@@ -92,8 +92,8 @@ export function ApiReference() {
 
       <p className="mt-6 text-xs text-muted-foreground">
         Full API documentation →{' '}
-        <a href={`${REPO_URL}/tree/main/docs`} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-signal-ink">
-          {REPO_URL}/tree/main/docs
+        <a href={`${REPO_URL}/tree/master/docs`} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-signal-ink">
+          {REPO_URL}/tree/master/docs
         </a>
       </p>
     </section>

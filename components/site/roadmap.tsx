@@ -82,7 +82,7 @@ export function Roadmap() {
           </div>
         </div>
         <a
-          href={`${REPO_URL}/blob/main/ROADMAP.md`}
+          href={`${REPO_URL}/blob/master/ROADMAP.md`}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider hover:text-signal-ink"

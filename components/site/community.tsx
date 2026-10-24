@@ -14,15 +14,15 @@ const CONTRIBUTING_PATHS = [
     icon: BookOpen,
     title: 'Architecture Docs',
     description: 'Understand the system before you touch it. Service boundaries, data flow, and design decisions are documented.',
-    link: `${REPO_URL}/tree/main/docs`,
+    link: `${REPO_URL}/tree/master/docs`,
     linkLabel: 'Read docs',
   },
   {
     icon: GitBranch,
     title: 'Plugin Registry',
     description: 'Build a custom skill, droid, or tool and publish it to the community registry. Plugins are self-contained and versioned.',
-    link: `${REPO_URL}/tree/main/plugins`,
-    linkLabel: 'Plugin template',
+    link: `${REPO_URL}/tree/master/docs/DEVELOPMENT.md`,
+    linkLabel: 'Dev guide',
   },
   {
     icon: MessageCircle,

@@ -63,7 +63,7 @@ export function ChangelogTicker() {
             ))}
           </div>
           <a
-            href={`${REPO_URL}/blob/main/CHANGELOG.md`}
+            href={`${REPO_URL}/blob/master/CHANGELOG.md`}
             target="_blank"
             rel="noreferrer"
             className="group mt-6 inline-flex items-center gap-1 text-sm font-medium underline underline-offset-2 hover:text-signal-ink"
