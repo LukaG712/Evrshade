@@ -7,35 +7,39 @@ import { SectionHeading } from './section-heading'
 const FAQ = [
   {
     q: 'Do I need a GPU?',
-    a: 'No. Evershade runs entirely on CPU. If you use cloud models (OpenAI, Anthropic, Google), all heavy lifting happens on their servers. Local models via Ollama also run on CPU, though they will be slower.',
+    a: 'For cloud models like GPT-4 or Claude, no — all processing happens on the provider servers, so any machine works. For local models via Ollama, a GPU is not required but strongly recommended: without one, models run on CPU and will be noticeably slower, especially for larger models (7B+ parameters). A mid-range NVIDIA GPU (GTX 1660 or better) makes local models practical for everyday use.',
+  },
+  {
+    q: 'Is Evershade free?',
+    a: 'Evershade itself is free and open-source under the MIT license. You can self-host it at no cost. However, using cloud AI models (OpenAI, Anthropic, Google) requires your own API key and billing with those providers. Local models via Ollama are free to run on your hardware. Note: this pricing model may change in the future. The core platform will remain open-source, but commercial tiers could be introduced.',
   },
   {
     q: 'Can I use my own API key?',
-    a: 'Yes. Evershade is designed to be self-hosted. You provide your own API keys for the models you want to use. Your data never leaves your machine except for the model API calls you explicitly make.',
+    a: 'Yes. You provide your own API keys for whichever models you want to use. Evershade never stores or transmits your keys anywhere except to the model provider you configure. Your data stays on your machine except for the explicit model API calls you make.',
   },
   {
     q: 'How much disk space does it need?',
-    a: 'The minimal profile (4 core services) uses approximately 500MB of disk space. The full profile with all 10 services and the dashboard uses around 1.5GB. Docker images are shared where possible.',
+    a: 'The minimal profile (4 core services) uses about 500MB. The full profile with all 10 services and the dashboard uses around 1.5GB. If you run local models via Ollama, add 4-8GB per model depending on size. Docker images share layers where possible to save space.',
   },
   {
     q: 'Is it production-ready?',
-    a: 'Evershade is under active development. It is suitable for development and testing workflows. For production use, review the security documentation and consider the current open items in the roadmap.',
+    a: 'Evershade is under active development and best suited for development and testing workflows right now. Core services are stable, but some features are still being built. For production use, review the security docs, test thoroughly in your environment, and check the roadmap for open items.',
   },
   {
     q: 'Can I run it on a VPS?',
-    a: 'Yes. Any machine with Docker and at least 2GB of RAM can run the minimal profile. A 4GB+ machine is recommended for the full profile. Evershade is designed to be lightweight and self-hosted.',
+    a: 'Yes. A VPS with Docker and at least 2GB of RAM can run the minimal profile. For the full profile with all services, 4GB+ RAM is recommended. If you want to run local models, you will need a GPU-enabled VPS — most standard VPS providers do not offer GPUs, so cloud models are more practical for that use case.',
   },
   {
     q: 'What models does it support?',
-    a: 'Via the Shrewd service, Evershade supports OpenAI (gpt-4o), Anthropic (Claude), Google (Gemini), and any OpenAI-compatible API. Local models via Ollama are also supported for offline use.',
+    a: 'Via the Shrewd service, Evershade supports OpenAI (GPT-4o, GPT-3.5), Anthropic (Claude), Google (Gemini), and any OpenAI-compatible API endpoint. For offline use, local models via Ollama are supported — you can run models like Llama 3, Mistral, or Phi directly on your hardware.',
   },
   {
     q: 'How do I update Evershade?',
-    a: 'Pull the latest changes from the repository, then rebuild your containers: git pull && docker compose --profile standard up -d --build. The version-manifest.json tracks service versions.',
+    a: 'Pull the latest code and rebuild: git pull && docker compose --profile standard up -d --build. The version-manifest.json file tracks which version each service is running. Always check the changelog before updating to see what changed.',
   },
   {
     q: 'Is my data private?',
-    a: 'Yes. All data is stored locally in SQLite databases. The only external calls are to the model APIs you configure. Logs and secrets are redacted by default. No telemetry or analytics are sent.',
+    a: 'Yes. All data is stored locally in SQLite databases on your machine. The only external calls are to the model APIs you explicitly configure. Logs and secrets are redacted by default, and Evershade sends no telemetry or analytics. You own everything.',
   },
 ] as const
 
