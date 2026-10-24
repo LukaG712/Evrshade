@@ -188,8 +188,8 @@ export function Hero() {
 
   if (isMobile) {
     return (
-      <section id="hero-scroll" className="blueprint relative pb-16 pt-20">
-        <div className="absolute inset-x-4 top-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+      <section id="hero-scroll" className="blueprint relative pb-10 pt-14 sm:pb-16 sm:pt-20">
+        <div className="absolute inset-x-3 top-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inset-x-4 sm:top-4 sm:text-[11px]">
           <span className="flex items-center gap-2">
             <span className="relative flex size-1.5">
               <span className="animate-pulse-ring absolute inset-0 bg-signal" />
@@ -199,22 +199,22 @@ export function Hero() {
           </span>
         </div>
 
-        <div className="relative px-4">
+        <div className="relative px-3 sm:px-4">
           <h1
             id="hero-title"
             className="font-semibold leading-[0.85] tracking-[-0.05em] text-foreground"
-            style={{ fontSize: 'clamp(3rem, 18vw, 8rem)' }}
+            style={{ fontSize: 'clamp(2.5rem, 16vw, 6rem)' }}
           >
             Evershade
             <span className="text-signal">.</span>
           </h1>
 
-          <p className="mt-4 max-w-md text-pretty text-base leading-snug">
+          <p className="mt-3 max-w-md text-pretty text-sm leading-snug sm:mt-4 sm:text-base">
             A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
             hardware. Your data.
           </p>
 
-          <div className="mt-6 flex items-center gap-2">
+          <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:items-center">
             <InstallDropdown />
             <a
               href={REPO_URL}
@@ -227,7 +227,7 @@ export function Hero() {
             </a>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 gap-2">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8">
             {SERVICES.map((svc, i) => (
               <div key={svc.id} className="border border-border p-3">
                 <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -242,7 +242,7 @@ export function Hero() {
 
           <a
             href="#overview"
-            className="mt-8 flex items-center gap-2 font-mono text-sm text-signal-ink underline underline-offset-4"
+            className="mt-4 flex items-center gap-2 font-mono text-sm text-signal-ink underline underline-offset-4 sm:mt-8"
           >
             Skip to content ↓
           </a>

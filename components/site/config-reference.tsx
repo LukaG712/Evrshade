@@ -62,14 +62,14 @@ export function ConfigReference() {
               )}
               <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{group.category}</p>
             </div>
-            <div className="mt-4 overflow-hidden border border-border">
+            <div className="mt-4 overflow-hidden border border-border sm:overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-card">
-                    <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:px-4 sm:py-3">
                       Variable
                     </th>
-                    <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:px-4 sm:py-3">
                       Description
                     </th>
                   </tr>
@@ -77,8 +77,8 @@ export function ConfigReference() {
                 <tbody>
                   {group.vars.map((v, i) => (
                     <tr key={v.name} className={i < group.vars.length - 1 ? 'border-b border-border' : ''}>
-                      <td className="px-4 py-3 font-mono text-xs font-semibold">{v.name}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{v.desc}</td>
+                      <td className="px-3 py-2.5 font-mono text-xs font-semibold sm:px-4 sm:py-3">{v.name}</td>
+                      <td className="px-3 py-2.5 text-muted-foreground sm:px-4 sm:py-3">{v.desc}</td>
                     </tr>
                   ))}
                 </tbody>

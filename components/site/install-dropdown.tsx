@@ -65,10 +65,10 @@ export function InstallDropdown() {
   const curlCmd = getCurlCommand(os)
 
   return (
-    <div className="flex flex-col gap-2" ref={dropdownRef}>
+    <div className="flex w-full flex-col gap-2 sm:w-auto" ref={dropdownRef}>
       {/* One-liner box */}
       <div className="border border-foreground">
-        <div className="flex items-center justify-between border-b border-foreground px-3 py-1.5">
+        <div className="flex items-center justify-between border-b border-foreground px-2 py-1.5 sm:px-3">
           <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
             {os === 'windows' ? 'powershell' : 'terminal'}
           </span>
@@ -81,8 +81,8 @@ export function InstallDropdown() {
             {copied ? 'Copied' : 'Copy'}
           </button>
         </div>
-        <div className="p-3">
-          <code className="font-mono text-[11px] leading-relaxed">{curlCmd}</code>
+        <div className="p-2 sm:p-3">
+          <code className="break-all font-mono text-[10px] leading-relaxed sm:text-[11px]">{curlCmd}</code>
         </div>
       </div>
 
@@ -91,14 +91,14 @@ export function InstallDropdown() {
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="inline-flex h-11 items-center gap-2 bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-signal-ink"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-signal-ink sm:w-auto sm:px-5"
         >
           Install Evershade
           <ChevronDown className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full z-50 mt-2 w-[320px] border border-foreground bg-background p-2 shadow-lg">
+          <div className="absolute right-0 top-full z-50 mt-2 w-full border border-foreground bg-background p-2 shadow-lg sm:w-[320px]">
             {installers.map((item) => {
               const Icon = item.icon
               return (

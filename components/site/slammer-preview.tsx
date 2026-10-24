@@ -228,27 +228,28 @@ export function SlammerPreview() {
           </div>
 
           {/* Top bar */}
-          <div className="flex items-center justify-between border-b border-border px-6 py-3">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-2 font-mono text-[11px] text-signal">
-                <span className="size-2 animate-pulse rounded-full bg-signal" aria-hidden="true" />
+          <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-6 sm:py-3">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <span className="flex items-center gap-1.5 font-mono text-[10px] sm:text-[11px] text-signal">
+                <span className="size-1.5 animate-pulse rounded-full bg-signal sm:size-2" aria-hidden="true" />
                 Live
               </span>
-              <span className="font-mono text-[11px] text-muted-foreground">{activeMissions} active</span>
+              <span className="font-mono text-[10px] sm:text-[11px] text-muted-foreground">{activeMissions} active</span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowNewMission(true)}
-                className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider hover:bg-foreground hover:text-background"
+                className="flex items-center gap-1 rounded border border-border px-2 py-1 sm:px-3 sm:py-1.5 font-mono text-[10px] uppercase tracking-wider hover:bg-foreground hover:text-background"
               >
                 <Plus className="size-3" aria-hidden="true" />
-                New mission
+                <span className="hidden sm:inline">New mission</span>
+                <span className="sm:hidden">New</span>
               </button>
             </div>
           </div>
 
           {/* Stats bar */}
-          <div className="grid grid-cols-4 gap-px border-b border-border bg-border">
+          <div className="grid grid-cols-2 gap-px border-b border-border bg-border sm:grid-cols-4">
             {[
               { label: 'Active missions', value: String(activeMissions), icon: Activity },
               { label: 'Workers', value: `${activeWorkers}/3`, icon: Terminal },
@@ -257,11 +258,11 @@ export function SlammerPreview() {
             ].map((stat) => {
               const Icon = stat.icon
               return (
-                <div key={stat.label} className="flex items-center gap-3 bg-background px-6 py-4">
-                  <Icon className="size-4 text-muted-foreground/60" aria-hidden="true" />
-                  <div>
-                    <p className="text-xl font-semibold tracking-tight">{stat.value}</p>
-                    <p className="font-mono text-[10px] text-muted-foreground">{stat.label}</p>
+                <div key={stat.label} className="flex items-center gap-2 bg-background px-3 py-3 sm:gap-3 sm:px-6 sm:py-4">
+                  <Icon className="size-3.5 shrink-0 text-muted-foreground/60 sm:size-4" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <p className="text-lg font-semibold tracking-tight sm:text-xl">{stat.value}</p>
+                    <p className="truncate font-mono text-[10px] text-muted-foreground">{stat.label}</p>
                   </div>
                 </div>
               )
@@ -269,18 +270,18 @@ export function SlammerPreview() {
           </div>
 
           {/* Panels grid */}
-          <div className="grid grid-cols-1 gap-px bg-border md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-px bg-border">
             {/* Missions panel */}
             <div className="bg-background">
-              <div className="flex items-center justify-between border-b border-border px-5 py-3">
+              <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-5 sm:py-3">
                 <div className="flex items-center gap-2">
-                  <Activity className="size-4 text-muted-foreground/60" aria-hidden="true" />
-                  <span className="font-mono text-[11px] uppercase tracking-wider">Missions</span>
+                  <Activity className="size-3.5 sm:size-4 text-muted-foreground/60" aria-hidden="true" />
+                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider">Missions</span>
                 </div>
                 <span className="font-mono text-[10px] text-muted-foreground">{filteredMissions.length} items</span>
               </div>
               {/* Search */}
-              <div className="border-b border-border px-5 py-2">
+              <div className="border-b border-border px-3 py-2 sm:px-5">
                 <div className="relative">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/40" aria-hidden="true" />
                   <input
@@ -297,7 +298,7 @@ export function SlammerPreview() {
                   <div key={mission.id}>
                     <button
                       onClick={() => setExpandedMission(expandedMission === mission.id ? null : mission.id)}
-                      className="w-full flex items-center justify-between px-5 py-3 hover:bg-foreground/[0.02] text-left"
+                      className="w-full flex items-center justify-between px-3 py-2.5 sm:px-5 sm:py-3 hover:bg-foreground/[0.02] text-left"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <span className={`flex items-center gap-1.5 font-mono text-[11px] ${statusColor(mission.status)} shrink-0`}>
@@ -307,7 +308,7 @@ export function SlammerPreview() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {mission.progress > 0 && mission.progress < 100 && (
-                          <div className="flex items-center gap-2">
+                          <div className="hidden sm:flex items-center gap-2">
                             <div className="h-1.5 w-12 overflow-hidden rounded-full bg-border">
                               <div
                                 className={`h-full rounded-full transition-all duration-1000 ${mission.status === 'failed' ? 'bg-destructive' : 'bg-signal'}`}
@@ -316,6 +317,9 @@ export function SlammerPreview() {
                             </div>
                             <span className="font-mono text-[10px] text-muted-foreground">{mission.progress}%</span>
                           </div>
+                        )}
+                        {mission.progress > 0 && mission.progress < 100 && (
+                          <span className="sm:hidden font-mono text-[10px] text-muted-foreground">{mission.progress}%</span>
                         )}
                         {mission.status === 'completed' && <span className="font-mono text-[10px] text-muted-foreground">Done</span>}
                         {mission.status === 'queued' && <span className="font-mono text-[10px] text-muted-foreground/60">Waiting</span>}
@@ -329,7 +333,7 @@ export function SlammerPreview() {
                     </button>
                     {/* Expanded mission details */}
                     {expandedMission === mission.id && (
-                      <div className="border-t border-border px-5 py-3 space-y-2">
+                      <div className="border-t border-border px-3 py-2.5 space-y-2 sm:px-5 sm:py-3">
                         <p className="font-mono text-[11px]">{mission.name}</p>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
@@ -360,16 +364,16 @@ export function SlammerPreview() {
 
             {/* Agents panel */}
             <div className="bg-background">
-              <div className="flex items-center justify-between border-b border-border px-5 py-3">
+              <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-5 sm:py-3">
                 <div className="flex items-center gap-2">
-                  <Terminal className="size-4 text-muted-foreground/60" aria-hidden="true" />
-                  <span className="font-mono text-[11px] uppercase tracking-wider">Agents</span>
+                  <Terminal className="size-3.5 sm:size-4 text-muted-foreground/60" aria-hidden="true" />
+                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider">Agents</span>
                 </div>
                 <span className="font-mono text-[10px] text-muted-foreground">{agents.length} items</span>
               </div>
               <div className="divide-y divide-border">
                 {agents.map((agent) => (
-                  <div key={agent.id} className="flex items-center justify-between px-5 py-3">
+                  <div key={agent.id} className="flex items-center justify-between px-3 py-2.5 sm:px-5 sm:py-3">
                     <div className="flex items-center gap-2">
                       <span className={`flex items-center gap-1.5 font-mono text-[11px] ${statusColor(agent.status)}`}>
                         {statusIcon(agent.status)}
@@ -386,16 +390,16 @@ export function SlammerPreview() {
 
             {/* Approvals panel */}
             <div className="bg-background">
-              <div className="flex items-center justify-between border-b border-border px-5 py-3">
+              <div className="flex items-center justify-between border-b border-border px-3 py-2.5 sm:px-5 sm:py-3">
                 <div className="flex items-center gap-2">
-                  <Shield className="size-4 text-muted-foreground/60" aria-hidden="true" />
-                  <span className="font-mono text-[11px] uppercase tracking-wider">Approvals</span>
+                  <Shield className="size-3.5 sm:size-4 text-muted-foreground/60" aria-hidden="true" />
+                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider">Approvals</span>
                 </div>
                 <span className="font-mono text-[10px] text-muted-foreground">{approvals.length} items</span>
               </div>
               <div className="divide-y divide-border">
                 {approvals.map((approval) => (
-                  <div key={approval.id} className="px-5 py-3">
+                  <div key={approval.id} className="px-3 py-2.5 sm:px-5 sm:py-3">
                     <div className="flex items-center justify-between">
                       <span className={`flex items-center gap-1.5 font-mono text-[11px] ${statusColor(approval.status)}`}>
                         {statusIcon(approval.status)}
@@ -433,7 +437,7 @@ export function SlammerPreview() {
 
           {/* Bottom log area */}
           <div className="border-t border-border">
-            <div className="flex items-center justify-between border-b border-border px-5 py-2">
+            <div className="flex items-center justify-between border-b border-border px-3 py-2 sm:px-5 sm:py-2">
               <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Live logs</span>
               <span className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground/60">
                 <span className="size-1.5 animate-pulse rounded-full bg-signal" aria-hidden="true" />
@@ -442,7 +446,7 @@ export function SlammerPreview() {
             </div>
             <div
               ref={logContainerRef}
-              className="max-h-32 overflow-y-auto bg-foreground/[0.02] p-4 font-mono text-[10px] leading-relaxed text-muted-foreground"
+              className="max-h-24 overflow-y-auto bg-foreground/[0.02] p-3 font-mono text-[9px] leading-relaxed text-muted-foreground sm:max-h-32 sm:p-4 sm:text-[10px]"
             >
               {logs.map((log, i) => (
                 <p key={i} className={i === logs.length - 1 ? 'text-foreground' : ''}>

@@ -25,16 +25,16 @@ export function DockerCompose() {
             {PROFILES.map((profile) => (
               <div
                 key={profile.name}
-                className="flex items-center gap-4 border border-border p-4 transition-colors hover:border-signal"
+                className="flex items-center gap-3 border border-border p-3 transition-colors hover:border-signal sm:gap-4 sm:p-4"
               >
-                <span className="flex size-8 shrink-0 items-center justify-center border border-foreground/40">
-                  <Box className="size-4 text-muted-foreground" aria-hidden="true" />
+                <span className="flex size-7 shrink-0 items-center justify-center border border-foreground/40 sm:size-8">
+                  <Box className="size-3.5 text-muted-foreground sm:size-4" aria-hidden="true" />
                 </span>
-                <div className="flex-1">
-                  <p className="font-semibold tracking-tight">{profile.name}</p>
-                  <p className="text-sm text-muted-foreground">{profile.detail}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold tracking-tight sm:text-base">{profile.name}</p>
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">{profile.detail}</p>
                 </div>
-                <code className="font-mono text-xs text-muted-foreground">{profile.flag}</code>
+                <code className="shrink-0 font-mono text-[10px] text-muted-foreground sm:text-xs">{profile.flag}</code>
               </div>
             ))}
           </div>
@@ -44,39 +44,39 @@ export function DockerCompose() {
         <div className="md:col-span-5">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Quick start'}</p>
           <div className="mt-6 space-y-4">
-            <div className="border border-border p-4">
+            <div className="border border-border p-3 sm:p-4">
               <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-signal">
+                <span className="flex size-5 items-center justify-center rounded-full bg-signal sm:size-6">
                   <span className="text-xs font-semibold text-background">1</span>
                 </span>
                 <p className="text-sm font-semibold tracking-tight">Clone the repo</p>
               </div>
-              <div className="mt-3 overflow-auto rounded border border-border bg-background p-3">
-                <code className="font-mono text-xs">git clone https://github.com/LukaG712/Evershade.git</code>
+              <div className="mt-2 overflow-x-auto rounded border border-border bg-background p-2 sm:p-3">
+                <code className="font-mono text-[10px] sm:text-xs">git clone https://github.com/LukaG712/Evershade.git</code>
               </div>
             </div>
 
-            <div className="border border-border p-4">
+            <div className="border border-border p-3 sm:p-4">
               <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-signal">
+                <span className="flex size-5 items-center justify-center rounded-full bg-signal sm:size-6">
                   <span className="text-xs font-semibold text-background">2</span>
                 </span>
                 <p className="text-sm font-semibold tracking-tight">Copy environment file</p>
               </div>
-              <div className="mt-3 overflow-auto rounded border border-border bg-background p-3">
-                <code className="font-mono text-xs">cp .env.example .env</code>
+              <div className="mt-2 overflow-x-auto rounded border border-border bg-background p-2 sm:p-3">
+                <code className="font-mono text-[10px] sm:text-xs">cp .env.example .env</code>
               </div>
             </div>
 
-            <div className="border border-border p-4">
+            <div className="border border-border p-3 sm:p-4">
               <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-signal">
+                <span className="flex size-5 items-center justify-center rounded-full bg-signal sm:size-6">
                   <span className="text-xs font-semibold text-background">3</span>
                 </span>
                 <p className="text-sm font-semibold tracking-tight">Start the services</p>
               </div>
-              <div className="mt-3 overflow-auto rounded border border-border bg-background p-3">
-                <code className="font-mono text-xs">docker compose --profile standard up -d</code>
+              <div className="mt-2 overflow-x-auto rounded border border-border bg-background p-2 sm:p-3">
+                <code className="font-mono text-[10px] sm:text-xs">docker compose --profile standard up -d</code>
               </div>
             </div>
           </div>
@@ -84,10 +84,10 @@ export function DockerCompose() {
       </div>
 
       {/* Docker Compose structure */}
-      <div className="mt-16 border border-border p-6 md:mt-24">
+      <div className="mt-12 border border-border p-4 sm:p-6 md:mt-24">
         <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'docker-compose.yml structure'}</p>
-        <div className="mt-4 overflow-auto rounded border border-border bg-background p-4">
-          <pre className="font-mono text-xs leading-relaxed text-muted-foreground">
+        <div className="mt-4 overflow-x-auto rounded border border-border bg-background p-3 sm:p-4">
+          <pre className="font-mono text-[10px] leading-relaxed text-muted-foreground sm:text-xs">
 {`services:
   greenie:
     build: ./services/greenie

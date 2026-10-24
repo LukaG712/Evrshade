@@ -208,6 +208,14 @@
   }
   /* Reduce giant footer text on very small screens */
   footer p[aria-hidden="true"] {
-    margin-top: 8rem !important;
+    margin-top: 6rem !important;
+    font-size: 8vw !important;
+  }
+  /* Prevent horizontal overflow on very small screens */
+  html {
+    overflow-x: hidden;
+  }
+  body {
+    overflow-x: hidden;
   }
 }
