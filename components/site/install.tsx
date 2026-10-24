@@ -223,7 +223,7 @@ export function Install() {
 
           {/* Post-install steps */}
           <ol className="mt-8 grid gap-px border border-foreground bg-foreground sm:grid-cols-3">
-            {POST_INSTALL_STEPS.map(([title, body], i) => (
+            {POST_INSTALL_STEPS.map(({ title, body }, i) => (
               <li key={title} className="bg-background p-5">
                 <div className="flex items-center gap-2">
                   <ChevronRight className="size-3 text-signal-ink" aria-hidden="true" />
