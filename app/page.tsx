@@ -1,3 +1,4 @@
+import { BackToTop } from '@/components/site/back-to-top'
 import { ApiReference } from '@/components/site/api-reference'
 import { Architecture } from '@/components/site/architecture'
 import { ChangelogTicker } from '@/components/site/changelog-ticker'
@@ -5,6 +6,7 @@ import { Cli } from '@/components/site/cli'
 import { Community } from '@/components/site/community'
 import { Comparison } from '@/components/site/comparison'
 import { Footer } from '@/components/site/footer'
+import { HapticFeedback } from '@/components/site/haptic-feedback'
 import { Harness } from '@/components/site/harness'
 import { Header } from '@/components/site/header'
 import { Hero } from '@/components/site/hero'
@@ -13,6 +15,7 @@ import { Integrations } from '@/components/site/integrations'
 import { KnowledgeGraph } from '@/components/site/knowledge-graph'
 import { MissionConsole } from '@/components/site/mission-console'
 import { MissionControl } from '@/components/site/mission-control'
+import { MobileToc } from '@/components/site/mobile-toc'
 import { PerformanceMetrics } from '@/components/site/performance-metrics'
 import { RequestTrace } from '@/components/site/request-trace'
 import { Roadmap } from '@/components/site/roadmap'
@@ -20,12 +23,17 @@ import { SectionDivider } from '@/components/site/section-divider'
 import { SectionReveal } from '@/components/site/section-reveal'
 import { Security } from '@/components/site/security'
 import { SlammerPreview } from '@/components/site/slammer-preview'
+import { SwipeNavigation } from '@/components/site/swipe-navigation'
 import { UseCases } from '@/components/site/use-cases'
 
 export default function Page() {
   return (
     <>
       <Header />
+      <SwipeNavigation />
+      <HapticFeedback />
+      <MobileToc />
+      <BackToTop />
       <main id="top">
         <Hero />
 

@@ -4,33 +4,16 @@ import { useEffect } from 'react'
 
 export function HapticFeedback() {
   useEffect(() => {
-    const handleTouch = (e: TouchEvent) => {
-      // Only vibrate on supported devices
-      if (!navigator.vibrate) return
-
+    const handler = (e: Event) => {
       const target = e.target as HTMLElement
-
-      // Check if the touched element is a button, link, or interactive element
-      const tag = target.tagName
-      const role = target.getAttribute('role')
-      const isInteractive =
-        tag === 'BUTTON' ||
-        tag === 'A' ||
-        tag === 'INPUT' ||
-        tag === 'SELECT' ||
-        tag === 'SUMMARY' ||
-        role === 'button' ||
-        role === 'tab' ||
-        role === 'menuitem' ||
-        target.closest('button, a, [role="button"], [role="tab"]') !== null
-
-      if (isInteractive) {
+      if (!target.closest('button, a, [role="button"], input, select, textarea')) return
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(10)
       }
     }
 
-    document.addEventListener('touchstart', handleTouch, { passive: true })
-    return () => document.removeEventListener('touchstart', handleTouch)
+    document.addEventListener('pointerdown', handler, { passive: true })
+    return () => document.removeEventListener('pointerdown', handler)
   }, [])
 
   return null
