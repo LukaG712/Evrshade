@@ -16,6 +16,7 @@ import { MissionControl } from '@/components/site/mission-control'
 import { PerformanceMetrics } from '@/components/site/performance-metrics'
 import { RequestTrace } from '@/components/site/request-trace'
 import { Roadmap } from '@/components/site/roadmap'
+import { SectionReveal } from '@/components/site/section-reveal'
 import { Security } from '@/components/site/security'
 import { SlammerPreview } from '@/components/site/slammer-preview'
 import { UseCases } from '@/components/site/use-cases'
@@ -26,24 +27,24 @@ export default function Page() {
       <Header />
       <main id="top">
         <Hero />
-        <MissionConsole />
-        <MissionControl />
-        <RequestTrace />
-        <Harness />
-        <Security />
-        <Architecture />
-        <Integrations />
-        <Cli />
-        <Install />
-        <ChangelogTicker />
-        <Roadmap />
-        <ApiReference />
-        <Comparison />
-        <UseCases />
-        <SlammerPreview />
-        <KnowledgeGraph />
-        <PerformanceMetrics />
-        <Community />
+        <SectionReveal><MissionConsole /></SectionReveal>
+        <SectionReveal><MissionControl /></SectionReveal>
+        <SectionReveal><RequestTrace /></SectionReveal>
+        <SectionReveal><Harness /></SectionReveal>
+        <SectionReveal><Security /></SectionReveal>
+        <SectionReveal><Architecture /></SectionReveal>
+        <SectionReveal><Integrations /></SectionReveal>
+        <SectionReveal><Cli /></SectionReveal>
+        <SectionReveal><Install /></SectionReveal>
+        <SectionReveal><ChangelogTicker /></SectionReveal>
+        <SectionReveal><Roadmap /></SectionReveal>
+        <SectionReveal><ApiReference /></SectionReveal>
+        <SectionReveal><Comparison /></SectionReveal>
+        <SectionReveal><UseCases /></SectionReveal>
+        <SectionReveal><SlammerPreview /></SectionReveal>
+        <SectionReveal><KnowledgeGraph /></SectionReveal>
+        <SectionReveal><PerformanceMetrics /></SectionReveal>
+        <SectionReveal><Community /></SectionReveal>
       </main>
       <Footer />
     </>
