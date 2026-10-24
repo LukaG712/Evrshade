@@ -1,7 +1,6 @@
 ﻿'use client'
 
 import { useEffect, useRef } from 'react'
-import { ArrowUpRight } from 'lucide-react'
 import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
 import { useI18n } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -231,7 +230,7 @@ export function Hero() {
                 className="inline-flex h-11 flex-1 items-center justify-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background active:scale-[0.98]"
               >
                 {t('hero.github')}
-                <ArrowUpRight className="size-4" aria-hidden="true" />
+                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
               </a>
             </div>
           </div>
@@ -362,7 +361,7 @@ export function Hero() {
               className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {t('hero.github')}
-              <ArrowUpRight className="size-4" aria-hidden="true" />
+              <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </a>
           </div>
         </div>
