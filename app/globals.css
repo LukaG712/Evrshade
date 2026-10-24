@@ -59,26 +59,26 @@
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.14 0.003 106);
-  --foreground: oklch(0.96 0.002 106);
-  --card: oklch(0.16 0.003 106);
-  --card-foreground: oklch(0.96 0.002 106);
-  --popover: oklch(0.16 0.003 106);
-  --popover-foreground: oklch(0.96 0.002 106);
-  --primary: oklch(0.96 0.002 106);
-  --primary-foreground: oklch(0.14 0.003 106);
-  --secondary: oklch(0.18 0.003 106);
-  --secondary-foreground: oklch(0.96 0.002 106);
-  --muted: oklch(0.18 0.003 106);
-  --muted-foreground: oklch(0.55 0 0);
-  --accent: oklch(0.18 0.003 106);
-  --accent-foreground: oklch(0.96 0.002 106);
+  --background: oklch(0.10 0.004 264);
+  --foreground: oklch(0.92 0.008 264);
+  --card: oklch(0.13 0.005 264);
+  --card-foreground: oklch(0.92 0.008 264);
+  --popover: oklch(0.13 0.005 264);
+  --popover-foreground: oklch(0.92 0.008 264);
+  --primary: oklch(0.92 0.008 264);
+  --primary-foreground: oklch(0.10 0.004 264);
+  --secondary: oklch(0.16 0.005 264);
+  --secondary-foreground: oklch(0.92 0.008 264);
+  --muted: oklch(0.16 0.005 264);
+  --muted-foreground: oklch(0.60 0.01 264);
+  --accent: oklch(0.18 0.006 264);
+  --accent-foreground: oklch(0.92 0.008 264);
   --destructive: oklch(0.60 0.22 25);
-  --border: oklch(0.96 0.002 106 / 12%);
-  --input: oklch(0.96 0.002 106 / 15%);
-  --ring: oklch(0.70 0.15 162);
-  --signal: oklch(0.70 0.16 162);
-  --signal-ink: oklch(0.60 0.12 162);
+  --border: oklch(0.92 0.008 264 / 14%);
+  --input: oklch(0.92 0.008 264 / 16%);
+  --ring: oklch(0.72 0.18 162);
+  --signal: oklch(0.72 0.18 162);
+  --signal-ink: oklch(0.78 0.16 150);
 }
 
 @layer base {
@@ -100,9 +100,15 @@
 
 @utility blueprint {
   background-image:
-    linear-gradient(to right, oklch(0.15 0 0 / 5%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.15 0 0 / 5%) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.15 0 0 / 6%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.15 0 0 / 6%) 1px, transparent 1px);
   background-size: 80px 80px;
+}
+
+.dark .blueprint {
+  background-image:
+    linear-gradient(to right, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px);
 }
 
 @keyframes pulse-ring {
