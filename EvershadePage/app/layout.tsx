@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://evershade.netlify.app',
+    url: 'https://evrshade.netlify.app',
     title: 'Evershade: Self-hosted AI agent platform',
     description:
       'Orchestrate AI agents, run missions, and own your data. 10 modular microservices, SQLite-first, no heavy infrastructure.',
