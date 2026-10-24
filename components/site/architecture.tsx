@@ -9,10 +9,11 @@ const LAYERS: { tier: ServiceTier; label: string; note: string }[] = [
   { tier: 'optional', label: 'Supporting / optional', note: 'Toggle per profile' },
 ]
 
-const SECURITY = [
-  ['Bearer auth', 'Every service requires an Authorization: Bearer header.'],
-  ['AES-256-GCM', 'Hider encrypts secrets at rest in SQLite.'],
-  ['TLS proxy', 'Optional Caddy reverse proxy profile with TLS.'],
+const DEPENDENCIES = [
+  { svc: 'Greenie', requires: ['Slinker', 'Trapper', 'Gobber'], optional: ['Sneaker', 'Hider', 'Poltergeist', 'Shrewd'] },
+  { svc: 'Gobber', requires: [], optional: ['Shrewd'] },
+  { svc: 'Sneaker', requires: [], optional: ['Poltergeist'] },
+  { svc: 'Trapper', requires: ['redis'], optional: [] },
 ]
 
 export function Architecture() {
@@ -20,7 +21,7 @@ export function Architecture() {
     <section id="architecture" aria-labelledby="architecture-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="architecture-title"
-        index="04"
+        index="07"
         label="Architecture"
         title={
           <>
@@ -80,7 +81,7 @@ export function Architecture() {
 
       <div className="mt-24 grid gap-12 md:mt-32 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'04.1 — Design principles'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.1 — Design principles'}</p>
           <ol className="mt-6 border-t border-foreground">
             {PRINCIPLES.map(([title, body], i) => (
               <li key={title} className="grid grid-cols-[3rem_1fr] gap-4 border-b border-border py-6 md:grid-cols-[4rem_1fr_1fr] md:gap-8">
@@ -92,18 +93,37 @@ export function Architecture() {
           </ol>
         </div>
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'04.2 — Security by default'}</p>
-          <ul className="mt-6 border-t border-l border-foreground">
-            {SECURITY.map(([title, body]) => (
-              <li key={title} className="border-r border-b border-foreground p-5">
-                <p className="flex items-center gap-2 font-mono text-xs">
-                  <span className="size-1.5 bg-signal" aria-hidden="true" />
-                  {title}
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.2 — Dependency map'}</p>
+          <ul className="mt-6 border-t border-foreground">
+            {DEPENDENCIES.map((d) => (
+              <li key={d.svc} className="border-b border-border py-4">
+                <p className="font-semibold tracking-tight">{d.svc}</p>
+                <p className="mt-2 flex flex-wrap gap-1.5">
+                  {d.requires.map((r) => (
+                    <span key={r} className="bg-foreground px-1.5 py-0.5 font-mono text-[10px] text-background">
+                      {r}
+                    </span>
+                  ))}
+                  {d.optional.map((r) => (
+                    <span key={r} className="border border-dashed border-foreground/50 px-1.5 py-0.5 font-mono text-[10px]">
+                      {r}
+                    </span>
+                  ))}
                 </p>
-                <p className="mt-3 text-pretty leading-snug text-muted-foreground">{body}</p>
               </li>
             ))}
           </ul>
+          <p className="mt-4 flex items-center gap-4 font-mono text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 bg-foreground" aria-hidden="true" />
+              {'required'}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 border border-dashed border-foreground/60" aria-hidden="true" />
+              {'optional'}
+            </span>
+            <span>{'from version-manifest.json'}</span>
+          </p>
         </div>
       </div>
     </section>

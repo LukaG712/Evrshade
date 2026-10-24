@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
-import { EDGES, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
+import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
@@ -32,6 +32,8 @@ export function Hero() {
   const edgeRefs = useRef<(SVGLineElement | null)[]>([])
   const packetRefs = useRef<(SVGRectElement | null)[]>([])
   const edgeGroupRef = useRef<SVGGElement>(null)
+  const liveRefs = useRef<(HTMLSpanElement | null)[]>([])
+  const liveTagRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -75,7 +77,7 @@ export function Hero() {
       if (hudRef.current) hudRef.current.style.opacity = String(fade)
 
       // Section title fades in alongside the modular grid.
-      const tt = ease(range(p, 0.5, 0.75))
+      const tt = ease(range(p, 0.42, 0.62))
       const titleTop = desktop ? topY : topY + headH * finalScale + 16
       title.style.top = `${titleTop}px`
       title.style.opacity = String(tt)
@@ -122,11 +124,26 @@ export function Hero() {
       const cw = gW / cols
       const ch = Math.max(80, (gBottom - gTop) / rows)
 
+      // Final phase: the grid becomes a live operations board.
+      const live = ease(range(p, 0.62, 0.78))
+      if (liveTagRef.current) {
+        liveTagRef.current.style.opacity = String(live)
+        liveTagRef.current.style.transform = `translate3d(0, ${(1 - live) * 12}px, 0)`
+      }
+
       const centers: Point[] = []
       SERVICES.forEach((svc, i) => {
+        const liveEl = liveRefs.current[i]
+        if (liveEl) {
+          const lines = LIVE_ACTIVITY[svc.id] ?? []
+          const k = lines.length ? Math.floor(time / 2.4 + i * 0.41) % lines.length : 0
+          const txt = lines[k] ?? ''
+          if (liveEl.textContent !== txt) liveEl.textContent = txt
+        }
+        nodeRefs.current[i]?.style.setProperty('--l', live.toFixed(3))
         const node = nodeRefs.current[i]
         if (!node) return
-        const g = ease(range(p, 0.24 + i * 0.022, 0.58 + i * 0.022))
+        const g = ease(range(p, 0.22 + i * 0.018, 0.50 + i * 0.018))
         const col = i % cols
         const row = Math.floor(i / cols)
         const gx = pad + col * cw + cw / 2
@@ -173,7 +190,7 @@ export function Hero() {
   }, [])
 
   return (
-    <section ref={wrapRef} aria-labelledby="hero-title" className="relative h-[340vh]">
+    <section ref={wrapRef} aria-labelledby="hero-title" className="relative h-[380vh]">
       <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden">
         <CornerMarks />
 
@@ -227,6 +244,9 @@ export function Hero() {
               nodeRef={(el) => {
                 nodeRefs.current[i] = el
               }}
+              liveRef={(el) => {
+                liveRefs.current[i] = el
+              }}
             />
           ))}
         </ul>
@@ -240,11 +260,24 @@ export function Hero() {
             Ten specialized microservices. Each has a single responsibility, talks over HTTP, and can run on its own
             while contributing to one platform.
           </p>
+          <p
+            ref={liveTagRef}
+            className="mt-4 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider opacity-0"
+          >
+            <span className="relative flex size-1.5">
+              <span className="animate-pulse-ring absolute inset-0 bg-signal" />
+              <span className="relative size-1.5 bg-signal" />
+            </span>
+            {'Live · mission m_7f3a executing'}
+            <a href="#console" className="ml-1 text-signal-ink underline underline-offset-4 hover:text-foreground">
+              {'Watch it run ↓'}
+            </a>
+          </p>
         </div>
 
         <div
           ref={introRef}
-          className="absolute inset-x-4 flex flex-col gap-5 md:inset-x-[max(24px,3vw)] md:flex-row md:items-end md:justify-between"
+          className="absolute inset-x-4 z-10 flex flex-col gap-5 md:inset-x-[max(24px,3vw)] md:flex-row md:items-end md:justify-between"
           style={{ bottom: 'calc(var(--head-h, 20vw) + max(16px, 3vw) + 24px)' }}
         >
           <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
@@ -298,10 +331,12 @@ function ServiceNode({
   svc,
   index,
   nodeRef,
+  liveRef,
 }: {
   svc: Service
   index: number
   nodeRef: (el: HTMLDivElement | null) => void
+  liveRef: (el: HTMLSpanElement | null) => void
 }) {
   const filled = svc.tier === 'core'
   const orchestrator = svc.tier === 'orchestrator'
@@ -359,7 +394,24 @@ function ServiceNode({
           <div>
             <p className="text-xl font-semibold leading-none tracking-tight md:text-3xl">{svc.name}</p>
             <p className="mt-2 hidden text-sm leading-snug text-muted-foreground md:block">{svc.role}</p>
+            <p
+              className="mt-2 flex items-center gap-1.5 font-mono text-[10px] text-signal-ink md:mt-3 md:text-[11px]"
+              style={{ opacity: 'var(--l, 0)' }}
+            >
+              <span className="size-1 shrink-0 animate-pulse bg-signal" aria-hidden="true" />
+              <span ref={liveRef} className="truncate" />
+            </p>
           </div>
+        </div>
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 overflow-hidden"
+          style={{ opacity: 'var(--l, 0)' }}
+          aria-hidden="true"
+        >
+          <div
+            className="h-full w-1/3 bg-signal"
+            style={{ animation: `scan ${2 + (index % 4) * 0.45}s ease-in-out ${index * 0.17}s infinite` }}
+          />
         </div>
       </div>
     </li>

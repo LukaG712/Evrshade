@@ -31,7 +31,7 @@ export function Install() {
     <section id="install" aria-labelledby="install-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="install-title"
-        index="05"
+        index="10"
         label="Install"
         title={
           <>
@@ -83,7 +83,7 @@ export function Install() {
         </div>
 
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'05.1 — Profiles'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'10.1 — Profiles'}</p>
           <ul className="mt-6 border-t border-foreground">
             {PROFILES.map((profile) => (
               <li key={profile.name} className="border-b border-border py-4">
