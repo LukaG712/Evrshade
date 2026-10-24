@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic'
+import { BackToTop } from '@/components/site/back-to-top'
 import { Footer } from '@/components/site/footer'
 import { Header } from '@/components/site/header'
 import { Hero } from '@/components/site/hero'
@@ -45,6 +46,7 @@ export default function Page() {
     <>
       <Header />
       <MobileToc />
+      <BackToTop />
       <main id="top">
         <Hero />
 
