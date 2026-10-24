@@ -4,8 +4,6 @@ import { useEffect, useRef } from 'react'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
-import { DownloadDropdown } from './download-dropdown'
-import { StarCount } from './star-count'
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const range = (v: number, a: number, b: number) => clamp((v - a) / (b - a))
@@ -41,30 +39,16 @@ export function Hero() {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const start = performance.now()
     let raf = 0
-    let frameCount = 0
-    let cachedRect: DOMRect | null = null
-    let cachedScrollTop = 0
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
-      // Pause animation when tab is hidden to save main thread time
-      if (document.hidden) return
-      // Only update DOM every other frame to reduce main thread blocking
-      frameCount++
-      if (frameCount % 2 !== 0) return
-
       const wrap = wrapRef.current
       const stage = stageRef.current
       const head = headRef.current
       const title = titleRef.current
       if (!wrap || !stage || !head || !title) return
 
-      // Cache getBoundingClientRect - only re-read when scroll position changes significantly
-      if (Math.abs(wrap.scrollTop - cachedScrollTop) > 5) {
-        cachedRect = wrap.getBoundingClientRect()
-        cachedScrollTop = wrap.scrollTop
-      }
-      const rect = cachedRect!
+      const rect = wrap.getBoundingClientRect()
       if (rect.bottom < 0) return
 
       const W = stage.clientWidth
@@ -207,7 +191,7 @@ export function Hero() {
 
   return (
     <section ref={wrapRef} aria-labelledby="hero-title" className="relative h-[380vh]">
-      <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden" style={{ backgroundImage: 'linear-gradient(to bottom, oklch(0.99 0.002 106 / 0.8), oklch(0.99 0.002 106 / 0.4)), linear-gradient(to right, oklch(0.15 0 0 / 5%) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.15 0 0 / 5%) 1px, transparent 1px)', backgroundSize: '80px 80px' }}>
+      <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden">
         <CornerMarks />
 
         <div
@@ -296,33 +280,27 @@ export function Hero() {
           className="absolute inset-x-4 z-10 flex flex-col gap-5 md:inset-x-[max(24px,3vw)] md:flex-row md:items-end md:justify-between"
           style={{ bottom: 'calc(var(--head-h, 20vw) + max(16px, 3vw) + 24px)' }}
         >
-          <div className="flex flex-col gap-3">
-            <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
-              A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
-              hardware. Your data.
-            </p>
-            <StarCount />
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-2">
-              <a
-                href="#install"
-                className="inline-flex h-11 items-center gap-2 bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-signal-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-              >
-                Install Evershade
-                <ArrowDown className="size-4" aria-hidden="true" />
-              </a>
-              <DownloadDropdown />
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
-              >
-                GitHub
-                <ArrowUpRight className="size-4" aria-hidden="true" />
-              </a>
-            </div>
+          <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
+            A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
+            hardware. Your data.
+          </p>
+          <div className="flex items-center gap-2">
+            <a
+              href="#install"
+              className="inline-flex h-11 items-center gap-2 bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-signal-ink focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              Install Evershade
+              <ArrowDown className="size-4" aria-hidden="true" />
+            </a>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              GitHub
+              <ArrowUpRight className="size-4" aria-hidden="true" />
+            </a>
           </div>
         </div>
 
@@ -362,8 +340,6 @@ function ServiceNode({
 }) {
   const filled = svc.tier === 'core'
   const orchestrator = svc.tier === 'orchestrator'
-  // Core services get green fill; orchestrator is green; others are black or empty
-  const dotColor = orchestrator || filled ? 'bg-signal' : filled ? 'bg-foreground' : 'bg-transparent'
 
   return (
     <li>
@@ -379,7 +355,7 @@ function ServiceNode({
           )}
         />
         <div
-          className={cn('absolute inset-0', dotColor)}
+          className={cn('absolute inset-0', orchestrator ? 'bg-signal' : filled ? 'bg-foreground' : 'bg-transparent')}
           style={{ opacity: 'max(0, 1 - var(--g) * 4)' }}
         />
         {orchestrator ? (
@@ -407,7 +383,7 @@ function ServiceNode({
               <span
                 className={cn(
                   'size-1.5',
-                  orchestrator || filled ? 'bg-signal' : 'border border-foreground',
+                  orchestrator ? 'bg-signal' : filled ? 'bg-foreground' : 'border border-foreground',
                 )}
               />
               {String(index + 1).padStart(2, '0')}

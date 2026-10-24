@@ -2,17 +2,14 @@
 
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
-import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
-  { href: '#overview', label: 'Overview' },
-  { href: '#how-it-works', label: 'How It Works' },
-  { href: '#platform', label: 'Platform' },
-  { href: '#get-started', label: 'Get Started' },
-  { href: '#about', label: 'About' },
-  { href: '#roadmap', label: 'Roadmap' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/compare', label: 'Compare' },
+  { href: '#overview', label: 'Overview', index: '01' },
+  { href: '#how-it-works', label: 'How It Works', index: '02' },
+  { href: '#platform', label: 'Platform', index: '03' },
+  { href: '#get-started', label: 'Get Started', index: '04' },
+  { href: '#about', label: 'About', index: '05' },
+  { href: '#roadmap', label: 'Roadmap', index: '06' },
 ]
 
 export function MobileNav() {
@@ -23,31 +20,29 @@ export function MobileNav() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-10 w-10 items-center justify-center border border-border transition-colors hover:bg-muted active:scale-95"
+        className="inline-flex h-8 items-center justify-center rounded border border-foreground p-1.5 transition-colors hover:bg-foreground hover:text-background"
         aria-label="Toggle menu"
         aria-expanded={open}
       >
-        {open ? <X className="size-5" /> : <Menu className="size-5" />}
+        {open ? <X className="size-4" /> : <Menu className="size-4" />}
       </button>
       {open && (
-        <div className="absolute left-0 right-0 top-16 z-50 border-b border-border bg-background/95 backdrop-blur-lg">
+        <div className="absolute left-0 right-0 top-14 z-50 border-b border-border bg-background/95 backdrop-blur-md">
           <nav aria-label="Mobile" className="px-4 py-4">
-            <ul className="space-y-1">
+            <ul className="space-y-1 font-mono text-[11px] uppercase tracking-wider">
               {NAV.map((item) => (
                 <li key={item.href}>
                   <a
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-muted"
+                    className="flex items-center gap-2 py-2 text-muted-foreground transition-colors hover:text-foreground"
                   >
+                    <span className="text-foreground/30">{item.index}</span>
                     {item.label}
                   </a>
                 </li>
               ))}
             </ul>
-            <div className="mt-4 flex items-center gap-2 border-t border-border pt-4">
-              <ThemeToggle />
-            </div>
           </nav>
         </div>
       )}

@@ -118,7 +118,7 @@ export function MissionConsole() {
         label="Mission Console"
         title={
           <>
-            One prompt<span className="text-signal">.</span>
+            One prompt.
             <br />
             <span className="text-muted-foreground">Ten services at work.</span>
           </>

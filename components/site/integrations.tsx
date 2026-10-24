@@ -10,7 +10,7 @@ export function Integrations() {
         label="Integrations"
         title={
           <>
-            Bring your models<span className="text-signal">.</span>
+            Bring your models.
             <br />
             <span className="text-muted-foreground">Keep your stack.</span>
           </>

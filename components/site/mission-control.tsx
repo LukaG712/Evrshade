@@ -12,19 +12,13 @@ export function MissionControl() {
 
   useEffect(() => {
     let raf = 0
-    let lastProgress = 0
     const update = () => {
       raf = 0
       const el = trackRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
       const total = el.offsetHeight - window.innerHeight
-      const newProgress = Math.min(1, Math.max(0, -rect.top / total))
-      // Only update React state when progress changes by more than 1% to reduce re-renders
-      if (Math.abs(newProgress - lastProgress) > 0.01) {
-        lastProgress = newProgress
-        setProgress(newProgress)
-      }
+      setProgress(Math.min(1, Math.max(0, -rect.top / total)))
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update)
@@ -51,7 +45,7 @@ export function MissionControl() {
           label="Mission Control"
           title={
             <>
-              Large tasks in<span className="text-signal">.</span>
+              Large tasks in.
               <br />
               <span className="text-muted-foreground">Validated work out.</span>
             </>

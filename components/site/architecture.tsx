@@ -24,7 +24,7 @@ export function Architecture() {
         label="Architecture"
         title={
           <>
-            Small services<span className="text-signal">.</span>
+            Small services.
             <br />
             <span className="text-muted-foreground">Clear boundaries.</span>
           </>

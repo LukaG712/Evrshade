@@ -1,9 +1,6 @@
 import { ArrowUpRight, BookOpen, Code2, GitBranch, Heart, MessageCircle, Users } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
-import { ContributorAvatars } from './contributor-avatars'
-import { DiscordWidget } from './discord-widget'
-import { GithubStats } from './github-stats'
 
 const CONTRIBUTING_PATHS = [
   {
@@ -36,6 +33,12 @@ const CONTRIBUTING_PATHS = [
   },
 ] as const
 
+const STATS = [
+  { label: 'Contributors', value: '40+' },
+  { label: 'Plugins', value: '12' },
+  { label: 'Languages', value: '8' },
+  { label: 'Stars', value: '1.2k' },
+] as const
 
 export function Community() {
   return (
@@ -79,9 +82,13 @@ export function Community() {
       <div className="mt-24 grid gap-8 border-t border-foreground pt-12 md:grid-cols-12">
         <div className="md:col-span-5">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.1 — By the numbers'}</p>
-          <div className="mt-6 space-y-4">
-            <GithubStats />
-            <ContributorAvatars />
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {STATS.map((stat) => (
+              <div key={stat.label} className="border border-border p-4">
+                <p className="text-3xl font-semibold tracking-tight tabular-nums">{stat.value}</p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -114,9 +121,6 @@ export function Community() {
           <p className="mt-1 text-sm text-muted-foreground">
             {'Star the repo, share it with a friend, or write about your setup.'}
           </p>
-          <div className="mt-3">
-            <DiscordWidget />
-          </div>
         </div>
         <a
           href={REPO_URL}

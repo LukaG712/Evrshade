@@ -65,7 +65,7 @@ export function SlammerPreview() {
         label="Slammer"
         title={
           <>
-            See everything<span className="text-signal">.</span>
+            See everything.
             <br />
             <span className="text-muted-foreground">Control everything.</span>
           </>

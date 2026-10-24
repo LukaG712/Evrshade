@@ -91,18 +91,11 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: 'ss01', 'cv11';
-    padding-left: env(safe-area-inset-left, 0);
-    padding-right: env(safe-area-inset-right, 0);
   }
   ::selection {
     background: var(--signal);
     color: var(--foreground);
   }
-}
-
-/* Smooth scroll offset so fixed header doesn't hide section headings */
-#overview, #how-it-works, #platform, #get-started, #about, #roadmap {
-  scroll-margin-top: 56px;
 }
 
 @utility blueprint {
@@ -111,66 +104,6 @@
     linear-gradient(to bottom, oklch(0.15 0 0 / 5%) 1px, transparent 1px);
   background-size: 80px 80px;
 }
-
-/* Subtle blueprint drift animation */
-@keyframes blueprint-drift {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(80px, 80px);
-  }
-}
-
-.blueprint-drift {
-  position: relative;
-}
-
-.blueprint-drift::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, oklch(0.15 0 0 / 5%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.15 0 0 / 5%) 1px, transparent 1px);
-  background-size: 80px 80px;
-  animation: blueprint-drift 20s linear infinite;
-  will-change: transform;
-  pointer-events: none;
-}
-
-/* Staggered fade-in for children of revealed sections */
-.stagger {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.stagger.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal.visible .stagger > *:nth-child(1),
-.stagger.visible > *:nth-child(1) { transition-delay: 0s; }
-.reveal.visible .stagger > *:nth-child(2),
-.stagger.visible > *:nth-child(2) { transition-delay: 0.05s; }
-.reveal.visible .stagger > *:nth-child(3),
-.stagger.visible > *:nth-child(3) { transition-delay: 0.1s; }
-.reveal.visible .stagger > *:nth-child(4),
-.stagger.visible > *:nth-child(4) { transition-delay: 0.15s; }
-.reveal.visible .stagger > *:nth-child(5),
-.stagger.visible > *:nth-child(5) { transition-delay: 0.2s; }
-.reveal.visible .stagger > *:nth-child(6),
-.stagger.visible > *:nth-child(6) { transition-delay: 0.25s; }
-.reveal.visible .stagger > *:nth-child(7),
-.stagger.visible > *:nth-child(7) { transition-delay: 0.3s; }
-.reveal.visible .stagger > *:nth-child(8),
-.stagger.visible > *:nth-child(8) { transition-delay: 0.35s; }
-.reveal.visible .stagger > *:nth-child(9),
-.stagger.visible > *:nth-child(9) { transition-delay: 0.4s; }
-.reveal.visible .stagger > *:nth-child(10),
-.stagger.visible > *:nth-child(10) { transition-delay: 0.45s; }
 
 @keyframes pulse-ring {
   0% {

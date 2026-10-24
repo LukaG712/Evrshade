@@ -1,9 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { HapticFeedback } from '@/components/site/haptic-feedback'
-import { PageTransition } from '@/components/site/page-transition'
-import { ServiceWorkerRegister } from '@/components/site/service-worker-register'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
@@ -64,19 +61,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   colorScheme: 'light dark',
   themeColor: [{ media: '(prefers-color-scheme: light)', color: '#fcfcfa' }, { media: '(prefers-color-scheme: dark)', color: '#242422' }],
-  viewportFit: 'cover',
-}
-
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'Evershade',
-  description: 'Self-hosted AI agent platform built as a collection of specialized microservices.',
-  applicationCategory: 'DeveloperApplication',
-  operatingSystem: 'Linux, macOS, Windows',
-  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  author: { '@type': 'Person', name: 'LukaG712', url: 'https://github.com/LukaG712' },
-  license: 'https://opensource.org/licenses/MIT',
 }
 
 export default function RootLayout({
@@ -86,11 +70,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
-      <body className="antialiased" suppressHydrationWarning>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <HapticFeedback />
-        <ServiceWorkerRegister />
-        <PageTransition>{children}</PageTransition>
+      <body className="antialiased">
+        {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
