@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpen, Bug, Code2, Docker, GitBranch, Terminal, Zap } from 'lucide-react'
+import { ArrowUpRight, BookOpen, Bug, Code2, Container, GitBranch, Terminal, Zap } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
@@ -16,7 +16,7 @@ const STEPS = [
     code: 'pnpm install && pnpm dev',
   },
   {
-    icon: Docker,
+    icon: Container,
     title: 'Run the services',
     description: 'Start the full stack with Docker Compose to test your changes against all services.',
     code: 'docker compose --profile full up -d',
@@ -58,7 +58,7 @@ const AREAS = [
     linkLabel: 'View docs',
   },
   {
-    icon: Docker,
+    icon: Container,
     title: 'Plugins & skills',
     description: 'Build a custom skill, droid, or tool and publish it. Plugins are self-contained and versioned.',
     link: `${REPO_URL}/tree/master/docs/DEVELOPMENT.md`,
