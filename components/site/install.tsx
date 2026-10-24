@@ -64,10 +64,29 @@ export function Install() {
   const [profile, setProfile] = useState('minimal')
   const [copied, setCopied] = useState(false)
   const [shownLines, setShownLines] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const sectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setOs(detectOS())
+  }, [])
+
+  // Only start typing animation when section scrolls into view
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -77,13 +96,13 @@ export function Install() {
   const lines = getTerminalLines(method, profile, os)
 
   useEffect(() => {
-    if (shownLines >= lines.length) return
+    if (!isVisible || shownLines >= lines.length) return
     const delay = shownLines === 0 ? 400 : 80
     timerRef.current = setTimeout(() => setShownLines((s) => s + 1), delay)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [shownLines, lines.length])
+  }, [shownLines, lines.length, isVisible])
 
   const currentCmd = getCurrentCommand(method, profile, os)
 
@@ -94,6 +113,7 @@ export function Install() {
   }, [currentCmd])
 
   return (
+    <div ref={sectionRef}>
     <section id="install" aria-labelledby="install-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="install-title"
@@ -307,6 +327,7 @@ export function Install() {
         </div>
       </div>
     </section>
+    </div>
   )
 }
 

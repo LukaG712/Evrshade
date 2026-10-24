@@ -18,37 +18,54 @@ export function MobileToc() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [offset, setOffset] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  const activeIndexRef = useRef(0)
 
   useEffect(() => {
-    const onScroll = () => {
-      // Find the current section based on scroll position
-      let current = 0
-      for (let i = NAV_KEYS.length - 1; i >= 0; i--) {
-        const el = document.getElementById(NAV_KEYS[i].href.slice(1))
-        if (el) {
-          const rect = el.getBoundingClientRect()
-          if (rect.top <= 200) {
-            current = i
-            break
-          }
-        }
-      }
-      setActiveIndex(current)
+    let ticking = false
+    let rafId = 0
 
-      // Auto-scroll the container to keep active item visible
-      const container = containerRef.current
-      if (container) {
-        const itemWidth = 100 // approximate width per item
-        const containerWidth = container.clientWidth
-        const idealOffset = current * itemWidth - containerWidth / 2 + itemWidth / 2
-        const maxOffset = Math.max(0, NAV_KEYS.length * itemWidth - containerWidth)
-        setOffset(Math.min(maxOffset, Math.max(0, idealOffset)))
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true
+        rafId = requestAnimationFrame(() => {
+          // Find the current section based on scroll position
+          let current = 0
+          for (let i = NAV_KEYS.length - 1; i >= 0; i--) {
+            const el = document.getElementById(NAV_KEYS[i].href.slice(1))
+            if (el) {
+              const rect = el.getBoundingClientRect()
+              if (rect.top <= 200) {
+                current = i
+                break
+              }
+            }
+          }
+          // Only update React state when the active section actually changes
+          if (current !== activeIndexRef.current) {
+            activeIndexRef.current = current
+            setActiveIndex(current)
+
+            // Auto-scroll the container to keep active item visible
+            const container = containerRef.current
+            if (container) {
+              const itemWidth = 100
+              const containerWidth = container.clientWidth
+              const idealOffset = current * itemWidth - containerWidth / 2 + itemWidth / 2
+              const maxOffset = Math.max(0, NAV_KEYS.length * itemWidth - containerWidth)
+              setOffset(Math.min(maxOffset, Math.max(0, idealOffset)))
+            }
+          }
+          ticking = false
+        })
       }
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(rafId)
+    }
   }, [])
 
   const scrollTo = (href: string) => {

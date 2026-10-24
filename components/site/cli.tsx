@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { SectionHeading } from './section-heading'
 
@@ -73,13 +73,32 @@ const CMDS: { cmd: string; what: string; out: Line[] }[] = [
 export function Cli() {
   const [active, setActive] = useState(0)
   const [shown, setShown] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const cur = CMDS[active]
 
+  // Only start typing animation when section scrolls into view
   useEffect(() => {
-    if (shown >= cur.out.length) return
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible || shown >= cur.out.length) return
     const id = window.setTimeout(() => setShown((s) => s + 1), shown === 0 ? 350 : 70)
     return () => window.clearTimeout(id)
-  }, [shown, cur.out.length])
+  }, [shown, cur.out.length, isVisible])
 
   const run = (i: number) => {
     setActive(i)
@@ -87,6 +106,7 @@ export function Cli() {
   }
 
   return (
+    <div ref={sectionRef}>
     <section id="cli" aria-labelledby="cli-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="cli-title"
@@ -153,5 +173,6 @@ export function Cli() {
         </div>
       </div>
     </section>
+    </div>
   )
 }

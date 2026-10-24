@@ -119,10 +119,27 @@ export function SlammerPreview() {
   const [newMissionName, setNewMissionName] = useState('')
   const logIndexRef = useRef(5)
   const logContainerRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const isVisibleRef = useRef(true)
 
-  // Simulate real-time log streaming
+  // Pause intervals when scrolled off-screen to save main thread time
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting
+      },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // Simulate real-time log streaming (paused when off-screen)
   useEffect(() => {
     const interval = setInterval(() => {
+      if (!isVisibleRef.current) return
       setLogs(prev => {
         const nextIndex = logIndexRef.current % LOG_MESSAGES.length
         const newLog = LOG_MESSAGES[nextIndex]
@@ -142,9 +159,10 @@ export function SlammerPreview() {
     }
   }, [logs])
 
-  // Simulate progress animation for running missions
+  // Simulate progress animation for running missions (paused when off-screen)
   useEffect(() => {
     const interval = setInterval(() => {
+      if (!isVisibleRef.current) return
       setMissions(prev =>
         prev.map(m => {
           if (m.status === 'running' && m.progress < 100) {
@@ -200,6 +218,7 @@ export function SlammerPreview() {
   const pendingApprovals = approvals.filter(a => a.status === 'pending').length
 
   return (
+    <div ref={sectionRef}>
     <section id="slammer" aria-labelledby="slammer-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="slammer-title"
@@ -531,5 +550,6 @@ export function SlammerPreview() {
         ))}
       </div>
     </section>
+    </div>
   )
 }

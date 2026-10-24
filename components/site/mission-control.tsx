@@ -9,6 +9,7 @@ import { SectionHeading } from './section-heading'
 export function MissionControl() {
   const trackRef = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
+  const progressRef = useRef(0)
 
   useEffect(() => {
     let raf = 0
@@ -18,7 +19,12 @@ export function MissionControl() {
       if (!el) return
       const rect = el.getBoundingClientRect()
       const total = el.offsetHeight - window.innerHeight
-      setProgress(Math.min(1, Math.max(0, -rect.top / total)))
+      const newProgress = Math.min(1, Math.max(0, -rect.top / total))
+      // Only re-render if progress changed by more than 1% threshold
+      if (Math.abs(newProgress - progressRef.current) > 0.01) {
+        progressRef.current = newProgress
+        setProgress(newProgress)
+      }
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update)

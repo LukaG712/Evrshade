@@ -42,6 +42,9 @@ export function Hero() {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const start = performance.now()
     let raf = 0
+    let frameCount = 0
+    let cachedRect: DOMRect | null = null
+    let lastRectTop = Infinity
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
@@ -53,8 +56,19 @@ export function Hero() {
       const title = titleRef.current
       if (!wrap || !stage || !head || !title) return
 
-      const rect = wrap.getBoundingClientRect()
+      // Only update DOM every other frame to reduce main thread blocking
+      frameCount++
+      if (frameCount % 2 !== 0) return
+
+      // Cache getBoundingClientRect - only re-read when scroll position changes significantly
+      if (Math.abs(wrap.scrollTop - (cachedRect?.top ?? Infinity)) > 5 || !cachedRect) {
+        cachedRect = wrap.getBoundingClientRect()
+      }
+      const rect = cachedRect!
       if (rect.bottom < 0) return
+      // Skip if scroll position hasn't changed meaningfully
+      if (Math.abs(rect.top - lastRectTop) < 1 && reduce) return
+      lastRectTop = rect.top
 
       const W = stage.clientWidth
       const H = stage.clientHeight
@@ -102,22 +116,27 @@ export function Hero() {
       const rot = reduce ? 0 : time * 0.06 * (1 - range(p, 0.2, 0.5))
       const breathe = reduce ? 0 : Math.sin(time * 0.8) * 3
 
-      const net: Point[] = SERVICES.map((svc, i) => {
-        if (svc.tier === 'orchestrator') return { x: cx, y: cy }
-        if (svc.tier === 'core') {
+      // Pre-compute trig values to avoid repeated Math calls
+      const net: Point[] = new Point[SERVICES.length]
+      for (let i = 0; i < SERVICES.length; i++) {
+        const svc = SERVICES[i]
+        if (svc.tier === 'orchestrator') net[i] = { x: cx, y: cy }
+        else if (svc.tier === 'core') {
           const a = -Math.PI / 2 + (i - 1) * ((Math.PI * 2) / 3) + rot
           const r = R * 0.46 + breathe
-          return { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
+          net[i] = { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
         }
-        if (svc.tier === 'optional') {
+        else if (svc.tier === 'optional') {
           const a = Math.PI / 4 + (i - 4) * (Math.PI / 2) - rot * 0.7
           const r = R * 0.92 - breathe
-          return { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
+          net[i] = { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
         }
-        const side = svc.id === 'slammer' ? -1 : 1
-        const x = desktop ? cx + side * R * stretch * 1.45 : side < 0 ? pad + 12 : W - pad - 112
-        return { x, y: desktop ? cy : cy + R * 1.05 }
-      })
+        else {
+          const side = svc.id === 'slammer' ? -1 : 1
+          const x = desktop ? cx + side * R * stretch * 1.45 : side < 0 ? pad + 12 : W - pad - 112
+          net[i] = { x, y: desktop ? cy : cy + R * 1.05 }
+        }
+      }
 
       // Grid layout (modular service index).
       const cols = desktop ? 5 : 2
@@ -130,18 +149,17 @@ export function Hero() {
       const ch = Math.max(80, (gBottom - gTop) / rows)
 
 
-      const centers: Point[] = []
-      SERVICES.forEach((svc, i) => {
+      const centers: (Point | undefined)[] = new Array(SERVICES.length)
+      for (let i = 0; i < SERVICES.length; i++) {
         const liveEl = liveRefs.current[i]
         if (liveEl) {
-          const lines = LIVE_ACTIVITY[svc.id] ?? []
+          const lines = LIVE_ACTIVITY[SERVICES[i].id] ?? []
           const k = lines.length ? Math.floor(time / 2.4 + i * 0.41) % lines.length : 0
           const txt = lines[k] ?? ''
           if (liveEl.textContent !== txt) liveEl.textContent = txt
         }
-        nodeRefs.current[i]?.style.setProperty('--l', '0')
         const node = nodeRefs.current[i]
-        if (!node) return
+        if (!node) continue
         const g = ease(range(p, 0.22 + i * 0.018, 0.50 + i * 0.018))
         const col = i % cols
         const row = Math.floor(i / cols)
@@ -149,15 +167,16 @@ export function Hero() {
         const gy = gTop + row * ch + ch / 2
         const x = lerp(net[i].x, gx, g)
         const y = lerp(net[i].y, gy, g)
-        const dot = DOT_SIZE[svc.tier]
+        const dot = DOT_SIZE[SERVICES[i].tier]
         const w = lerp(dot, cw + 1, g)
         const hh = lerp(dot, ch + 1, g)
         centers[i] = { x, y }
-        node.style.width = `${w}px`
-        node.style.height = `${hh}px`
-        node.style.transform = `translate3d(${x - w / 2}px, ${y - hh / 2}px, 0)`
-        node.style.setProperty('--g', g.toFixed(3))
-      })
+        const style = node.style
+        style.width = `${w}px`
+        style.height = `${hh}px`
+        style.transform = `translate3d(${x - w / 2}px, ${y - hh / 2}px, 0)`
+        style.setProperty('--g', g.toFixed(3))
+      }
 
       const edgeOpacity = 1 - range(p, 0.18, 0.42)
       if (edgeGroupRef.current) edgeGroupRef.current.style.opacity = String(edgeOpacity)
