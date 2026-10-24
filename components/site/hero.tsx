@@ -56,9 +56,9 @@ export function Hero() {
       const title = titleRef.current
       if (!wrap || !stage || !head || !title) return
 
-      // Only update DOM every 3rd frame to reduce main thread blocking
+      // Only update DOM every other frame to reduce main thread blocking
       frameCount++
-      if (frameCount % 3 !== 0) return
+      if (frameCount % 2 !== 0) return
 
       // Cache getBoundingClientRect - only re-read when scroll position changes significantly
       if (Math.abs(wrap.scrollTop - (cachedRect?.top ?? Infinity)) > 5 || !cachedRect) {

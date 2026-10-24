@@ -12,7 +12,7 @@ export function DownloadDropdown() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
+        className="inline-flex h-11 items-center gap-2 rounded-sm border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
       >
         <DownloadIcon className="size-4" aria-hidden="true" />
         Download
@@ -22,7 +22,7 @@ export function DownloadDropdown() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
-          <div className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-[300px] border border-foreground bg-background p-2 shadow-lg">
+          <div className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-[300px] overflow-hidden rounded-sm border border-border bg-background shadow-lg">
             {INSTALLERS.map((item) => {
               const Icon = item.icon
               return (
@@ -31,7 +31,7 @@ export function DownloadDropdown() {
                   href={`${RELEASES_BASE_URL}/${item.file}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3 rounded p-3 transition-colors hover:bg-foreground/5"
+                  className="flex items-center gap-3 border-b border-border p-3 transition-colors last:border-0 hover:bg-muted/50"
                   onClick={() => setOpen(false)}
                 >
                   <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
