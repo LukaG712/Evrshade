@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronDown, Download, Copy, Check, Apple, Monitor, Terminal } from 'lucide-react'
+import { ChevronDown, Download as DownloadIcon, Copy, Check, Apple, Monitor, Terminal } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 type OS = 'macos' | 'windows' | 'linux' | 'unknown'
@@ -135,7 +135,7 @@ export function Download() {
               onClick={() => setOpen(!open)}
               className="inline-flex h-12 items-center gap-2 bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-signal-ink"
             >
-              <Download className="size-4" aria-hidden="true" />
+              <DownloadIcon className="size-4" aria-hidden="true" />
               Download all installers
               <ChevronDown className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
