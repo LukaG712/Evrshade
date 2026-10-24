@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: '/EvershadePage',
   typescript: {
     ignoreBuildErrors: true,
   },

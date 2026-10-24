@@ -277,7 +277,7 @@ export function Hero() {
 
         <div
           ref={introRef}
-          className="absolute inset-x-4 flex flex-col gap-5 md:inset-x-[max(24px,3vw)] md:flex-row md:items-end md:justify-between"
+          className="absolute inset-x-4 z-10 flex flex-col gap-5 md:inset-x-[max(24px,3vw)] md:flex-row md:items-end md:justify-between"
           style={{ bottom: 'calc(var(--head-h, 20vw) + max(16px, 3vw) + 24px)' }}
         >
           <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
