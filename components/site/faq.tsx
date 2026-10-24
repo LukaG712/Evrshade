@@ -1,3 +1,5 @@
+'use client'
+
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react'
 import { useState } from 'react'
 import { SectionHeading } from './section-heading'
