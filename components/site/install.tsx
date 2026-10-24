@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Check, Copy, Terminal, Docker, FolderGit, Monitor, Apple, ChevronRight, Cpu, HardDrive, Shield, Rocket } from 'lucide-react'
+import { Check, Copy, Terminal, Dock, FolderGit, Monitor, Apple, ChevronRight, Cpu, HardDrive, Shield, Rocket } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PROFILES, SERVICES } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
@@ -45,7 +45,7 @@ const MANUAL_STEPS = [
 ]
 
 const PREREQUISITES = [
-  { icon: Docker, text: 'Docker Desktop or Docker Engine 24+', detail: 'Required for all install methods' },
+  { icon: Dock, text: 'Docker Desktop or Docker Engine 24+', detail: 'Required for all install methods' },
   { icon: Terminal, text: 'Git', detail: 'For cloning the repository' },
   { icon: Shield, text: 'LLM API key or Ollama', detail: 'OpenAI, Anthropic, or local Ollama' },
   { icon: Cpu, text: '~512MB RAM minimum', detail: 'Minimal profile; ~2GB for full' },
@@ -142,7 +142,7 @@ export function Install() {
             <div className="flex items-center justify-between border-b border-foreground px-4 py-2.5">
               <div className="flex items-center gap-2">
                 {method === 'oneliner' && <Terminal className="size-3.5 text-muted-foreground" />}
-                {method === 'docker' && <Docker className="size-3.5 text-muted-foreground" />}
+                {method === 'docker' && <Dock className="size-3.5 text-muted-foreground" />}
                 {method === 'manual' && <FolderGit className="size-3.5 text-muted-foreground" />}
                 {method === 'gui' && <Monitor className="size-3.5 text-muted-foreground" />}
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
