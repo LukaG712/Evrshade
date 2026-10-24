@@ -46,6 +46,8 @@ export function Hero() {
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
+      // Pause animation when tab is hidden to save main thread time
+      if (document.hidden) return
       const wrap = wrapRef.current
       const stage = stageRef.current
       const head = headRef.current

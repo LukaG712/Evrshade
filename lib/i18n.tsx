@@ -760,13 +760,25 @@ const I18nContext = createContext<I18nContextValue>({
 })
 
 export function I18nProvider({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false)
   const [locale, setLocale] = useState<Locale>('en')
 
   useEffect(() => {
     const saved = loadLocale()
     setLocale(saved)
     document.documentElement.lang = saved
+    setMounted(true)
   }, [])
+
+  // During SSR and initial hydration, always render with 'en' to avoid mismatch.
+  // After hydration, 'mounted' becomes true and the real locale is used.
+  if (!mounted) {
+    return (
+      <I18nContext.Provider value={{ locale: 'en', setLocale: () => {}, t: (key: string) => DICTIONARY.en[key] ?? key }}>
+        {children}
+      </I18nContext.Provider>
+    )
+  }
 
   const handleSetLocale = (next: Locale) => {
     setLocale(next)

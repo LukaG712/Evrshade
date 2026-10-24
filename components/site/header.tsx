@@ -1,13 +1,25 @@
 'use client'
 
-import { ArrowUpRight, ChevronDown } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import { REPO_URL } from '@/lib/evershade'
 import { useI18n } from '@/lib/i18n'
-import { CommandPalette } from './command-palette'
-import { LanguageSelector } from './language-selector'
 import { MobileNav } from './mobile-nav'
-import { ThemeToggle } from './theme-toggle'
+
+// Lazy-load non-critical header components to reduce initial TBT
+const CommandPalette = dynamic(
+  () => import('./command-palette').then(m => ({ default: m.CommandPalette })),
+  { ssr: false, loading: () => null }
+)
+const LanguageSelector = dynamic(
+  () => import('./language-selector').then(m => ({ default: m.LanguageSelector })),
+  { ssr: false, loading: () => null }
+)
+const ThemeToggle = dynamic(
+  () => import('./theme-toggle').then(m => ({ default: m.ThemeToggle })),
+  { ssr: false, loading: () => null }
+)
 
 const PRIMARY_NAV = [
   { href: '#overview', key: 'nav.overview' },
@@ -114,7 +126,7 @@ export function Header() {
             className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-foreground px-3.5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             {t('hero.github')}
-            <ArrowUpRight className="size-3.5" aria-hidden="true" />
+            <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
           </a>
         </div>
       </div>
