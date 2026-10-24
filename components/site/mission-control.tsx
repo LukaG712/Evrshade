@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { Check, RotateCcw } from 'lucide-react'
@@ -9,10 +9,10 @@ import { SectionHeading } from './section-heading'
 export function MissionControl() {
   const trackRef = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
-  const progressRef = useRef(0)
 
   useEffect(() => {
     let raf = 0
+    let lastProgress = 0
     const update = () => {
       raf = 0
       const el = trackRef.current
@@ -20,9 +20,9 @@ export function MissionControl() {
       const rect = el.getBoundingClientRect()
       const total = el.offsetHeight - window.innerHeight
       const newProgress = Math.min(1, Math.max(0, -rect.top / total))
-      // Only re-render if progress changed by more than 1% threshold
-      if (Math.abs(newProgress - progressRef.current) > 0.01) {
-        progressRef.current = newProgress
+      // Only update React state when progress changes by more than 1% to reduce re-renders
+      if (Math.abs(newProgress - lastProgress) > 0.01) {
+        lastProgress = newProgress
         setProgress(newProgress)
       }
     }
@@ -45,7 +45,7 @@ export function MissionControl() {
 
   return (
     <section id="missions" aria-labelledby="missions-title" className="relative">
-      <div className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+      <div className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
         <SectionHeading
           id="missions-title"
           label="Mission Control"

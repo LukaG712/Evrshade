@@ -1,16 +1,12 @@
+import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { I18nProvider } from '@/lib/i18n'
-import { ServiceWorkerRegister } from '@/components/site/service-worker-register'
-import { PlausibleAnalytics } from '@/components/site/plausible-analytics'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://evrshade.netlify.app'),
   title: 'Evershade: Self-hosted AI agent platform',
   description:
     'Evershade is a self-hosted AI agent platform built as a collection of specialized microservices. Orchestrate agents, run missions, and own your data.',
@@ -60,44 +56,24 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   manifest: '/site.webmanifest',
-  alternates: {
-    types: {
-      'application/rss+xml': [
-        { url: '/api/releases', title: 'Evershade Release Feed' },
-      ],
-    },
-  },
 }
 
 export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  viewportFit: 'cover',
   colorScheme: 'light dark',
-  themeColor: [{ media: '(prefers-color-scheme: light)', color: '#fcfcfa' }, { media: '(prefers-color-scheme: dark)', color: '#1a1a2e' }],
+  themeColor: [{ media: '(prefers-color-scheme: light)', color: '#fcfcfa' }, { media: '(prefers-color-scheme: dark)', color: '#242422' }],
+  viewportFit: 'cover',
 }
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
   name: 'Evershade',
-  description: 'Self-hosted AI agent platform built as a collection of specialized microservices. Orchestrate agents, run missions, and own your data.',
-  url: 'https://evrshade.netlify.app',
-  image: 'https://evrshade.netlify.app/og.png',
-  softwareVersion: '0.1.0',
-  operatingSystem: 'Linux, macOS, Windows',
+  description: 'Self-hosted AI agent platform built as a collection of specialized microservices.',
   applicationCategory: 'DeveloperApplication',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-  },
+  operatingSystem: 'Linux, macOS, Windows',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  author: { '@type': 'Person', name: 'LukaG712', url: 'https://github.com/LukaG712' },
   license: 'https://opensource.org/licenses/MIT',
-  author: {
-    '@type': 'Person',
-    name: 'LukaG712',
-    url: 'https://github.com/LukaG712',
-  },
 }
 
 export default function RootLayout({
@@ -105,28 +81,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const plausibleDomain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
-      <head>
-        <Script
-          id="json-ld"
-          type="application/ld+json"
-          strategy="afterInteractive"
-        >
-          {JSON.stringify(jsonLd)}
-        </Script>
-      </head>
-      <body className="antialiased">
-        <I18nProvider>
-          {children}
-        </I18nProvider>
-        <ServiceWorkerRegister />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#fcfcfa" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        {plausibleDomain && <PlausibleAnalytics domain={plausibleDomain} />}
+      <body className="antialiased" suppressHydrationWarning>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        {children}
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

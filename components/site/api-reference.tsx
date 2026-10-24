@@ -1,23 +1,34 @@
-﻿'use client'
-
-import { useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
-import { SERVICES, REPO_URL } from '@/lib/evershade'
+import { SERVICES, MISSION_STAGES, VERSION, REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
 const API_ENDPOINTS = [
-  { method: 'POST', path: '/api/missions', service: 'Greenie', description: 'Create a new mission with milestones' },
+  { method: 'POST', path: '/api/missions', service: 'Greenie', description: 'Create a new mission with milestones and features' },
+  { method: 'GET', path: '/api/missions', service: 'Greenie', description: 'List all missions with pagination' },
   { method: 'GET', path: '/api/missions/{id}', service: 'Greenie', description: 'Get mission details and current state' },
-  { method: 'POST', path: '/api/missions/{id}/execute', service: 'Greenie', description: 'Execute mission milestones' },
-  { method: 'POST', path: '/api/missions/{id}/validate', service: 'Greenie', description: 'Run tests, lint, and security checks' },
+  { method: 'POST', path: '/api/missions/{id}/plan', service: 'Greenie', description: 'Generate LLM-based plan via Shrewd' },
+  { method: 'POST', path: '/api/missions/{id}/execute', service: 'Greenie', description: 'Execute mission milestones with parallel workers' },
+  { method: 'POST', path: '/api/missions/{id}/validate', service: 'Greenie', description: 'Run test, lint, type and security checks' },
+  { method: 'POST', path: '/api/missions/{id}/fix-revalidate', service: 'Greenie', description: 'Auto-fix failures and re-run validation' },
+  { method: 'POST', path: '/api/missions/{id}/cancel', service: 'Greenie', description: 'Cancel a running mission' },
+  { method: 'POST', path: '/api/missions/{id}/pause', service: 'Greenie', description: 'Pause mission execution' },
+  { method: 'POST', path: '/api/missions/{id}/resume', service: 'Greenie', description: 'Resume a paused mission' },
+  { method: 'GET', path: '/api/missions/analytics', service: 'Greenie', description: 'Get mission completion analytics' },
   { method: 'GET', path: '/api/missions/{id}/logs', service: 'Greenie', description: 'Stream mission logs via SSE' },
+  { method: 'POST', path: '/api/agents', service: 'Greenie', description: 'Create a new agent configuration' },
+  { method: 'GET', path: '/api/agents', service: 'Greenie', description: 'List all agents' },
+  { method: 'POST', path: '/api/workflows', service: 'Greenie', description: 'Create a workflow with triggers' },
   { method: 'POST', path: '/api/secrets', service: 'Hider', description: 'Store an encrypted secret' },
+  { method: 'GET', path: '/api/secrets/{name}', service: 'Hider', description: 'Lease a secret (AES-256-GCM encrypted)' },
   { method: 'POST', path: '/api/notifications', service: 'Poltergeist', description: 'Send notification via configured channel' },
-  { method: 'POST', path: '/v1/chat/completions', service: 'Shrewd', description: 'OpenAI-compatible chat completions' },
+  { method: 'GET', path: '/api/models', service: 'Shrewd', description: 'List available LLM providers' },
+  { method: 'POST', path: '/v1/chat/completions', service: 'Shrewd', description: 'OpenAI-compatible chat completions endpoint' },
   { method: 'GET', path: '/api/metrics', service: 'Sneaker', description: 'Get platform metrics and traces' },
+  { method: 'POST', path: '/api/alerts', service: 'Sneaker', description: 'Configure alert rules' },
   { method: 'GET', path: '/api/graph/search', service: 'Gobber', description: 'Hybrid search across knowledge graph' },
+  { method: 'POST', path: '/api/graph/embed', service: 'Gobber', description: 'Embed and store text chunks' },
+  { method: 'POST', path: '/api/crawl', service: 'Trapper', description: 'Start a web crawl with SSRF protection' },
   { method: 'POST', path: '/api/execute', service: 'Slinker', description: 'Execute code in isolated sandbox' },
-  { method: 'GET', path: '/api/health', service: 'All', description: 'Health check for all services' },
+  { method: 'GET', path: '/api/health', service: 'All', description: 'Health check endpoint for all services' },
 ]
 
 const methodColor: Record<string, string> = {
@@ -25,19 +36,9 @@ const methodColor: Record<string, string> = {
   POST: 'text-signal-ink',
 }
 
-// Group endpoints by service for mobile accordion
-const groupedEndpoints = API_ENDPOINTS.reduce((acc, ep) => {
-  const service = ep.service === 'All' ? 'Platform' : ep.service
-  if (!acc[service]) acc[service] = []
-  acc[service].push(ep)
-  return acc
-}, {} as Record<string, typeof API_ENDPOINTS>)
-
 export function ApiReference() {
-  const [openService, setOpenService] = useState<string | null>(null)
-
   return (
-    <section id="api" aria-labelledby="api-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="api" aria-labelledby="api-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="api-title"
         label="API Reference"
@@ -51,46 +52,7 @@ export function ApiReference() {
         lead={`All ${SERVICES.length} services expose a REST API. Below are the core endpoints across the platform. Full OpenAPI specs are available in the repository.`}
       />
 
-      {/* Mobile: accordion by service */}
-      <div className="mt-12 space-y-2 md:hidden">
-        {Object.entries(groupedEndpoints).map(([service, endpoints]) => (
-          <div key={service} className="border border-border">
-            <button
-              onClick={() => setOpenService(openService === service ? null : service)}
-              className="flex w-full items-center justify-between p-4 text-left"
-              aria-expanded={openService === service}
-            >
-              <div>
-                <p className="font-semibold tracking-tight">{service}</p>
-                <p className="text-xs text-muted-foreground">{endpoints.length} endpoints</p>
-              </div>
-              {openService === service ? (
-                <ChevronUp className="size-4 text-muted-foreground" aria-hidden="true" />
-              ) : (
-                <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
-              )}
-            </button>
-            {openService === service && (
-              <div className="border-t border-border px-4 pb-4">
-                <div className="mt-3 space-y-2">
-                  {endpoints.map((ep) => (
-                    <div key={ep.path} className="rounded border border-border p-3">
-                      <div className="flex items-start gap-2">
-                        <span className={`font-mono text-[11px] font-bold uppercase ${methodColor[ep.method] || ''}`}>{ep.method}</span>
-                        <code className="font-mono text-xs">{ep.path}</code>
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">{ep.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Desktop: full table */}
-      <div className="hidden mt-16 border border-foreground md:block md:mt-24">
+      <div className="mt-16 border border-foreground md:mt-24">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -130,8 +92,8 @@ export function ApiReference() {
 
       <p className="mt-6 text-xs text-muted-foreground">
         Full API documentation →{' '}
-        <a href={`${REPO_URL}/tree/master/docs`} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-signal-ink">
-          {REPO_URL}/tree/master/docs
+        <a href={`${REPO_URL}/tree/main/docs`} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-signal-ink">
+          {REPO_URL}/tree/main/docs
         </a>
       </p>
     </section>

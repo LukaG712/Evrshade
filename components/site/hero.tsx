@@ -1,10 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useRef } from 'react'
+import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
-import { useI18n } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-import { InstallDropdown } from './install-dropdown'
 import { DownloadDropdown } from './download-dropdown'
 import { StarCount } from './star-count'
 
@@ -23,7 +22,6 @@ const DOT_SIZE: Record<Service['tier'], number> = {
 type Point = { x: number; y: number }
 
 export function Hero() {
-  const { t } = useI18n()
   const wrapRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const headRef = useRef<HTMLHeadingElement>(null)
@@ -37,6 +35,7 @@ export function Hero() {
   const packetRefs = useRef<(SVGRectElement | null)[]>([])
   const edgeGroupRef = useRef<SVGGElement>(null)
   const liveRefs = useRef<(HTMLSpanElement | null)[]>([])
+  const liveTagRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -44,31 +43,29 @@ export function Hero() {
     let raf = 0
     let frameCount = 0
     let cachedRect: DOMRect | null = null
-    let lastRectTop = Infinity
+    let cachedScrollTop = 0
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
       // Pause animation when tab is hidden to save main thread time
       if (document.hidden) return
+      // Only update DOM every other frame to reduce main thread blocking
+      frameCount++
+      if (frameCount % 2 !== 0) return
+
       const wrap = wrapRef.current
       const stage = stageRef.current
       const head = headRef.current
       const title = titleRef.current
       if (!wrap || !stage || !head || !title) return
 
-      // Only update DOM every other frame to reduce main thread blocking
-      frameCount++
-      if (frameCount % 2 !== 0) return
-
       // Cache getBoundingClientRect - only re-read when scroll position changes significantly
-      if (Math.abs(wrap.scrollTop - (cachedRect?.top ?? Infinity)) > 5 || !cachedRect) {
+      if (Math.abs(wrap.scrollTop - cachedScrollTop) > 5) {
         cachedRect = wrap.getBoundingClientRect()
+        cachedScrollTop = wrap.scrollTop
       }
       const rect = cachedRect!
       if (rect.bottom < 0) return
-      // Skip if scroll position hasn't changed meaningfully
-      if (Math.abs(rect.top - lastRectTop) < 1 && reduce) return
-      lastRectTop = rect.top
 
       const W = stage.clientWidth
       const H = stage.clientHeight
@@ -116,27 +113,22 @@ export function Hero() {
       const rot = reduce ? 0 : time * 0.06 * (1 - range(p, 0.2, 0.5))
       const breathe = reduce ? 0 : Math.sin(time * 0.8) * 3
 
-      // Pre-compute trig values to avoid repeated Math calls
-      const net: Point[] = new Point[SERVICES.length]
-      for (let i = 0; i < SERVICES.length; i++) {
-        const svc = SERVICES[i]
-        if (svc.tier === 'orchestrator') net[i] = { x: cx, y: cy }
-        else if (svc.tier === 'core') {
+      const net: Point[] = SERVICES.map((svc, i) => {
+        if (svc.tier === 'orchestrator') return { x: cx, y: cy }
+        if (svc.tier === 'core') {
           const a = -Math.PI / 2 + (i - 1) * ((Math.PI * 2) / 3) + rot
           const r = R * 0.46 + breathe
-          net[i] = { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
+          return { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
         }
-        else if (svc.tier === 'optional') {
+        if (svc.tier === 'optional') {
           const a = Math.PI / 4 + (i - 4) * (Math.PI / 2) - rot * 0.7
           const r = R * 0.92 - breathe
-          net[i] = { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
+          return { x: cx + Math.cos(a) * r * stretch, y: cy + Math.sin(a) * r }
         }
-        else {
-          const side = svc.id === 'slammer' ? -1 : 1
-          const x = desktop ? cx + side * R * stretch * 1.45 : side < 0 ? pad + 12 : W - pad - 112
-          net[i] = { x, y: desktop ? cy : cy + R * 1.05 }
-        }
-      }
+        const side = svc.id === 'slammer' ? -1 : 1
+        const x = desktop ? cx + side * R * stretch * 1.45 : side < 0 ? pad + 12 : W - pad - 112
+        return { x, y: desktop ? cy : cy + R * 1.05 }
+      })
 
       // Grid layout (modular service index).
       const cols = desktop ? 5 : 2
@@ -148,18 +140,25 @@ export function Hero() {
       const cw = gW / cols
       const ch = Math.max(80, (gBottom - gTop) / rows)
 
+      // Final phase: the grid becomes a live operations board.
+      const live = ease(range(p, 0.62, 0.78))
+      if (liveTagRef.current) {
+        liveTagRef.current.style.opacity = String(live)
+        liveTagRef.current.style.transform = `translate3d(0, ${(1 - live) * 12}px, 0)`
+      }
 
-      const centers: (Point | undefined)[] = new Array(SERVICES.length)
-      for (let i = 0; i < SERVICES.length; i++) {
+      const centers: Point[] = []
+      SERVICES.forEach((svc, i) => {
         const liveEl = liveRefs.current[i]
         if (liveEl) {
-          const lines = LIVE_ACTIVITY[SERVICES[i].id] ?? []
+          const lines = LIVE_ACTIVITY[svc.id] ?? []
           const k = lines.length ? Math.floor(time / 2.4 + i * 0.41) % lines.length : 0
           const txt = lines[k] ?? ''
           if (liveEl.textContent !== txt) liveEl.textContent = txt
         }
+        nodeRefs.current[i]?.style.setProperty('--l', live.toFixed(3))
         const node = nodeRefs.current[i]
-        if (!node) continue
+        if (!node) return
         const g = ease(range(p, 0.22 + i * 0.018, 0.50 + i * 0.018))
         const col = i % cols
         const row = Math.floor(i / cols)
@@ -167,16 +166,15 @@ export function Hero() {
         const gy = gTop + row * ch + ch / 2
         const x = lerp(net[i].x, gx, g)
         const y = lerp(net[i].y, gy, g)
-        const dot = DOT_SIZE[SERVICES[i].tier]
+        const dot = DOT_SIZE[svc.tier]
         const w = lerp(dot, cw + 1, g)
         const hh = lerp(dot, ch + 1, g)
         centers[i] = { x, y }
-        const style = node.style
-        style.width = `${w}px`
-        style.height = `${hh}px`
-        style.transform = `translate3d(${x - w / 2}px, ${y - hh / 2}px, 0)`
-        style.setProperty('--g', g.toFixed(3))
-      }
+        node.style.width = `${w}px`
+        node.style.height = `${hh}px`
+        node.style.transform = `translate3d(${x - w / 2}px, ${y - hh / 2}px, 0)`
+        node.style.setProperty('--g', g.toFixed(3))
+      })
 
       const edgeOpacity = 1 - range(p, 0.18, 0.42)
       if (edgeGroupRef.current) edgeGroupRef.current.style.opacity = String(edgeOpacity)
@@ -207,105 +205,22 @@ export function Hero() {
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  // On mobile (<768px), show a simplified static layout instead of the heavy scroll-driven animation
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-
-  if (isMobile) {
-    return (
-      <section id="hero-scroll" className="blueprint relative pb-10 pt-14 sm:pb-16 sm:pt-20">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/0 via-background/30 to-background/80" aria-hidden="true" />
-        <div className="absolute inset-x-3 top-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inset-x-4 sm:top-4 sm:text-[11px]">
-          <span className="flex items-center gap-2">
-            <span className="relative flex size-1.5">
-              <span className="animate-pulse-ring absolute inset-0 bg-signal" />
-              <span className="relative size-1.5 bg-signal" />
-            </span>
-            {`v${VERSION}`}
-          </span>
-          <span className="hidden sm:inline">{t('hero.tagline')}</span>
-        </div>
-
-        <div className="relative px-3 sm:px-4">
-          <h1
-            id="hero-title"
-            className="font-semibold leading-[0.85] tracking-[-0.05em] text-foreground"
-            style={{ fontSize: 'clamp(2.5rem, 16vw, 6rem)' }}
-          >
-            Evershade<span className="text-signal">.</span>
-          </h1>
-
-          <p className="mt-3 max-w-md text-pretty text-sm leading-snug sm:mt-4 sm:text-base">
-            {t('hero.description')}
-          </p>
-
-          <div className="mt-4 flex flex-col gap-2.5">
-            <InstallDropdown />
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-              <DownloadDropdown />
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-11 flex-1 items-center justify-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background active:scale-[0.98]"
-              >
-                {t('hero.github')}
-                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-              </a>
-            </div>
-          </div>
-          <div className="mt-3">
-            <StarCount />
-          </div>
-
-          <div className="mt-6 border border-border p-4 sm:mt-8">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{t('hero.services-label')}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {SERVICES.filter(s => s.tier === 'orchestrator' || s.tier === 'core').map(svc => (
-                <span
-                  key={svc.id}
-                  className="inline-flex items-center gap-1.5 border border-border px-2 py-1 font-mono text-[10px] text-muted-foreground"
-                >
-                  <span className={`size-1 ${svc.tier === 'orchestrator' ? 'bg-signal' : 'bg-foreground'}`} />
-                  {svc.name}
-                </span>
-              ))}
-              <span className="inline-flex items-center px-2 py-1 font-mono text-[10px] text-muted-foreground">
-                +{SERVICES.filter(s => s.tier !== 'orchestrator' && s.tier !== 'core').length} {t('hero.more-services')}
-              </span>
-            </div>
-          </div>
-
-          <a
-            href="#overview"
-            className="mt-4 flex items-center gap-2 font-mono text-sm text-signal-ink underline underline-offset-4 sm:mt-8"
-          >
-            {t('hero.explore')}
-          </a>
-        </div>
-      </section>
-    )
-  }
-
   return (
-    <section ref={wrapRef} id="hero-scroll" aria-labelledby="hero-title" className="relative h-[300vh] md:h-[380vh]">
-      <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/0 via-background/40 to-background/90" aria-hidden="true" />
+    <section ref={wrapRef} aria-labelledby="hero-title" className="relative h-[380vh]">
+      <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden" style={{ backgroundImage: 'linear-gradient(to bottom, oklch(0.99 0.002 106 / 0.8), oklch(0.99 0.002 106 / 0.4)), linear-gradient(to right, oklch(0.15 0 0 / 5%) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.15 0 0 / 5%) 1px, transparent 1px)', backgroundSize: '80px 80px' }}>
         <CornerMarks />
 
         <div
           ref={hudRef}
-          className="z-20 absolute inset-x-4 top-[72px] flex items-start justify-end sm:justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground md:inset-x-[max(24px,3vw)]"
+          className="absolute inset-x-4 top-[72px] flex items-start justify-end sm:justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground md:inset-x-[max(24px,3vw)]"
         >
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline">{t('hero.tagline')}</span>
-            <StarCount />
-          </div>
+          <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
           <span className="flex items-center gap-2">
             <span className="relative flex size-1.5">
               <span className="animate-pulse-ring absolute inset-0 bg-signal" />
               <span className="relative size-1.5 bg-signal" />
             </span>
-            {`v${VERSION}`}
+            {`v${VERSION} · Production ready`}
           </span>
         </div>
 
@@ -336,7 +251,7 @@ export function Hero() {
           </g>
         </svg>
 
-        <ul className="z-10" aria-label="Evershade services">
+        <ul aria-label="Evershade services">
           {SERVICES.map((svc, i) => (
             <ServiceNode
               key={svc.id}
@@ -354,11 +269,25 @@ export function Hero() {
 
         <div
           ref={titleRef}
-          className="z-15 absolute right-4 left-4 opacity-0 md:left-auto md:right-[max(24px,3vw)] md:w-[40%] md:max-w-xl"
+          className="absolute right-4 left-4 opacity-0 md:left-auto md:right-[max(24px,3vw)] md:w-[40%] md:max-w-xl"
         >
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{t('hero.modular-services')}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'01 — Modular services'}</p>
           <p className="mt-3 text-pretty text-lg leading-snug tracking-tight md:text-2xl">
-            {t('hero.modular-description')}
+            Ten specialized microservices. Each has a single responsibility, talks over HTTP, and can run on its own
+            while contributing to one platform.
+          </p>
+          <p
+            ref={liveTagRef}
+            className="mt-4 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider opacity-0"
+          >
+            <span className="relative flex size-1.5">
+              <span className="animate-pulse-ring absolute inset-0 bg-signal" />
+              <span className="relative size-1.5 bg-signal" />
+            </span>
+            {'Live · mission m_7f3a executing'}
+            <a href="#console" className="ml-1 text-signal-ink underline underline-offset-4 hover:text-foreground">
+              {'Watch it run ↓'}
+            </a>
           </p>
         </div>
 
@@ -367,21 +296,33 @@ export function Hero() {
           className="absolute inset-x-4 z-10 flex flex-col gap-5 md:inset-x-[max(24px,3vw)] md:flex-row md:items-end md:justify-between"
           style={{ bottom: 'calc(var(--head-h, 20vw) + max(16px, 3vw) + 24px)' }}
         >
-          <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
-            {t('hero.description')}
-          </p>
-          <div className="flex items-center gap-2">
-            <InstallDropdown />
-            <DownloadDropdown />
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-              {t('hero.github')}
-              <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
+          <div className="flex flex-col gap-3">
+            <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
+              A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
+              hardware. Your data.
+            </p>
+            <StarCount />
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2">
+              <a
+                href="#install"
+                className="inline-flex h-11 items-center gap-2 bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-signal-ink focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                Install Evershade
+                <ArrowDown className="size-4" aria-hidden="true" />
+              </a>
+              <DownloadDropdown />
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                GitHub
+                <ArrowUpRight className="size-4" aria-hidden="true" />
+              </a>
+            </div>
           </div>
         </div>
 
@@ -391,7 +332,8 @@ export function Hero() {
           className="absolute left-4 bottom-4 origin-bottom-left font-semibold leading-[0.78] tracking-[-0.075em] will-change-transform md:left-[max(24px,3vw)] md:bottom-[max(24px,3vw)]"
           style={{ fontSize: 'clamp(4.5rem, 21.5vw, 26rem)' }}
         >
-          Evershade<span className="text-signal">.</span>
+          Evershade
+          <span className="text-signal">.</span>
         </h1>
 
         <div className="absolute top-1/2 right-2 hidden -translate-y-1/2 flex-col items-center gap-3 md:flex" aria-hidden="true">

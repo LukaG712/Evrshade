@@ -1,4 +1,4 @@
-﻿import { SectionHeading } from './section-heading'
+import { SectionHeading } from './section-heading'
 
 const HARNESS = [
   {
@@ -48,7 +48,7 @@ const PERSISTENCE = [
 
 export function Harness() {
   return (
-    <section id="harness" aria-labelledby="harness-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="harness" aria-labelledby="harness-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="harness-title"
         label="Agent Harness"
@@ -62,7 +62,7 @@ export function Harness() {
         lead="Reusable workflows, specialized subagents and event-driven automation for advanced agent development."
       />
 
-      <ul className="mt-16 grid border-t border-l border-foreground md:mt-16 md:grid-cols-2 xl:grid-cols-5">
+      <ul className="mt-16 grid border-t border-l border-foreground md:mt-24 md:grid-cols-2 xl:grid-cols-5">
         {HARNESS.map((item) => (
           <li key={item.code} className="group flex flex-col border-r border-b border-foreground p-6 transition-colors hover:bg-foreground hover:text-background md:min-h-[26rem]">
             <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-wider">
@@ -84,7 +84,7 @@ export function Harness() {
 
       <div className="mt-24 grid gap-10 md:mt-32 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-4">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'05.1: Workstations'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'05.1 — Workstations'}</p>
           <h3 className="mt-4 text-balance text-4xl font-semibold leading-[0.95] tracking-[-0.04em] md:text-5xl">
             A computer for every agent.
           </h3>

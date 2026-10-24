@@ -1,81 +1,55 @@
 'use client'
 
-import { CheckCircle, XCircle, Loader, GitBranch } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { CheckCircle, XCircle, Loader } from 'lucide-react'
+import { REPO_URL } from '@/lib/evershade'
 
-type Status = 'success' | 'failure' | 'in_progress' | 'unknown'
-
-interface BuildStatus {
-  status: Status
-  commitMessage: string
-  commitSha: string
-  workflowName: string
-  updatedAt: string
+interface WorkflowRun {
+  id: number
+  status: string
+  conclusion: string | null
+  html_url: string
+  head_commit: { message: string }
 }
 
-const REPO_OWNER = 'LukaG712'
-const REPO_NAME = 'Evershade'
-
 export function BuildStatus() {
-  const [build, setBuild] = useState<BuildStatus | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [run, setRun] = useState<WorkflowRun | null>(null)
 
   useEffect(() => {
-    fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs?per_page=1`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.workflow_runs && data.workflow_runs.length > 0) {
-          const run = data.workflow_runs[0]
-          let status: Status = 'unknown'
-          if (run.conclusion === 'success') status = 'success'
-          else if (run.conclusion === 'failure') status = 'failure'
-          else if (run.status === 'in_progress' || run.status === 'queued') status = 'in_progress'
-
-          setBuild({
-            status,
-            commitMessage: run.head_commit.message.split('\n')[0],
-            commitSha: run.head_commit.id.slice(0, 7),
-            workflowName: run.name,
-            updatedAt: new Date(run.updated_at).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            }),
-          })
-        }
+    fetch('https://api.github.com/repos/LukaG712/Evershade/actions/runs?per_page=1')
+      .then((res) => {
+        if (!res.ok) return null
+        return res.json()
       })
-      .catch(() => {
-        // Silently fail — badge will remain hidden
+      .then((data: { workflow_runs: WorkflowRun[] } | null) => {
+        if (data?.workflow_runs?.[0]) setRun(data.workflow_runs[0])
       })
-      .finally(() => setLoading(false))
+      .catch(() => {})
   }, [])
 
-  if (loading || build === null) return null
+  if (!run) return null
 
-  const statusIcon = {
-    success: <CheckCircle className="size-3.5 text-signal" aria-hidden="true" />,
-    failure: <XCircle className="size-3.5 text-destructive" aria-hidden="true" />,
-    in_progress: <Loader className="size-3.5 text-foreground/40 animate-spin" aria-hidden="true" />,
-    unknown: <GitBranch className="size-3.5 text-muted-foreground" aria-hidden="true" />,
-  }[build.status]
-
-  const statusLabel = {
-    success: 'Passing',
-    failure: 'Failing',
-    in_progress: 'Building',
-    unknown: 'Unknown',
-  }[build.status]
+  const isPassing = run.conclusion === 'success'
+  const isRunning = run.status === 'in_progress'
 
   return (
     <a
-      href={`https://github.com/${REPO_OWNER}/${REPO_NAME}/actions/runs/${build.commitSha}`}
+      href={run.html_url}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-2 rounded-sm border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
-      title={`${build.commitMessage} (${build.commitSha})`}
+      className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 font-mono text-[11px] transition-colors hover:border-signal"
+      title={run.head_commit.message}
     >
-      {statusIcon}
-      <span>{statusLabel}</span>
-      <span className="text-[10px] text-muted-foreground/60">{build.updatedAt}</span>
+      {isRunning ? (
+        <Loader className="size-3 animate-spin text-muted-foreground" />
+      ) : isPassing ? (
+        <CheckCircle className="size-3 text-signal" />
+      ) : (
+        <XCircle className="size-3 text-destructive" />
+      )}
+      <span className={isPassing ? 'text-signal-ink' : isRunning ? 'text-muted-foreground' : 'text-destructive'}>
+        {isRunning ? 'Building' : isPassing ? 'Passing' : 'Failing'}
+      </span>
     </a>
   )
 }

@@ -1,4 +1,4 @@
-﻿import { ArrowUpRight, BookOpen, Code2, GitBranch, Heart, MessageCircle, Users } from 'lucide-react'
+import { ArrowUpRight, BookOpen, Code2, GitBranch, Heart, MessageCircle, Users } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
@@ -14,15 +14,15 @@ const CONTRIBUTING_PATHS = [
     icon: BookOpen,
     title: 'Architecture Docs',
     description: 'Understand the system before you touch it. Service boundaries, data flow, and design decisions are documented.',
-    link: `${REPO_URL}/tree/master/docs`,
+    link: `${REPO_URL}/tree/main/docs`,
     linkLabel: 'Read docs',
   },
   {
     icon: GitBranch,
     title: 'Plugin Registry',
     description: 'Build a custom skill, droid, or tool and publish it to the community registry. Plugins are self-contained and versioned.',
-    link: `${REPO_URL}/tree/master/docs/DEVELOPMENT.md`,
-    linkLabel: 'Dev guide',
+    link: `${REPO_URL}/tree/main/plugins`,
+    linkLabel: 'Plugin template',
   },
   {
     icon: MessageCircle,
@@ -33,18 +33,24 @@ const CONTRIBUTING_PATHS = [
   },
 ] as const
 
+const STATS = [
+  { label: 'Contributors', value: '40+' },
+  { label: 'Plugins', value: '12' },
+  { label: 'Languages', value: '8' },
+  { label: 'Stars', value: '1.2k' },
+] as const
 
 export function Community() {
   return (
-    <section id="community" aria-labelledby="community-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="community" aria-labelledby="community-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="community-title"
         label="Community"
-        title={<>Build together<span className="text-signal">.</span></>}
-        lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service - every pull request is welcome."
+        title={<>Build <span className="text-signal">together.</span></>}
+        lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service — every pull request is welcome."
       />
 
-      <div className="mt-12 stagger grid gap-4 md:mt-16 md:grid-cols-2">
+      <div className="mt-16 grid gap-6 md:mt-24 md:grid-cols-2">
         {CONTRIBUTING_PATHS.map((path) => {
           const Icon = path.icon
           return (
@@ -74,8 +80,20 @@ export function Community() {
       </div>
 
       <div className="mt-24 grid gap-8 border-t border-foreground pt-12 md:grid-cols-12">
-        <div className="md:col-span-5 md:col-start-1">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.2: How to contribute'}</p>
+        <div className="md:col-span-5">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.1 — By the numbers'}</p>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {STATS.map((stat) => (
+              <div key={stat.label} className="border border-border p-4">
+                <p className="text-3xl font-semibold tracking-tight tabular-nums">{stat.value}</p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="md:col-span-5 md:col-start-7">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.2 — How to contribute'}</p>
           <ol className="mt-6 space-y-3 border-t border-foreground pt-6">
             {[
               'Fork the repository and clone it locally.',

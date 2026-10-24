@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Check, Link2 } from 'lucide-react'
+import { Check, Link } from 'lucide-react'
+import { useState, useCallback } from 'react'
 
 export function SectionHeading({
   label,
@@ -16,52 +16,30 @@ export function SectionHeading({
 }) {
   const [copied, setCopied] = useState(false)
 
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    const url = `${window.location.origin}${window.location.pathname}#${id}`
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      const input = document.createElement('input')
-      input.value = url
-      document.body.appendChild(input)
-      input.select()
-      document.execCommand('copy')
-      document.body.removeChild(input)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
+  const copyLink = useCallback(() => {
+    navigator.clipboard.writeText(`#${id}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [id])
 
   return (
     <div className="grid gap-6 border-t border-foreground pt-6 md:grid-cols-12 md:gap-8">
       <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground md:col-span-3">{label}</p>
       <div className="md:col-span-9">
-        <div className="relative inline-flex items-center gap-2">
-          <h3
-            id={id}
-            className="cursor-pointer text-balance text-2xl font-semibold leading-[0.9] tracking-[-0.05em] md:text-5xl lg:text-7xl"
-            onClick={handleCopy}
-            title="Click to copy link"
-          >
+        <div className="flex items-center gap-2">
+          <h3 id={id} className="text-balance text-4xl font-semibold leading-[0.9] tracking-[-0.05em] md:text-6xl lg:text-7xl">
             {title}
           </h3>
           <button
-            onClick={handleCopy}
-            className="shrink-0 text-muted-foreground/40 transition-colors hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-offset-2"
-            aria-label="Copy link to this section"
             type="button"
+            onClick={copyLink}
+            className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 hover:text-signal-ink focus:opacity-100"
+            aria-label={`Copy link to ${label}`}
           >
-            {copied ? (
-              <Check className="size-4 text-signal" aria-hidden="true" />
-            ) : (
-              <Link2 className="size-4" aria-hidden="true" />
-            )}
+            {copied ? <Check className="size-4 text-signal-ink" /> : <Link className="size-4" />}
           </button>
         </div>
-        {lead ? <p className="mt-4 max-w-2xl text-pretty text-base leading-snug text-muted-foreground md:mt-6 md:text-xl">{lead}</p> : null}
+        {lead ? <p className="mt-6 max-w-2xl text-pretty text-lg leading-snug text-muted-foreground md:text-xl">{lead}</p> : null}
       </div>
     </div>
   )

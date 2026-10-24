@@ -1,4 +1,4 @@
-export const VERSION = '0.1.0'
+export const VERSION = '1.14.0'
 export const REPO_URL = 'https://github.com/LukaG712/Evershade'
 
 export type ServiceTier = 'orchestrator' | 'core' | 'optional' | 'client'
@@ -186,7 +186,7 @@ export const HARDENING = [
   'Prompt-injection test suite',
 ] as const
 
-export type Integration = { name: string; note?: string; status: 'planned' | 'extensible' }
+export type Integration = { name: string; note?: string; status: 'shipped' | 'extensible' }
 
 export const INTEGRATIONS: { group: string; via: string; detail: string; items: Integration[] }[] = [
   {
@@ -194,10 +194,10 @@ export const INTEGRATIONS: { group: string; via: string; detail: string; items: 
     via: 'Shrewd',
     detail: 'Model routing with cost tracking and privacy classification. OpenAI-compatible /v1/chat/completions.',
     items: [
-      { name: 'OpenAI', status: 'planned' },
-      { name: 'Anthropic', status: 'planned' },
-      { name: 'Google', status: 'planned' },
-      { name: 'Ollama', note: 'local', status: 'planned' },
+      { name: 'OpenAI', status: 'shipped' },
+      { name: 'Anthropic', status: 'shipped' },
+      { name: 'Google', status: 'shipped' },
+      { name: 'Ollama', note: 'local', status: 'shipped' },
     ],
   },
   {
@@ -205,10 +205,10 @@ export const INTEGRATIONS: { group: string; via: string; detail: string; items: 
     via: 'Poltergeist',
     detail: 'Async notifications with SQLite persistence. Also receives alerts from Sneaker.',
     items: [
-      { name: 'Slack', status: 'planned' },
-      { name: 'Discord', status: 'planned' },
-      { name: 'Email / SMTP', status: 'planned' },
-      { name: 'Telegram', status: 'planned' },
+      { name: 'Slack', status: 'shipped' },
+      { name: 'Discord', status: 'shipped' },
+      { name: 'Email / SMTP', status: 'shipped' },
+      { name: 'Telegram', status: 'shipped' },
     ],
   },
   {
@@ -216,10 +216,10 @@ export const INTEGRATIONS: { group: string; via: string; detail: string; items: 
     via: 'Greenie',
     detail: 'Automation engine with idempotency and rate limiting. Starts workflows and missions.',
     items: [
-      { name: 'GitHub webhooks', status: 'planned' },
-      { name: 'Schedules', status: 'planned' },
-      { name: 'File changes', status: 'planned' },
-      { name: 'Webhooks', status: 'planned' },
+      { name: 'GitHub webhooks', status: 'shipped' },
+      { name: 'Schedules', status: 'shipped' },
+      { name: 'File changes', status: 'shipped' },
+      { name: 'Webhooks', status: 'shipped' },
     ],
   },
   {
@@ -227,9 +227,9 @@ export const INTEGRATIONS: { group: string; via: string; detail: string; items: 
     via: 'Greenie',
     detail: 'Agents invoke tools exposed by MCP servers. Plugins register through the plugin registry.',
     items: [
-      { name: 'MCP', note: 'stdio', status: 'planned' },
-      { name: 'MCP', note: 'sse', status: 'planned' },
-      { name: 'Plugin registry', status: 'planned' },
+      { name: 'MCP', note: 'stdio', status: 'shipped' },
+      { name: 'MCP', note: 'sse', status: 'shipped' },
+      { name: 'Plugin registry', status: 'shipped' },
     ],
   },
   {
@@ -237,7 +237,7 @@ export const INTEGRATIONS: { group: string; via: string; detail: string; items: 
     via: 'Slinker',
     detail: 'Pluggable runner interface. Junie is the default; the abstraction is built for more.',
     items: [
-      { name: 'Junie', note: 'default', status: 'planned' },
+      { name: 'Junie', note: 'default', status: 'shipped' },
       { name: 'Ollama', status: 'extensible' },
       { name: 'Custom runners', status: 'extensible' },
     ],
@@ -247,10 +247,22 @@ export const INTEGRATIONS: { group: string; via: string; detail: string; items: 
     via: 'Sneaker',
     detail: 'Metrics, traces and logs with secret redaction. Alert rules with deduplication and cooldown.',
     items: [
-      { name: 'OTLP', status: 'planned' },
-      { name: 'Alert rules', status: 'planned' },
+      { name: 'OTLP', status: 'shipped' },
+      { name: 'Alert rules', status: 'shipped' },
     ],
   },
 ]
 
+export const ROADMAP = [
+  { phase: 1, name: 'Foundations', items: ['Architecture docs', 'Version manifest', 'Compose profiles + hardening'] },
+  { phase: 2, name: 'Security & persistence', items: ['AES-256-GCM secrets', 'Bearer auth everywhere', 'SSRF protection'] },
+  { phase: 3, name: 'Real implementation', items: ['LLM providers', 'Notification delivery', 'Full CLI'] },
+  { phase: 4, name: 'Workflow engine', items: ['Triggers', 'Visual builder', 'Approval gates'] },
+  { phase: 5, name: 'Agent workstations', items: ['Container driver', 'Default-deny network', 'Live terminal + desktop'] },
+  { phase: 6, name: 'Quality & release', items: ['Security tests', 'Agent eval suite', 'Release signing'] },
+  { phase: 7, name: 'UI & extensibility', items: ['Single dashboard', 'MCP + plugins', 'Ops dashboards'] },
+  { phase: 8, name: 'Hardening', items: ['Emergency stop', 'Activity timeline', 'Credential rotation'] },
+  { phase: 9, name: 'Mission Control', items: ['Mission lifecycle', 'Fix-revalidate', 'SSE streaming'] },
+] as const
 
+export const OPEN_ITEMS = ['Sneaker: SQLite persistence for metrics, traces and logs'] as const

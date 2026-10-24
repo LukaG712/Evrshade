@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, CircleDashed, Loader, Lock, Pause, Play, RotateCcw, ShieldCheck, X } from 'lucide-react'
@@ -112,7 +112,7 @@ export function MissionConsole() {
   })
 
   return (
-    <section id="console" aria-labelledby="console-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="console" aria-labelledby="console-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="console-title"
         label="Mission Console"

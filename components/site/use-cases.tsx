@@ -1,4 +1,4 @@
-﻿import { Terminal, GitPullRequest, Search, Clock } from 'lucide-react'
+import { Terminal, GitPullRequest, Search, Clock } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const USE_CASES = [
@@ -6,7 +6,7 @@ const USE_CASES = [
     icon: GitPullRequest,
     title: 'Automate your code review pipeline',
     subtitle: 'From PR to production, safely',
-    description: 'Connect Evershade to your GitHub repo. When a pull request opens, Greenie triggers a mission that reads the diff, runs tests in Slinker sandboxes, checks for security issues, and posts a structured review comment - all without your intervention.',
+    description: 'Connect Evershade to your GitHub repo. When a pull request opens, Greenie triggers a mission that reads the diff, runs tests in Slinker sandboxes, checks for security issues, and posts a structured review comment — all without your intervention.',
     steps: [
       'Push code or open a pull request',
       'GitHub webhook triggers a review mission',
@@ -19,7 +19,7 @@ const USE_CASES = [
     icon: Search,
     title: 'Research and summarize a codebase',
     subtitle: 'Onboard faster, remember more',
-    description: 'Point Evershade at a repository. Trapper crawls the docs, Gobber builds a knowledge graph with embeddings, and you can query it naturally - "how does authentication work?" or "where is the retry logic?" - getting answers with source references.',
+    description: 'Point Evershade at a repository. Trapper crawls the docs, Gobber builds a knowledge graph with embeddings, and you can query it naturally — "how does authentication work?" or "where is the retry logic?" — getting answers with source references.',
     steps: [
       'Point Evershade at a repository URL',
       'Trapper crawls and extracts documentation',
@@ -32,7 +32,7 @@ const USE_CASES = [
     icon: Terminal,
     title: 'Build a feature from a spec',
     subtitle: 'Describe it, let Evershade build it',
-    description: 'Write a mission spec - "add rate limiting to the API" - and Evershade plans the milestones, writes the code, runs the tests, fixes failures, and opens a pull request. You approve the sensitive steps and review the final diff.',
+    description: 'Write a mission spec — "add rate limiting to the API" — and Evershade plans the milestones, writes the code, runs the tests, fixes failures, and opens a pull request. You approve the sensitive steps and review the final diff.',
     steps: [
       'Write a mission spec in markdown or via CLI',
       'Shrewd plans milestones and features',
@@ -58,7 +58,7 @@ const USE_CASES = [
 
 export function UseCases() {
   return (
-    <section id="use-cases" aria-labelledby="use-cases-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="use-cases" aria-labelledby="use-cases-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="use-cases-title"
         label="Use cases"
@@ -69,16 +69,16 @@ export function UseCases() {
             <span className="text-muted-foreground">with Evershade.</span>
           </>
         }
-        lead="Evershade isn't just a collection of services - it's a platform for automating the work that matters. Here are four concrete scenarios."
+        lead="Evershade isn't just a collection of services — it's a platform for automating the work that matters. Here are four concrete scenarios."
       />
 
-      <div className="mt-12 md:mt-24">
+      <div className="mt-16 md:mt-24">
         {USE_CASES.map((useCase, index) => {
           const Icon = useCase.icon
           return (
             <div
               key={useCase.title}
-              className="grid gap-8 border-t border-foreground py-12 md:grid-cols-12 md:gap-6 md:py-16"
+              className="grid gap-8 border-t border-foreground py-12 md:grid-cols-12 md:gap-8 md:py-16"
             >
               <div className="md:col-span-5">
                 <div className="flex items-center gap-3">

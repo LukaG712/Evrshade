@@ -1,142 +1,110 @@
 'use client'
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useI18n } from '@/lib/i18n'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-const NAV_KEYS = [
-  { href: '#overview', key: 'nav.overview' },
-  { href: '#how-it-works', key: 'nav.how-it-works' },
-  { href: '#platform', key: 'nav.platform' },
-  { href: '#get-started', key: 'nav.get-started' },
-  { href: '#about', key: 'nav.about' },
-  { href: '#roadmap', key: 'nav.roadmap' },
-] as const
+const SECTIONS = [
+  { label: 'Home', href: '#top' },
+  { label: 'Overview', href: '#overview' },
+  { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Platform', href: '#platform' },
+  { label: 'Get Started', href: '#get-started' },
+  { label: 'About', href: '#about' },
+  { label: 'Roadmap', href: '#roadmap' },
+]
 
 export function MobileToc() {
-  const { t } = useI18n()
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [offset, setOffset] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const activeIndexRef = useRef(0)
+  const [active, setActive] = useState(0)
+  const [overflow, setOverflow] = useState({ left: true, right: true })
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    let ticking = false
-    let rafId = 0
-
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true
-        rafId = requestAnimationFrame(() => {
-          // Find the current section based on scroll position
-          let current = 0
-          for (let i = NAV_KEYS.length - 1; i >= 0; i--) {
-            const el = document.getElementById(NAV_KEYS[i].href.slice(1))
-            if (el) {
-              const rect = el.getBoundingClientRect()
-              if (rect.top <= 200) {
-                current = i
-                break
-              }
-            }
-          }
-          // Only update React state when the active section actually changes
-          if (current !== activeIndexRef.current) {
-            activeIndexRef.current = current
-            setActiveIndex(current)
-
-            // Auto-scroll the container to keep active item visible
-            const container = containerRef.current
-            if (container) {
-              const itemWidth = 100
-              const containerWidth = container.clientWidth
-              const idealOffset = current * itemWidth - containerWidth / 2 + itemWidth / 2
-              const maxOffset = Math.max(0, NAV_KEYS.length * itemWidth - containerWidth)
-              setOffset(Math.min(maxOffset, Math.max(0, idealOffset)))
-            }
-          }
-          ticking = false
-        })
+    let raf = 0
+    let lastActive = 0
+    const update = () => {
+      raf = 0
+      const sections = SECTIONS.slice(1).map((s) => document.querySelector(s.href))
+      let current = 0
+      for (let i = 0; i < sections.length; i++) {
+        const el = sections[i]
+        if (el && el.getBoundingClientRect().top <= 100) {
+          current = i + 1
+        }
+      }
+      if (current !== lastActive) {
+        lastActive = current
+        setActive(current)
       }
     }
-
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      cancelAnimationFrame(rafId)
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
     }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const scrollTo = (href: string) => {
-    const el = document.getElementById(href.slice(1))
-    if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 64
-      window.scrollTo({ top: y, behavior: 'smooth' })
+  const scroll = (dir: 'left' | 'right') => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollBy({ left: dir === 'left' ? -120 : 120, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const check = () => {
+      setOverflow({
+        left: el.scrollLeft > 5,
+        right: el.scrollLeft < el.scrollWidth - el.clientWidth - 5,
+      })
     }
-  }
-
-  const canScrollLeft = offset > 0
-  const canScrollRight = offset < Math.max(0, NAV_KEYS.length * 100 - (containerRef.current?.clientWidth ?? 300))
-
-  const scroll = (direction: 'left' | 'right') => {
-    setOffset(prev => {
-      const delta = direction === 'left' ? -100 : 100
-      const maxOffset = Math.max(0, NAV_KEYS.length * 100 - (containerRef.current?.clientWidth ?? 300))
-      return Math.min(maxOffset, Math.max(0, prev + delta))
-    })
-  }
+    check()
+    el.addEventListener('scroll', check)
+    return () => el.removeEventListener('scroll', check)
+  }, [])
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur md:hidden"
-      aria-label="Table of contents"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/90 backdrop-blur-md md:hidden"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0)' }}
+      aria-label="Mobile navigation"
     >
-      <div className="flex items-center h-14">
-        {canScrollLeft && (
+      <div className="relative flex items-center">
+        {overflow.left && (
           <button
-            onClick={() => scroll('left')}
-            className="flex-shrink-0 px-2 text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
-            aria-label={t('mobile-toc.scroll-left')}
             type="button"
+            onClick={() => scroll('left')}
+            className="absolute left-0 z-10 flex h-10 w-8 items-center justify-center bg-gradient-to-r from-background to-transparent"
+            aria-label="Scroll left"
           >
             <ChevronLeft className="size-4" />
           </button>
         )}
         <div
-          ref={containerRef}
-          className="flex-1 overflow-hidden px-1"
+          ref={scrollRef}
+          className="flex flex-1 overflow-x-auto px-2 py-1.5 scrollbar-hide"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <div
-            className="flex gap-1"
-            style={{ transform: `translateX(-${offset}px)`, transition: 'transform 0.3s ease' }}
-          >
-            {NAV_KEYS.map((section, i) => {
-              const isActive = i === activeIndex
-              return (
-                <button
-                  key={section.href}
-                  onClick={() => scrollTo(section.href)}
-                  className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${
-                    isActive
-                      ? 'bg-signal/10 text-signal'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }`}
-                  aria-current={isActive ? 'true' : undefined}
-                  type="button"
-                >
-                  {t(section.key)}
-                </button>
-              )
-            })}
-          </div>
+          {SECTIONS.map((section, i) => (
+            <a
+              key={section.href}
+              href={section.href}
+              className={`flex shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                i === active
+                  ? 'bg-signal/10 text-signal-ink'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {section.label}
+            </a>
+          ))}
         </div>
-        {canScrollRight && (
+        {overflow.right && (
           <button
-            onClick={() => scroll('right')}
-            className="flex-shrink-0 px-2 text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
-            aria-label={t('mobile-toc.scroll-right')}
             type="button"
+            onClick={() => scroll('right')}
+            className="absolute right-0 z-10 flex h-10 w-8 items-center justify-center bg-gradient-to-l from-background to-transparent"
+            aria-label="Scroll right"
           >
             <ChevronRight className="size-4" />
           </button>

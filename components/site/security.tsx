@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { Check, Lock, OctagonX, RotateCcw } from 'lucide-react'
@@ -19,7 +19,7 @@ const needsGate = (level: AutonomyId, sensitive: boolean) =>
 
 export function Security() {
   return (
-    <section id="security" aria-labelledby="security-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="security" aria-labelledby="security-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="security-title"
         label="Trust & control"
@@ -33,14 +33,14 @@ export function Security() {
         lead="Agents act on real repositories with real credentials. Evershade puts approval gates, isolation boundaries and injection defenses between a model and a side effect."
       />
 
-      <div className="mt-12 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-2">
+      <div className="mt-16 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-2">
         <AutonomyDial />
         <PanicPanel />
       </div>
 
       <div className="mt-px grid gap-px border border-t-0 border-foreground bg-foreground lg:grid-cols-2">
         <div className="bg-background p-5 md:p-8">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.3: Slinker isolation levels'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.3 — Slinker isolation levels'}</p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-3">
             {ISOLATION.map((iso) => (
               <li key={iso.level} className="flex flex-col">
@@ -59,7 +59,7 @@ export function Security() {
         </div>
 
         <div className="bg-background p-5 md:p-8">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.4: Prompt-injection defense'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.4 — Prompt-injection defense'}</p>
           <p className="mt-6 text-pretty text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
             Scraped pages, repo files, notes and tool output are <span className="text-signal-ink">data</span>, never
             instructions.
@@ -97,7 +97,7 @@ function AutonomyDial() {
 
   return (
     <div className="bg-background p-5 md:p-8">
-      <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.1: Autonomy levels'}</p>
+      <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.1 — Autonomy levels'}</p>
       <div role="radiogroup" aria-label="Autonomy level" className="mt-6 grid grid-cols-3 border border-foreground">
         {AUTONOMY.map((a, i) => {
           const on = a.id === level
@@ -167,7 +167,7 @@ function PanicPanel() {
   return (
     <div className={cn('flex flex-col p-5 transition-colors duration-500 md:p-8', engaged ? 'bg-foreground text-background' : 'bg-background')}>
       <p className={cn('font-mono text-[11px] uppercase tracking-wider', engaged ? 'text-signal' : 'text-signal-ink')}>
-        {'06.2: Emergency stop'}
+        {'06.2 — Emergency stop'}
       </p>
       <p className="mt-6 text-4xl font-semibold leading-[0.95] tracking-[-0.04em] md:text-5xl">
         {done ? 'Everything is stopped.' : engaged ? 'Stopping…' : 'One command halts it all.'}

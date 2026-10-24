@@ -1,9 +1,10 @@
 import { INTEGRATIONS } from '@/lib/evershade'
+import { cn } from '@/lib/utils'
 import { SectionHeading } from './section-heading'
 
 export function Integrations() {
   return (
-    <section id="integrations" aria-labelledby="integrations-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="integrations" aria-labelledby="integrations-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="integrations-title"
         label="Integrations"
@@ -17,7 +18,7 @@ export function Integrations() {
         lead="Each integration lives behind exactly one service, so swapping a provider never ripples through the platform. Ollama keeps everything on your machine."
       />
 
-      <ul className="mt-16 stagger grid border-t border-l border-foreground md:mt-16 md:grid-cols-2 xl:grid-cols-3">
+      <ul className="mt-16 grid border-t border-l border-foreground md:mt-24 md:grid-cols-2 xl:grid-cols-3">
         {INTEGRATIONS.map((g, gi) => (
           <li key={g.group} className="flex flex-col border-r border-b border-foreground p-6 md:p-8">
             <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-wider">
@@ -36,8 +37,13 @@ export function Integrations() {
                     {item.name}
                     {item.note ? <span className="ml-2 font-mono text-[11px] font-normal text-muted-foreground">{item.note}</span> : null}
                   </span>
-                  <span className="border border-dashed border-foreground/40 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {item.status}
+                  <span
+                    className={cn(
+                      'font-mono text-[10px] uppercase tracking-wider',
+                      item.status === 'shipped' ? 'text-signal-ink' : 'border border-dashed border-foreground/40 px-1.5 py-0.5 text-muted-foreground',
+                    )}
+                  >
+                    {item.status === 'shipped' ? '● shipped' : 'extensible'}
                   </span>
                 </li>
               ))}
@@ -46,7 +52,7 @@ export function Integrations() {
         ))}
       </ul>
       <p className="mt-4 font-mono text-[11px] text-muted-foreground">
-        {'"Planned" means the interface is designed but not yet implemented.'}
+        {'“Extensible” means the interface exists but a built-in adapter does not ship today.'}
       </p>
     </section>
   )

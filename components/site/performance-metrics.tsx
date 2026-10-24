@@ -1,11 +1,11 @@
-﻿import { Box, Cpu, Layers, Lock, Server, Terminal, Zap } from 'lucide-react'
+import { Box, Cpu, Layers, Lock, Server, Terminal, Zap } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const GOALS = [
   {
     icon: Zap,
     label: 'Fast validation',
-    description: 'Deterministic checks - tests, lint, type - run in parallel. Security review adds a diff-based pass on top.',
+    description: 'Deterministic checks — tests, lint, type — run in parallel. Security review adds a diff-based pass on top.',
   },
   {
     icon: Server,
@@ -36,17 +36,20 @@ const GOALS = [
 
 export function PerformanceMetrics() {
   return (
-    <section id="metrics" aria-labelledby="metrics-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="metrics" aria-labelledby="metrics-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="metrics-title"
         label="Design goals"
         title={
-          <>Built for your machine<span className="text-signal">.</span></>
+          <>
+            Built for
+            <span className="text-signal"> your machine.</span>
+          </>
         }
         lead="Evershade is designed to run locally, stay fast, and keep costs low. These are the principles that guide every architectural decision."
       />
 
-      <div className="mt-16 stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
+      <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
         {GOALS.map((goal) => {
           const Icon = goal.icon
           return (
@@ -66,7 +69,7 @@ export function PerformanceMetrics() {
         })}
       </div>
 
-      <div className="mt-24 grid gap-6 md:grid-cols-12 md:gap-8">
+      <div className="mt-24 grid gap-12 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Mission lifecycle'}</p>
           <div className="mt-6 overflow-hidden border border-border">

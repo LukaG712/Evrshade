@@ -5,33 +5,31 @@ import { Star } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
 
 export function StarCount() {
-  const [count, setCount] = useState<number | null>(null)
+  const [stars, setStars] = useState<number | null>(null)
 
   useEffect(() => {
     fetch('https://api.github.com/repos/LukaG712/Evershade')
       .then((res) => {
-        if (!res.ok) throw new Error('Failed')
+        if (!res.ok) return
         return res.json()
       })
       .then((data: { stargazers_count: number }) => {
-        setCount(data.stargazers_count)
+        if (data?.stargazers_count) setStars(data.stargazers_count)
       })
-      .catch(() => {
-        // Silently fail — badge just won't show a count
-      })
+      .catch(() => {})
   }, [])
 
-  if (count === null) return null
+  if (stars === null) return null
 
   return (
     <a
       href={REPO_URL}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm transition-colors hover:border-foreground/20 hover:text-foreground"
+      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:border-signal hover:text-signal-ink"
     >
-      <Star className="size-3.5 fill-signal text-signal" aria-hidden="true" />
-      <span>{count >= 1000 ? `${(count / 1000).toFixed(1).replace(/\.0$/, '')}k` : count} stars</span>
+      <Star className="size-3 fill-signal text-signal" aria-hidden="true" />
+      {stars >= 1000 ? `${(stars / 1000).toFixed(1).replace(/\.0$/, '')}k` : stars} stars
     </a>
   )
 }

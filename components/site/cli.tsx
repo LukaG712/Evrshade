@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -11,17 +11,17 @@ const CMDS: { cmd: string; what: string; out: Line[] }[] = [
     cmd: 'evershade status',
     what: 'Health of every service at a glance.',
     out: [
-      { text: 'SERVICE       PORT   STATUS', tone: 'dim' },
-      { text: 'greenie       8080   running', tone: 'ok' },
-      { text: 'slinker       8000   running', tone: 'ok' },
-      { text: 'trapper       3000   running', tone: 'ok' },
-      { text: 'gobber        8085   running', tone: 'ok' },
-      { text: 'shrewd        8089   running', tone: 'ok' },
-      { text: 'sneaker       8086   running', tone: 'ok' },
-      { text: 'hider         8087   running', tone: 'ok' },
-      { text: 'poltergeist   8088   running', tone: 'ok' },
+      { text: 'SERVICE       PORT   STATUS    VERSION', tone: 'dim' },
+      { text: 'greenie       8080   healthy   1.8.0', tone: 'ok' },
+      { text: 'slinker       8000   healthy   1.2.0', tone: 'ok' },
+      { text: 'trapper       3000   healthy   1.1.0', tone: 'ok' },
+      { text: 'gobber        8085   healthy   1.1.0', tone: 'ok' },
+      { text: 'shrewd        8089   healthy', tone: 'ok' },
+      { text: 'sneaker       8086   healthy   1.2.0', tone: 'ok' },
+      { text: 'hider         8087   healthy   1.1.0', tone: 'ok' },
+      { text: 'poltergeist   8088   healthy', tone: 'ok' },
       { text: '' },
-      { text: '8/8 running · profile standard' },
+      { text: 'ecosystem v1.14.0 · 8/8 healthy · profile standard' },
     ],
   },
   {
@@ -71,34 +71,34 @@ const CMDS: { cmd: string; what: string; out: Line[] }[] = [
 ]
 
 export function Cli() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(0)
   const [shown, setShown] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
-  const sectionRef = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
   const cur = CMDS[active]
 
-  // Only start typing animation when section scrolls into view
+  // Defer typing animation until section scrolls into view
   useEffect(() => {
-    const el = sectionRef.current
+    const el = rootRef.current
     if (!el) return
-    const observer = new IntersectionObserver(
+    const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true)
-          observer.disconnect()
+          setVisible(true)
+          io.disconnect()
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.2 },
     )
-    observer.observe(el)
-    return () => observer.disconnect()
+    io.observe(el)
+    return () => io.disconnect()
   }, [])
 
   useEffect(() => {
-    if (!isVisible || shown >= cur.out.length) return
+    if (!visible || shown >= cur.out.length) return
     const id = window.setTimeout(() => setShown((s) => s + 1), shown === 0 ? 350 : 70)
     return () => window.clearTimeout(id)
-  }, [shown, cur.out.length, isVisible])
+  }, [visible, shown, cur.out.length])
 
   const run = (i: number) => {
     setActive(i)
@@ -106,8 +106,7 @@ export function Cli() {
   }
 
   return (
-    <div ref={sectionRef}>
-    <section id="cli" aria-labelledby="cli-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section ref={rootRef} id="cli" aria-labelledby="cli-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="cli-title"
         label="Speedy CLI"
@@ -121,7 +120,7 @@ export function Cli() {
         lead="Speedy is the evershade command. It installs, starts, stops, diagnoses, tails logs, backs up and restores the whole ecosystem."
       />
 
-      <div className="mt-12 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-12">
+      <div className="mt-16 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-12">
         <ul className="bg-background lg:col-span-4" aria-label="Commands">
           {CMDS.map((c, i) => (
             <li key={c.cmd} className="border-b border-border last:border-b-0">
@@ -146,7 +145,7 @@ export function Cli() {
 
         <div className="flex min-h-[22rem] flex-col bg-foreground text-background lg:col-span-8">
           <div className="flex items-center justify-between border-b border-background/15 px-5 py-2.5 font-mono text-[10px] uppercase tracking-wider opacity-60">
-            <span>{'~/evershade - zsh'}</span>
+            <span>{'~/evershade — zsh'}</span>
             <span>{'Example output'}</span>
           </div>
           <pre className="flex-1 overflow-x-auto p-5 font-mono text-[12px] leading-relaxed md:p-6 md:text-[13px]" aria-live="polite">
@@ -173,6 +172,5 @@ export function Cli() {
         </div>
       </div>
     </section>
-    </div>
   )
 }

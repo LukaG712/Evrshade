@@ -1,23 +1,29 @@
-﻿import { Check, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
 const COMPARISON = [
   { feature: 'Self-hosted', evershade: true, cursor: false, copilot: false, aider: true, opendevin: true },
   { feature: 'Modular microservices', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
+  { feature: 'SQLite-first storage', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'No cloud dependency', evershade: true, cursor: false, copilot: false, aider: true, opendevin: true },
+  { feature: 'Mission-based workflow', evershade: true, cursor: false, copilot: false, aider: false, opendevin: true },
   { feature: 'Approval gates', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'Knowledge graph memory', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'Sandboxed execution', evershade: true, cursor: false, copilot: false, aider: false, opendevin: true },
+  { feature: 'Multi-model routing', evershade: true, cursor: false, copilot: false, aider: true, opendevin: true },
   { feature: 'Web dashboard', evershade: true, cursor: true, copilot: false, aider: false, opendevin: true },
   { feature: 'CLI interface', evershade: true, cursor: false, copilot: false, aider: true, opendevin: false },
+  { feature: 'Observability built-in', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'Runs on dev hardware', evershade: true, cursor: true, copilot: true, aider: true, opendevin: true },
+  { feature: 'No Kubernetes needed', evershade: true, cursor: true, copilot: true, aider: true, opendevin: true },
   { feature: 'Secrets encryption', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
+  { feature: 'Prompt injection defense', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
 ] as const
 
 const WHY_POINTS = [
   {
     title: 'You own everything',
-    body: 'Your code, your data, your secrets - all stored locally. No cloud vendor, no telemetry, no surprise API bills.',
+    body: 'Your code, your data, your secrets — all stored locally. No cloud vendor, no telemetry, no surprise API bills.',
   },
   {
     title: 'Modular by design',
@@ -25,7 +31,7 @@ const WHY_POINTS = [
   },
   {
     title: 'Built for trust',
-    body: 'Approval gates, sandboxed execution, encrypted secrets, and prompt injection defense - security is the default, not an afterthought.',
+    body: 'Approval gates, sandboxed execution, encrypted secrets, and prompt injection defense — security is the default, not an afterthought.',
   },
   {
     title: 'Lightweight infra',
@@ -35,7 +41,7 @@ const WHY_POINTS = [
 
 export function Comparison() {
   return (
-    <section id="why" aria-labelledby="why-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="why" aria-labelledby="why-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="why-title"
         label="Why Evershade"
@@ -49,7 +55,7 @@ export function Comparison() {
         lead="Evershade is a self-hosted AI agent platform where you control the infrastructure, the data, and the autonomy. Here's how it compares to the alternatives."
       />
 
-      <div className="mt-12 stagger grid gap-6 md:mt-16 md:grid-cols-2">
+      <div className="mt-16 grid gap-8 md:mt-24 md:grid-cols-2">
         {WHY_POINTS.map((point) => (
           <div key={point.title} className="border-t border-foreground pt-6">
             <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{point.title}</h3>
@@ -58,31 +64,8 @@ export function Comparison() {
         ))}
       </div>
 
-      {/* Mobile: simplified comparison */}
-      <div className="mt-12 md:hidden">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Feature comparison'}</p>
-        <div className="mt-6 space-y-3">
-          {[
-            { name: 'Cursor', count: COMPARISON.filter(r => r.cursor).length },
-            { name: 'Copilot', count: COMPARISON.filter(r => r.copilot).length },
-            { name: 'Aider', count: COMPARISON.filter(r => r.aider).length },
-            { name: 'OpenDevin', count: COMPARISON.filter(r => r.opendevin).length },
-          ].map((competitor) => (
-            <div key={competitor.name} className="flex items-center justify-between border border-border p-3">
-              <p className="font-medium text-sm">{competitor.name}</p>
-              <span className="font-mono text-xs text-muted-foreground">{competitor.count}/{COMPARISON.length}</span>
-            </div>
-          ))}
-          <div className="flex items-center justify-between border border-signal bg-signal/5 p-3">
-            <p className="font-semibold text-sm text-signal-ink">Evershade</p>
-            <span className="font-mono text-xs text-signal-ink">{COMPARISON.length}/{COMPARISON.length}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop: full comparison table */}
-      <div className="hidden mt-16 md:block md:mt-32">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'14.1: Feature comparison'}</p>
+      <div className="mt-24 md:mt-32">
+        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'14.1 — Feature comparison'}</p>
         <div className="mt-6 overflow-x-auto border-t border-foreground">
           <table className="w-full min-w-[640px] text-sm">
             <thead>

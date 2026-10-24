@@ -1,4 +1,4 @@
-﻿import { PRINCIPLES, SERVICES, TIER_LABEL, type ServiceTier } from '@/lib/evershade'
+import { PRINCIPLES, SERVICES, TIER_LABEL, type ServiceTier } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
 import { SectionHeading } from './section-heading'
 
@@ -18,7 +18,7 @@ const DEPENDENCIES = [
 
 export function Architecture() {
   return (
-    <section id="architecture" aria-labelledby="architecture-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="architecture" aria-labelledby="architecture-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="architecture-title"
         label="Architecture"
@@ -32,7 +32,7 @@ export function Architecture() {
         lead="Every service has a single responsibility and a public HTTP interface. Greenie is the API-only backend that orchestrates the rest. Slammer is the single dashboard."
       />
 
-      <div className="mt-12 md:mt-24" role="list" aria-label="Service layers">
+      <div className="mt-16 md:mt-24" role="list" aria-label="Service layers">
         {LAYERS.map((layer, li) => {
           const services = SERVICES.filter((s) => s.tier === layer.tier)
           return (
@@ -65,7 +65,7 @@ export function Architecture() {
                     <div className="mt-6">
                       <p className={cn('font-semibold tracking-tight', layer.tier === 'orchestrator' ? 'text-4xl md:text-6xl' : 'text-xl md:text-2xl')}>
                         {svc.name}
-                        {layer.tier === 'orchestrator' ? '.' : null}
+                        {layer.tier === 'orchestrator' ? <span className="text-signal">.</span> : null}
                       </p>
                       <p className="mt-1 text-sm leading-snug opacity-60">{svc.role}</p>
                       <p className="mt-3 font-mono text-[10px] opacity-50">{svc.stack}</p>
@@ -78,9 +78,9 @@ export function Architecture() {
         })}
       </div>
 
-      <div className="mt-24 grid gap-6 md:mt-32 md:grid-cols-12 md:gap-8">
+      <div className="mt-24 grid gap-12 md:mt-32 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.1: Design principles'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.1 — Design principles'}</p>
           <ol className="mt-6 border-t border-foreground">
             {PRINCIPLES.map(([title, body], i) => (
               <li key={title} className="grid grid-cols-[3rem_1fr] gap-4 border-b border-border py-6 md:grid-cols-[4rem_1fr_1fr] md:gap-8">
@@ -92,7 +92,7 @@ export function Architecture() {
           </ol>
         </div>
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.2: Dependency map'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.2 — Dependency map'}</p>
           <ul className="mt-6 border-t border-foreground">
             {DEPENDENCIES.map((d) => (
               <li key={d.svc} className="border-b border-border py-4">

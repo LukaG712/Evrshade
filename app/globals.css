@@ -59,26 +59,26 @@
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.10 0.004 264);
-  --foreground: oklch(0.92 0.008 264);
-  --card: oklch(0.13 0.005 264);
-  --card-foreground: oklch(0.92 0.008 264);
-  --popover: oklch(0.13 0.005 264);
-  --popover-foreground: oklch(0.92 0.008 264);
-  --primary: oklch(0.92 0.008 264);
-  --primary-foreground: oklch(0.10 0.004 264);
-  --secondary: oklch(0.16 0.005 264);
-  --secondary-foreground: oklch(0.92 0.008 264);
-  --muted: oklch(0.16 0.005 264);
-  --muted-foreground: oklch(0.60 0.01 264);
-  --accent: oklch(0.18 0.006 264);
-  --accent-foreground: oklch(0.92 0.008 264);
+  --background: oklch(0.14 0.003 106);
+  --foreground: oklch(0.96 0.002 106);
+  --card: oklch(0.16 0.003 106);
+  --card-foreground: oklch(0.96 0.002 106);
+  --popover: oklch(0.16 0.003 106);
+  --popover-foreground: oklch(0.96 0.002 106);
+  --primary: oklch(0.96 0.002 106);
+  --primary-foreground: oklch(0.14 0.003 106);
+  --secondary: oklch(0.18 0.003 106);
+  --secondary-foreground: oklch(0.96 0.002 106);
+  --muted: oklch(0.18 0.003 106);
+  --muted-foreground: oklch(0.55 0 0);
+  --accent: oklch(0.18 0.003 106);
+  --accent-foreground: oklch(0.96 0.002 106);
   --destructive: oklch(0.60 0.22 25);
-  --border: oklch(0.92 0.008 264 / 14%);
-  --input: oklch(0.92 0.008 264 / 16%);
-  --ring: oklch(0.72 0.18 162);
-  --signal: oklch(0.72 0.18 162);
-  --signal-ink: oklch(0.78 0.16 150);
+  --border: oklch(0.96 0.002 106 / 12%);
+  --input: oklch(0.96 0.002 106 / 15%);
+  --ring: oklch(0.70 0.15 162);
+  --signal: oklch(0.70 0.16 162);
+  --signal-ink: oklch(0.60 0.12 162);
 }
 
 @layer base {
@@ -91,6 +91,8 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: 'ss01', 'cv11';
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
   }
   ::selection {
     background: var(--signal);
@@ -98,27 +100,19 @@
   }
 }
 
-/* Smooth scroll offset — prevents fixed header from hiding section headings */
-#overview,
-#how-it-works,
-#platform,
-#get-started,
-#about,
-#roadmap {
-  scroll-margin-top: 64px;
+/* Smooth scroll offset so fixed header doesn't hide section headings */
+#overview, #how-it-works, #platform, #get-started, #about, #roadmap {
+  scroll-margin-top: 56px;
 }
 
-@media (min-width: 768px) {
-  #overview,
-  #how-it-works,
-  #platform,
-  #get-started,
-  #about,
-  #roadmap {
-    scroll-margin-top: 64px;
-  }
+@utility blueprint {
+  background-image:
+    linear-gradient(to right, oklch(0.15 0 0 / 5%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.15 0 0 / 5%) 1px, transparent 1px);
+  background-size: 80px 80px;
 }
 
+/* Subtle blueprint drift animation */
 @keyframes blueprint-drift {
   0% {
     transform: translate(0, 0);
@@ -128,34 +122,55 @@
   }
 }
 
-@utility blueprint {
+.blueprint-drift {
   position: relative;
 }
 
-.blueprint::after {
+.blueprint-drift::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(to right, oklch(0.15 0 0 / 6%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.15 0 0 / 6%) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.15 0 0 / 5%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.15 0 0 / 5%) 1px, transparent 1px);
   background-size: 80px 80px;
   animation: blueprint-drift 20s linear infinite;
   will-change: transform;
   pointer-events: none;
 }
 
-.dark .blueprint::after {
-  background-image:
-    linear-gradient(to right, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px);
+/* Staggered fade-in for children of revealed sections */
+.stagger {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.dark .blueprint {
-  background-image:
-    linear-gradient(to right, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px);
+.stagger.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
+
+.reveal.visible .stagger > *:nth-child(1),
+.stagger.visible > *:nth-child(1) { transition-delay: 0s; }
+.reveal.visible .stagger > *:nth-child(2),
+.stagger.visible > *:nth-child(2) { transition-delay: 0.05s; }
+.reveal.visible .stagger > *:nth-child(3),
+.stagger.visible > *:nth-child(3) { transition-delay: 0.1s; }
+.reveal.visible .stagger > *:nth-child(4),
+.stagger.visible > *:nth-child(4) { transition-delay: 0.15s; }
+.reveal.visible .stagger > *:nth-child(5),
+.stagger.visible > *:nth-child(5) { transition-delay: 0.2s; }
+.reveal.visible .stagger > *:nth-child(6),
+.stagger.visible > *:nth-child(6) { transition-delay: 0.25s; }
+.reveal.visible .stagger > *:nth-child(7),
+.stagger.visible > *:nth-child(7) { transition-delay: 0.3s; }
+.reveal.visible .stagger > *:nth-child(8),
+.stagger.visible > *:nth-child(8) { transition-delay: 0.35s; }
+.reveal.visible .stagger > *:nth-child(9),
+.stagger.visible > *:nth-child(9) { transition-delay: 0.4s; }
+.reveal.visible .stagger > *:nth-child(10),
+.stagger.visible > *:nth-child(10) { transition-delay: 0.45s; }
 
 @keyframes pulse-ring {
   0% {
@@ -183,7 +198,7 @@
 
 @keyframes travel-r {
   0% {
-    transform: translateX(0);
+    left: 0%;
     opacity: 0;
   }
   15%,
@@ -191,14 +206,14 @@
     opacity: 1;
   }
   100% {
-    transform: translateX(100%);
+    left: 100%;
     opacity: 0;
   }
 }
 
 @keyframes travel-l {
   0% {
-    transform: translateX(100%);
+    left: 100%;
     opacity: 0;
   }
   15%,
@@ -206,7 +221,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateX(0);
+    left: 0%;
     opacity: 0;
   }
 }
@@ -218,53 +233,6 @@
 }
 
 .reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Staggered children animation — triggered by parent .reveal.visible or own .visible */
-.stagger > *,
-.reveal.visible .stagger > * {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.stagger.visible > *:nth-child(1),
-.reveal.visible .stagger > *:nth-child(1) { transition-delay: 0.05s; }
-.stagger.visible > *:nth-child(2),
-.reveal.visible .stagger > *:nth-child(2) { transition-delay: 0.1s; }
-.stagger.visible > *:nth-child(3),
-.reveal.visible .stagger > *:nth-child(3) { transition-delay: 0.15s; }
-.stagger.visible > *:nth-child(4),
-.reveal.visible .stagger > *:nth-child(4) { transition-delay: 0.2s; }
-.stagger.visible > *:nth-child(5),
-.reveal.visible .stagger > *:nth-child(5) { transition-delay: 0.25s; }
-.stagger.visible > *:nth-child(6),
-.reveal.visible .stagger > *:nth-child(6) { transition-delay: 0.3s; }
-.stagger.visible > *:nth-child(7),
-.reveal.visible .stagger > *:nth-child(7) { transition-delay: 0.35s; }
-.stagger.visible > *:nth-child(8),
-.reveal.visible .stagger > *:nth-child(8) { transition-delay: 0.4s; }
-.stagger.visible > *:nth-child(9),
-.reveal.visible .stagger > *:nth-child(9) { transition-delay: 0.45s; }
-.stagger.visible > *:nth-child(10),
-.reveal.visible .stagger > *:nth-child(10) { transition-delay: 0.5s; }
-.stagger.visible > *:nth-child(11),
-.reveal.visible .stagger > *:nth-child(11) { transition-delay: 0.55s; }
-.stagger.visible > *:nth-child(12),
-.reveal.visible .stagger > *:nth-child(12) { transition-delay: 0.6s; }
-.stagger.visible > *:nth-child(13),
-.reveal.visible .stagger > *:nth-child(13) { transition-delay: 0.65s; }
-.stagger.visible > *:nth-child(14),
-.reveal.visible .stagger > *:nth-child(14) { transition-delay: 0.7s; }
-.stagger.visible > *:nth-child(15),
-.reveal.visible .stagger > *:nth-child(15) { transition-delay: 0.75s; }
-.stagger.visible > *:nth-child(16),
-.reveal.visible .stagger > *:nth-child(16) { transition-delay: 0.8s; }
-
-.stagger.visible > *,
-.reveal.visible .stagger > * {
   opacity: 1;
   transform: translateY(0);
 }
@@ -283,47 +251,5 @@
   .reveal {
     opacity: 1;
     transform: none;
-  }
-  .stagger > * {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (max-width: 767px) {
-  /* Safe area padding for notched phones */
-  body {
-    padding-top: env(safe-area-inset-top);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  /* Fixed header needs safe area top */
-  header {
-    padding-top: env(safe-area-inset-top);
-  }
-  /* Better touch targets on mobile */
-  a, button {
-    min-height: 44px;
-  }
-  /* Improve table scroll on mobile */
-  .overflow-x-auto {
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .overflow-x-auto::-webkit-scrollbar {
-    display: none;
-  }
-  /* Reduce giant footer text on very small screens */
-  footer p[aria-hidden="true"] {
-    margin-top: 6rem !important;
-    font-size: 8vw !important;
-  }
-  /* Prevent horizontal overflow on very small screens */
-  html {
-    overflow-x: hidden;
-  }
-  body {
-    overflow-x: hidden;
   }
 }
