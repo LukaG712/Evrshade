@@ -1,5 +1,5 @@
 {
-  "name": "Evershade",
+  "name": "Evershade: Self-hosted AI agent platform",
   "short_name": "Evershade",
   "description": "Self-hosted AI agent platform",
   "start_url": "/",
@@ -21,6 +21,12 @@
       "src": "/apple-icon.png",
       "sizes": "180x180",
       "type": "image/png"
+    },
+    {
+      "src": "/maskable-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
