@@ -18,6 +18,9 @@ const NAV = [
   { href: '#why', label: 'Why', index: '14' },
   { href: '#use-cases', label: 'Use cases', index: '15' },
   { href: '#slammer', label: 'Slammer', index: '16' },
+  { href: '#knowledge-graph', label: 'Graph', index: '17' },
+  { href: '#metrics', label: 'Metrics', index: '18' },
+  { href: '#community', label: 'Community', index: '19' },
 ]
 
 export function Header() {

@@ -19,6 +19,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/#why',
     '/#use-cases',
     '/#slammer',
+    '/#knowledge-graph',
+    '/#metrics',
+    '/#community',
   ]
 
   return [
