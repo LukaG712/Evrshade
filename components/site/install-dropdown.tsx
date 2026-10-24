@@ -14,16 +14,15 @@ const detectOS = (): OS => {
   return 'unknown'
 }
 
-const getCurlCommand = (os: OS) => {
+const getInstallCommand = (os: OS) => {
   switch (os) {
     case 'macos':
-      return 'curl -fsSL https://raw.githubusercontent.com/LukaG712/Evershade/master/install.sh | sh'
-    case 'windows':
-      return 'irm https://raw.githubusercontent.com/LukaG712/Evershade/master/install.ps1 | iex'
     case 'linux':
-      return 'curl -fsSL https://raw.githubusercontent.com/LukaG712/Evershade/master/install.sh | sh'
+      return 'git clone https://github.com/LukaG712/Evershade.git && cd Evershade && docker compose --profile standard up -d'
+    case 'windows':
+      return 'git clone https://github.com/LukaG712/Evershade.git; cd Evershade; docker compose --profile standard up -d'
     default:
-      return 'curl -fsSL https://raw.githubusercontent.com/LukaG712/Evershade/master/install.sh | sh'
+      return 'git clone https://github.com/LukaG712/Evershade.git && cd Evershade && docker compose --profile standard up -d'
   }
 }
 
@@ -57,17 +56,17 @@ export function InstallDropdown() {
   }, [open])
 
   const copy = useCallback(async () => {
-    await navigator.clipboard.writeText(getCurlCommand(os))
+    await navigator.clipboard.writeText(getInstallCommand(os))
     setCopied(true)
     setTimeout(() => setCopied(false), 1600)
   }, [os])
 
-  const curlCmd = getCurlCommand(os)
+  const installCmd = getInstallCommand(os)
 
   return (
-    <div className="flex w-full flex-col gap-2 sm:w-auto" ref={dropdownRef}>
+    <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center" ref={dropdownRef}>
       {/* One-liner box */}
-      <div className="border border-foreground">
+      <div className="border border-foreground sm:w-[280px] sm:shrink-0">
         <div className="flex items-center justify-between border-b border-foreground px-2 py-1.5 sm:px-3">
           <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
             {os === 'windows' ? 'powershell' : 'terminal'}
@@ -82,12 +81,12 @@ export function InstallDropdown() {
           </button>
         </div>
         <div className="p-2 sm:p-3">
-          <code className="break-all font-mono text-[10px] leading-relaxed sm:text-[11px]">{curlCmd}</code>
+          <code className="break-all font-mono text-[10px] leading-relaxed sm:text-[11px]">{installCmd}</code>
         </div>
       </div>
 
       {/* Dropdown button */}
-      <div className="relative">
+      <div className="relative w-full sm:w-auto">
         <button
           type="button"
           onClick={() => setOpen(!open)}
