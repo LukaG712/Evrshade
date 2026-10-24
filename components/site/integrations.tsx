@@ -1,5 +1,4 @@
-﻿import { INTEGRATIONS } from '@/lib/evershade'
-import { cn } from '@/lib/utils'
+import { INTEGRATIONS } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
 export function Integrations() {
@@ -37,13 +36,8 @@ export function Integrations() {
                     {item.name}
                     {item.note ? <span className="ml-2 font-mono text-[11px] font-normal text-muted-foreground">{item.note}</span> : null}
                   </span>
-                  <span
-                    className={cn(
-                      'font-mono text-[10px] uppercase tracking-wider',
-                      item.status === 'shipped' ? 'text-signal-ink' : 'border border-dashed border-foreground/40 px-1.5 py-0.5 text-muted-foreground',
-                    )}
-                  >
-                    {item.status === 'shipped' ? '● shipped' : 'extensible'}
+                  <span className="border border-dashed border-foreground/40 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {item.status}
                   </span>
                 </li>
               ))}
@@ -52,7 +46,7 @@ export function Integrations() {
         ))}
       </ul>
       <p className="mt-4 font-mono text-[11px] text-muted-foreground">
-        {'“Extensible” means the interface exists but a built-in adapter does not ship today.'}
+        {'"Planned" means the interface is designed but not yet implemented.'}
       </p>
     </section>
   )

@@ -278,7 +278,7 @@ export function Hero() {
               <span className="animate-pulse-ring absolute inset-0 bg-signal" />
               <span className="relative size-1.5 bg-signal" />
             </span>
-            {`v${VERSION} · Production ready`}
+            {`v${VERSION}`}
           </span>
         </div>
 

@@ -1,5 +1,5 @@
 ﻿import { ArrowUpRight } from 'lucide-react'
-import { REPO_URL, VERSION } from '@/lib/evershade'
+import { REPO_URL } from '@/lib/evershade'
 
 const LINKS = [
   ['Repository', REPO_URL],
@@ -26,7 +26,6 @@ export function Footer() {
           ))}
         </ul>
         <div className="font-mono text-[11px] uppercase leading-relaxed tracking-wider text-muted-foreground md:col-span-2 md:text-right">
-          <p>{`v${VERSION}`}</p>
           <p>{'MIT License'}</p>
         </div>
       </div>

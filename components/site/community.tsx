@@ -33,12 +33,6 @@ const CONTRIBUTING_PATHS = [
   },
 ] as const
 
-const STATS = [
-  { label: 'Contributors', value: '40+' },
-  { label: 'Plugins', value: '12' },
-  { label: 'Languages', value: '8' },
-  { label: 'Stars', value: '1.2k' },
-] as const
 
 export function Community() {
   return (
@@ -80,19 +74,7 @@ export function Community() {
       </div>
 
       <div className="mt-24 grid gap-8 border-t border-foreground pt-12 md:grid-cols-12">
-        <div className="md:col-span-5">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.1: By the numbers'}</p>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {STATS.map((stat) => (
-              <div key={stat.label} className="border border-border p-4">
-                <p className="text-3xl font-semibold tracking-tight tabular-nums">{stat.value}</p>
-                <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="md:col-span-5 md:col-start-7">
+        <div className="md:col-span-5 md:col-start-1">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'18.2: How to contribute'}</p>
           <ol className="mt-6 space-y-3 border-t border-foreground pt-6">
             {[
