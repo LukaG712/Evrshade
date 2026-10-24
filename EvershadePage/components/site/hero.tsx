@@ -77,7 +77,7 @@ export function Hero() {
       if (hudRef.current) hudRef.current.style.opacity = String(fade)
 
       // Section title fades in alongside the modular grid.
-      const tt = ease(range(p, 0.5, 0.75))
+      const tt = ease(range(p, 0.42, 0.62))
       const titleTop = desktop ? topY : topY + headH * finalScale + 16
       title.style.top = `${titleTop}px`
       title.style.opacity = String(tt)
@@ -125,7 +125,7 @@ export function Hero() {
       const ch = Math.max(80, (gBottom - gTop) / rows)
 
       // Final phase: the grid becomes a live operations board.
-      const live = ease(range(p, 0.74, 0.88))
+      const live = ease(range(p, 0.62, 0.78))
       if (liveTagRef.current) {
         liveTagRef.current.style.opacity = String(live)
         liveTagRef.current.style.transform = `translate3d(0, ${(1 - live) * 12}px, 0)`
@@ -143,7 +143,7 @@ export function Hero() {
         nodeRefs.current[i]?.style.setProperty('--l', live.toFixed(3))
         const node = nodeRefs.current[i]
         if (!node) return
-        const g = ease(range(p, 0.24 + i * 0.022, 0.58 + i * 0.022))
+        const g = ease(range(p, 0.22 + i * 0.018, 0.50 + i * 0.018))
         const col = i % cols
         const row = Math.floor(i / cols)
         const gx = pad + col * cw + cw / 2
@@ -190,7 +190,7 @@ export function Hero() {
   }, [])
 
   return (
-    <section ref={wrapRef} aria-labelledby="hero-title" className="relative h-[440vh]">
+    <section ref={wrapRef} aria-labelledby="hero-title" className="relative h-[380vh]">
       <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden">
         <CornerMarks />
 
