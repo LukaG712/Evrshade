@@ -51,7 +51,7 @@ const GRAPH_ENTITIES = [
 
 export function KnowledgeGraph() {
   return (
-    <section id="knowledge-graph" aria-labelledby="kg-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="knowledge-graph" aria-labelledby="kg-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="kg-title"
         label="Knowledge Graph"
@@ -59,7 +59,7 @@ export function KnowledgeGraph() {
         lead="Every query enriches the system's memory. Gobber combines keyword search, vector embeddings, and graph relationships to surface context that no single method could find alone."
       />
 
-      <div className="mt-16 md:mt-24">
+      <div className="mt-12 md:mt-24">
         <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.1 — Query pipeline'}</p>
         <ol className="mt-8 grid gap-0 border-t border-foreground">
           {PIPELINE_STEPS.map((step, i) => {
@@ -86,7 +86,7 @@ export function KnowledgeGraph() {
         </ol>
       </div>
 
-      <div className="mt-24 grid gap-12 md:grid-cols-12 md:gap-8">
+      <div className="mt-24 grid gap-6 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.2 — Graph entities'}</p>
           <ul className="mt-6 grid gap-3 border-t border-foreground sm:grid-cols-2">

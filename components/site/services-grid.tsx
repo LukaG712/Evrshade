@@ -11,7 +11,7 @@ const TIER_ICON: Record<string, typeof Box> = {
 
 export function ServicesGrid() {
   return (
-    <section id="services" aria-labelledby="services-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="services" aria-labelledby="services-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="services-title"
         label="Services"

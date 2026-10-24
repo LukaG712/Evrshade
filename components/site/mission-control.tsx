@@ -39,7 +39,7 @@ export function MissionControl() {
 
   return (
     <section id="missions" aria-labelledby="missions-title" className="relative">
-      <div className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+      <div className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
         <SectionHeading
           id="missions-title"
           label="Mission Control"

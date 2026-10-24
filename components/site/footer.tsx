@@ -11,7 +11,7 @@ const LINKS = [
 export function Footer() {
   return (
     <footer className="mt-24 overflow-hidden border-t border-foreground px-4 pt-8 md:mt-48 md:px-[max(24px,3vw)]">
-      <div className="grid gap-8 md:grid-cols-12">
+      <div className="grid gap-6 md:grid-cols-12">
         <p className="max-w-sm text-pretty text-base leading-snug md:col-span-5 md:text-lg">
           You own everything. Nothing leaves your machine unless you explicitly connect an external AI provider.
         </p>

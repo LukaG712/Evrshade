@@ -1,4 +1,8 @@
-import { SERVICES, MISSION_STAGES, VERSION, REPO_URL } from '@/lib/evershade'
+'use client'
+
+import { useState } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { SERVICES, REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
 const API_ENDPOINTS = [
@@ -36,9 +40,19 @@ const methodColor: Record<string, string> = {
   POST: 'text-signal-ink',
 }
 
+// Group endpoints by service for mobile accordion
+const groupedEndpoints = API_ENDPOINTS.reduce((acc, ep) => {
+  const service = ep.service === 'All' ? 'Platform' : ep.service
+  if (!acc[service]) acc[service] = []
+  acc[service].push(ep)
+  return acc
+}, {} as Record<string, typeof API_ENDPOINTS>)
+
 export function ApiReference() {
+  const [openService, setOpenService] = useState<string | null>(null)
+
   return (
-    <section id="api" aria-labelledby="api-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="api" aria-labelledby="api-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="api-title"
         label="API Reference"
@@ -52,7 +66,46 @@ export function ApiReference() {
         lead={`All ${SERVICES.length} services expose a REST API. Below are the core endpoints across the platform. Full OpenAPI specs are available in the repository.`}
       />
 
-      <div className="mt-16 border border-foreground md:mt-24">
+      {/* Mobile: accordion by service */}
+      <div className="mt-12 space-y-2 md:hidden">
+        {Object.entries(groupedEndpoints).map(([service, endpoints]) => (
+          <div key={service} className="border border-border">
+            <button
+              onClick={() => setOpenService(openService === service ? null : service)}
+              className="flex w-full items-center justify-between p-4 text-left"
+              aria-expanded={openService === service}
+            >
+              <div>
+                <p className="font-semibold tracking-tight">{service}</p>
+                <p className="text-xs text-muted-foreground">{endpoints.length} endpoints</p>
+              </div>
+              {openService === service ? (
+                <ChevronUp className="size-4 text-muted-foreground" aria-hidden="true" />
+              ) : (
+                <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
+              )}
+            </button>
+            {openService === service && (
+              <div className="border-t border-border px-4 pb-4">
+                <div className="mt-3 space-y-2">
+                  {endpoints.map((ep) => (
+                    <div key={ep.path} className="rounded border border-border p-3">
+                      <div className="flex items-start gap-2">
+                        <span className={`font-mono text-[11px] font-bold uppercase ${methodColor[ep.method] || ''}`}>{ep.method}</span>
+                        <code className="font-mono text-xs">{ep.path}</code>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{ep.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: full table */}
+      <div className="hidden mt-16 border border-foreground md:block md:mt-24">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

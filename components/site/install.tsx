@@ -28,7 +28,7 @@ export function Install() {
   }
 
   return (
-    <section id="install" aria-labelledby="install-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="install" aria-labelledby="install-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="install-title"
         label="Install"
@@ -42,7 +42,7 @@ export function Install() {
         lead="Shell scripts for Linux, macOS and Windows PowerShell, plus visual step-by-step GUI installers for Ubuntu Desktop and Windows."
       />
 
-      <div className="mt-16 grid gap-10 md:mt-24 md:grid-cols-12 md:gap-8">
+      <div className="mt-16 grid gap-10 md:mt-16 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
           <div className="border border-foreground">
             <div className="flex items-center justify-between border-b border-foreground px-4 py-2.5">

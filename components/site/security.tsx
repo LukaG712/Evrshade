@@ -19,7 +19,7 @@ const needsGate = (level: AutonomyId, sensitive: boolean) =>
 
 export function Security() {
   return (
-    <section id="security" aria-labelledby="security-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="security" aria-labelledby="security-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="security-title"
         label="Trust & control"
@@ -33,7 +33,7 @@ export function Security() {
         lead="Agents act on real repositories with real credentials. Evershade puts approval gates, isolation boundaries and injection defenses between a model and a side effect."
       />
 
-      <div className="mt-16 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-2">
+      <div className="mt-12 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-2">
         <AutonomyDial />
         <PanicPanel />
       </div>

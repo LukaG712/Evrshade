@@ -18,7 +18,7 @@ const GLOSSARY = [
 
 export function Glossary() {
   return (
-    <section id="glossary" aria-labelledby="glossary-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="glossary" aria-labelledby="glossary-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="glossary-title"
         label="Glossary"

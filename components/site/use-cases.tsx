@@ -58,7 +58,7 @@ const USE_CASES = [
 
 export function UseCases() {
   return (
-    <section id="use-cases" aria-labelledby="use-cases-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="use-cases" aria-labelledby="use-cases-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="use-cases-title"
         label="Use cases"
@@ -72,13 +72,13 @@ export function UseCases() {
         lead="Evershade isn't just a collection of services — it's a platform for automating the work that matters. Here are four concrete scenarios."
       />
 
-      <div className="mt-16 md:mt-24">
+      <div className="mt-12 md:mt-24">
         {USE_CASES.map((useCase, index) => {
           const Icon = useCase.icon
           return (
             <div
               key={useCase.title}
-              className="grid gap-8 border-t border-foreground py-12 md:grid-cols-12 md:gap-8 md:py-16"
+              className="grid gap-8 border-t border-foreground py-12 md:grid-cols-12 md:gap-6 md:py-16"
             >
               <div className="md:col-span-5">
                 <div className="flex items-center gap-3">

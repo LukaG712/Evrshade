@@ -189,6 +189,80 @@ export function Hero() {
     return () => cancelAnimationFrame(raf)
   }, [])
 
+  // On mobile (<768px), show a simplified static layout instead of the heavy scroll-driven animation
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
+  if (isMobile) {
+    return (
+      <section id="hero-scroll" className="blueprint relative pb-16 pt-20">
+        <div className="absolute inset-x-4 top-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+          <span className="flex items-center gap-2">
+            <span className="relative flex size-1.5">
+              <span className="animate-pulse-ring absolute inset-0 bg-signal" />
+              <span className="relative size-1.5 bg-signal" />
+            </span>
+            {`v${VERSION}`}
+          </span>
+        </div>
+
+        <div className="relative px-4">
+          <h1
+            id="hero-title"
+            className="font-semibold leading-[0.85] tracking-[-0.05em] text-foreground"
+            style={{ fontSize: 'clamp(3rem, 18vw, 8rem)' }}
+          >
+            Evershade
+            <span className="text-signal">.</span>
+          </h1>
+
+          <p className="mt-4 max-w-md text-pretty text-base leading-snug">
+            A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
+            hardware. Your data.
+          </p>
+
+          <div className="mt-6 flex items-center gap-2">
+            <a
+              href="#install"
+              className="inline-flex h-11 items-center gap-2 bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-signal-ink"
+            >
+              Install
+              <ArrowDown className="size-4" aria-hidden="true" />
+            </a>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-11 items-center gap-2 border border-foreground px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
+            >
+              GitHub
+              <ArrowUpRight className="size-4" aria-hidden="true" />
+            </a>
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-2">
+            {SERVICES.map((svc, i) => (
+              <div key={svc.id} className="border border-border p-3">
+                <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <span className={`size-1 ${svc.tier === 'orchestrator' ? 'bg-signal' : svc.tier === 'core' ? 'bg-foreground' : 'border border-foreground'}`} />
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <p className="mt-1 text-sm font-semibold tracking-tight">{svc.name}</p>
+                <p className="font-mono text-[10px] text-muted-foreground">{svc.port === 'CLI' ? 'CLI' : `:${svc.port}`}</p>
+              </div>
+            ))}
+          </div>
+
+          <a
+            href="#overview"
+            className="mt-8 flex items-center gap-2 font-mono text-sm text-signal-ink underline underline-offset-4"
+          >
+            Skip to content ↓
+          </a>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section ref={wrapRef} id="hero-scroll" aria-labelledby="hero-title" className="relative h-[300vh] md:h-[380vh]">
       <div ref={stageRef} className="blueprint sticky top-0 h-svh w-full overflow-hidden">

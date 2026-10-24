@@ -18,7 +18,7 @@ const DEPENDENCIES = [
 
 export function Architecture() {
   return (
-    <section id="architecture" aria-labelledby="architecture-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="architecture" aria-labelledby="architecture-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="architecture-title"
         label="Architecture"
@@ -32,7 +32,7 @@ export function Architecture() {
         lead="Every service has a single responsibility and a public HTTP interface. Greenie is the API-only backend that orchestrates the rest. Slammer is the single dashboard."
       />
 
-      <div className="mt-16 md:mt-24" role="list" aria-label="Service layers">
+      <div className="mt-12 md:mt-24" role="list" aria-label="Service layers">
         {LAYERS.map((layer, li) => {
           const services = SERVICES.filter((s) => s.tier === layer.tier)
           return (
@@ -78,7 +78,7 @@ export function Architecture() {
         })}
       </div>
 
-      <div className="mt-24 grid gap-12 md:mt-32 md:grid-cols-12 md:gap-8">
+      <div className="mt-24 grid gap-6 md:mt-32 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.1 — Design principles'}</p>
           <ol className="mt-6 border-t border-foreground">

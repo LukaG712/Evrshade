@@ -40,7 +40,7 @@ const FOCUS_AREAS = [
 
 export function Roadmap() {
   return (
-    <section id="roadmap" aria-labelledby="roadmap-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="roadmap" aria-labelledby="roadmap-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="roadmap-title"
         label="What's next"
@@ -53,7 +53,7 @@ export function Roadmap() {
         lead="Evershade is actively developed. These are the current focus areas and open items — not a list of finished features."
       />
 
-      <div className="mt-16 grid gap-6 sm:grid-cols-2 md:mt-24 lg:grid-cols-4">
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 md:mt-24 lg:grid-cols-4">
         {FOCUS_AREAS.map((area) => (
           <div key={area.title} className="border border-border p-5">
             <p className="font-semibold tracking-tight">{area.title}</p>

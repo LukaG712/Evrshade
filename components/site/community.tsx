@@ -42,7 +42,7 @@ const STATS = [
 
 export function Community() {
   return (
-    <section id="community" aria-labelledby="community-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="community" aria-labelledby="community-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="community-title"
         label="Community"
@@ -50,7 +50,7 @@ export function Community() {
         lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service — every pull request is welcome."
       />
 
-      <div className="mt-16 grid gap-6 md:mt-24 md:grid-cols-2">
+      <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-2">
         {CONTRIBUTING_PATHS.map((path) => {
           const Icon = path.icon
           return (

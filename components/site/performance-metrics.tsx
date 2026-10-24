@@ -36,7 +36,7 @@ const GOALS = [
 
 export function PerformanceMetrics() {
   return (
-    <section id="metrics" aria-labelledby="metrics-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="metrics" aria-labelledby="metrics-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="metrics-title"
         label="Design goals"
@@ -69,7 +69,7 @@ export function PerformanceMetrics() {
         })}
       </div>
 
-      <div className="mt-24 grid gap-12 md:grid-cols-12 md:gap-8">
+      <div className="mt-24 grid gap-6 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Mission lifecycle'}</p>
           <div className="mt-6 overflow-hidden border border-border">

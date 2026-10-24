@@ -3,7 +3,7 @@ import { SectionHeading } from './section-heading'
 
 export function TryIt() {
   return (
-    <section id="try-it" aria-labelledby="try-it-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="try-it" aria-labelledby="try-it-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="try-it-title"
         label="Try it"
@@ -16,7 +16,7 @@ export function TryIt() {
         lead="No account needed. No cloud dependency. Just Docker and a terminal."
       />
 
-      <div className="mt-16 grid gap-8 md:grid-cols-12 md:mt-24">
+      <div className="mt-16 grid gap-6 md:grid-cols-12 md:mt-24">
         <div className="md:col-span-8">
           {/* One-liner */}
           <div className="border border-border p-6">

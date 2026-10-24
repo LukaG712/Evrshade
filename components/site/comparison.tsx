@@ -41,7 +41,7 @@ const WHY_POINTS = [
 
 export function Comparison() {
   return (
-    <section id="why" aria-labelledby="why-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="why" aria-labelledby="why-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="why-title"
         label="Why Evershade"
@@ -55,7 +55,7 @@ export function Comparison() {
         lead="Evershade is a self-hosted AI agent platform where you control the infrastructure, the data, and the autonomy. Here's how it compares to the alternatives."
       />
 
-      <div className="mt-16 grid gap-8 md:mt-24 md:grid-cols-2">
+      <div className="mt-12 grid gap-6 md:mt-16 md:grid-cols-2">
         {WHY_POINTS.map((point) => (
           <div key={point.title} className="border-t border-foreground pt-6">
             <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{point.title}</h3>
@@ -64,7 +64,48 @@ export function Comparison() {
         ))}
       </div>
 
-      <div className="mt-24 md:mt-32">
+      {/* Mobile: comparison cards */}
+      <div className="mt-12 md:hidden">
+        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Feature comparison'}</p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {[
+            { name: 'Cursor', data: COMPARISON.map(r => r.cursor) },
+            { name: 'Copilot', data: COMPARISON.map(r => r.copilot) },
+            { name: 'Aider', data: COMPARISON.map(r => r.aider) },
+            { name: 'OpenDevin', data: COMPARISON.map(r => r.opendevin) },
+          ].map((competitor) => (
+            <div key={competitor.name} className="border border-border p-4">
+              <p className="font-semibold tracking-tight">{competitor.name}</p>
+              <div className="mt-3 space-y-2">
+                {COMPARISON.map((row, i) => (
+                  <div key={row.feature} className="flex items-center gap-2 text-sm">
+                    {competitor.data[i] ? (
+                      <Check className="size-4 shrink-0 text-signal" aria-hidden="true" />
+                    ) : (
+                      <X className="size-4 shrink-0 text-muted-foreground/40" aria-hidden="true" />
+                    )}
+                    <span className="text-muted-foreground">{row.feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 border border-signal p-4">
+          <p className="font-semibold tracking-tight text-signal-ink">Evershade</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {COMPARISON.map((row) => (
+              <span key={row.feature} className="inline-flex items-center gap-1 rounded border border-signal/30 px-2 py-1 font-mono text-[10px] text-signal-ink">
+                <Check className="size-3" aria-hidden="true" />
+                {row.feature}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: full comparison table */}
+      <div className="hidden mt-16 md:block md:mt-32">
         <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'14.1 — Feature comparison'}</p>
         <div className="mt-6 overflow-x-auto border-t border-foreground">
           <table className="w-full min-w-[640px] text-sm">

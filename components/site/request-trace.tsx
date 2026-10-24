@@ -49,7 +49,7 @@ export function RequestTrace() {
   const N = LANES.length
 
   return (
-    <section id="trace" aria-labelledby="trace-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="trace" aria-labelledby="trace-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="trace-title"
         label="Anatomy of a feature"
@@ -63,7 +63,7 @@ export function RequestTrace() {
         lead="Greenie owns the conversation. Every other service does one job over HTTP. Pick a step to see who talks to whom and why."
       />
 
-      <div ref={ref} className="mt-16 grid gap-8 md:mt-24 lg:grid-cols-12">
+      <div ref={ref} className="mt-16 grid gap-6 md:mt-24 lg:grid-cols-12">
         <div className="overflow-x-auto border border-foreground lg:col-span-8">
           <div className="relative min-w-[860px]">
             <div className="grid border-b border-foreground" style={{ gridTemplateColumns: `repeat(${N}, 1fr)` }}>

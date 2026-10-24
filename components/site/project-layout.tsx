@@ -27,7 +27,7 @@ const TREE = [
 
 export function ProjectLayout() {
   return (
-    <section id="project-layout" aria-labelledby="project-layout-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="project-layout" aria-labelledby="project-layout-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="project-layout-title"
         label="Project"
@@ -40,7 +40,7 @@ export function ProjectLayout() {
         lead="Every service lives in its own directory under services/. Compose configs and docs are at the root."
       />
 
-      <div className="mt-16 grid gap-8 md:grid-cols-12 md:mt-24">
+      <div className="mt-16 grid gap-6 md:grid-cols-12 md:mt-24">
         <div className="md:col-span-7">
           <div className="overflow-auto rounded border border-border bg-background p-4">
             <div className="flex items-center gap-2 mb-3">

@@ -87,7 +87,7 @@ export function Cli() {
   }
 
   return (
-    <section id="cli" aria-labelledby="cli-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="cli" aria-labelledby="cli-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="cli-title"
         label="Speedy CLI"
@@ -101,7 +101,7 @@ export function Cli() {
         lead="Speedy is the evershade command. It installs, starts, stops, diagnoses, tails logs, backs up and restores the whole ecosystem."
       />
 
-      <div className="mt-16 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-12">
+      <div className="mt-12 grid gap-px border border-foreground bg-foreground md:mt-24 lg:grid-cols-12">
         <ul className="bg-background lg:col-span-4" aria-label="Commands">
           {CMDS.map((c, i) => (
             <li key={c.cmd} className="border-b border-border last:border-b-0">

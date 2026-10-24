@@ -59,7 +59,7 @@ function statusIcon(status: string) {
 
 export function SlammerPreview() {
   return (
-    <section id="slammer" aria-labelledby="slammer-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="slammer" aria-labelledby="slammer-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="slammer-title"
         label="Slammer"
@@ -74,7 +74,7 @@ export function SlammerPreview() {
       />
 
       {/* Dashboard mockup */}
-      <div className="mt-16 md:mt-24">
+      <div className="mt-12 md:mt-24">
         <div className="overflow-hidden rounded-lg border border-border bg-background">
           {/* Title bar */}
           <div className="flex items-center gap-2 border-b border-border bg-foreground/[0.03] px-4 py-3">
@@ -198,7 +198,7 @@ export function SlammerPreview() {
       </div>
 
       {/* Features list */}
-      <div className="mt-16 grid gap-6 md:mt-24 md:grid-cols-3">
+      <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-3">
         {[
           {
             title: 'Mission overview',

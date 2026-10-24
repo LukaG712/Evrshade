@@ -67,7 +67,7 @@ export function Faq() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <section id="faq" aria-labelledby="faq-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="faq" aria-labelledby="faq-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="faq-title"
         label="FAQ"

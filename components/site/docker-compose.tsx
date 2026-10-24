@@ -4,7 +4,7 @@ import { SectionHeading } from './section-heading'
 
 export function DockerCompose() {
   return (
-    <section id="docker-compose" aria-labelledby="docker-compose-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="docker-compose" aria-labelledby="docker-compose-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="docker-compose-title"
         label="Setup"
@@ -17,7 +17,7 @@ export function DockerCompose() {
         lead="Evershade uses Docker Compose profiles to let you start with just the core services or spin up the full platform."
       />
 
-      <div className="mt-16 grid gap-12 md:grid-cols-12 md:mt-24">
+      <div className="mt-12 grid gap-6 md:grid-cols-12 md:mt-24">
         {/* Compose profiles */}
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Compose profiles'}</p>

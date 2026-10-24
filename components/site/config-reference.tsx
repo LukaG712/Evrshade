@@ -38,7 +38,7 @@ const ENV_VARS = [
 
 export function ConfigReference() {
   return (
-    <section id="config-reference" aria-labelledby="config-reference-title" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
+    <section id="config-reference" aria-labelledby="config-reference-title" className="px-4 pt-16 md:px-[max(24px,3vw)] md:pt-40">
       <SectionHeading
         id="config-reference-title"
         label="Config"
@@ -51,7 +51,7 @@ export function ConfigReference() {
         lead="Copy .env.example to .env and fill in the values you need. Only model API keys are required to get started."
       />
 
-      <div className="mt-16 space-y-12 md:mt-24">
+      <div className="mt-12 space-y-8 md:mt-24">
         {ENV_VARS.map((group) => (
           <div key={group.category}>
             <div className="flex items-center gap-2">
