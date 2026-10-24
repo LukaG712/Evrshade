@@ -33,7 +33,6 @@ export function Hero() {
   const packetRefs = useRef<(SVGRectElement | null)[]>([])
   const edgeGroupRef = useRef<SVGGElement>(null)
   const liveRefs = useRef<(HTMLSpanElement | null)[]>([])
-  const liveTagRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -124,12 +123,6 @@ export function Hero() {
       const cw = gW / cols
       const ch = Math.max(80, (gBottom - gTop) / rows)
 
-      // Final phase: the grid becomes a live operations board.
-      const live = ease(range(p, 0.62, 0.78))
-      if (liveTagRef.current) {
-        liveTagRef.current.style.opacity = String(live)
-        liveTagRef.current.style.transform = `translate3d(0, ${(1 - live) * 12}px, 0)`
-      }
 
       const centers: Point[] = []
       SERVICES.forEach((svc, i) => {
@@ -140,7 +133,7 @@ export function Hero() {
           const txt = lines[k] ?? ''
           if (liveEl.textContent !== txt) liveEl.textContent = txt
         }
-        nodeRefs.current[i]?.style.setProperty('--l', live.toFixed(3))
+        nodeRefs.current[i]?.style.setProperty('--l', '0')
         const node = nodeRefs.current[i]
         if (!node) return
         const g = ease(range(p, 0.22 + i * 0.018, 0.50 + i * 0.018))
@@ -333,19 +326,6 @@ export function Hero() {
           <p className="mt-3 text-pretty text-lg leading-snug tracking-tight md:text-2xl">
             Ten specialized microservices. Each has a single responsibility, talks over HTTP, and can run on its own
             while contributing to one platform.
-          </p>
-          <p
-            ref={liveTagRef}
-            className="mt-4 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider opacity-0"
-          >
-            <span className="relative flex size-1.5">
-              <span className="animate-pulse-ring absolute inset-0 bg-signal" />
-              <span className="relative size-1.5 bg-signal" />
-            </span>
-            {'Live · mission m_7f3a executing'}
-            <a href="#console" className="ml-1 text-signal-ink underline underline-offset-4 hover:text-foreground">
-              {'Watch it run ↓'}
-            </a>
           </p>
         </div>
 
