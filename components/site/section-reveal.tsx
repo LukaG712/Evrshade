@@ -23,5 +23,5 @@ export function SectionReveal({ children }: { children: React.ReactNode }) {
     return () => observer.disconnect()
   }, [])
 
-  return <div ref={ref} className="reveal">{children}</div>
+  return <div ref={ref} className="reveal" style={{ contentVisibility: 'auto', containIntrinsicSize: '400px' }}>{children}</div>
 }

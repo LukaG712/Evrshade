@@ -121,19 +121,34 @@
 
 @keyframes blueprint-drift {
   0% {
-    background-position: 0 0;
+    transform: translate(0, 0);
   }
   100% {
-    background-position: 80px 80px;
+    transform: translate(80px, 80px);
   }
 }
 
 @utility blueprint {
+  position: relative;
+}
+
+.blueprint::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-image:
     linear-gradient(to right, oklch(0.15 0 0 / 6%) 1px, transparent 1px),
     linear-gradient(to bottom, oklch(0.15 0 0 / 6%) 1px, transparent 1px);
   background-size: 80px 80px;
   animation: blueprint-drift 20s linear infinite;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.dark .blueprint::after {
+  background-image:
+    linear-gradient(to right, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.92 0.008 264 / 6%) 1px, transparent 1px);
 }
 
 .dark .blueprint {
