@@ -11,7 +11,9 @@ const NAV = [
   { href: '#integrations', label: 'Integrations', index: '08' },
   { href: '#cli', label: 'CLI', index: '09' },
   { href: '#install', label: 'Install', index: '10' },
-  { href: '#roadmap', label: 'Roadmap', index: '11' },
+  { href: '#changelog', label: 'Changelog', index: '11' },
+  { href: '#roadmap', label: 'Roadmap', index: '12' },
+  { href: '#api', label: 'API', index: '13' },
 ]
 
 export function Header() {

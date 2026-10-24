@@ -1,4 +1,6 @@
+import { ApiReference } from '@/components/site/api-reference'
 import { Architecture } from '@/components/site/architecture'
+import { ChangelogTicker } from '@/components/site/changelog-ticker'
 import { Cli } from '@/components/site/cli'
 import { Footer } from '@/components/site/footer'
 import { Harness } from '@/components/site/harness'
@@ -27,7 +29,9 @@ export default function Page() {
         <Integrations />
         <Cli />
         <Install />
+        <ChangelogTicker />
         <Roadmap />
+        <ApiReference />
       </main>
       <Footer />
     </>
