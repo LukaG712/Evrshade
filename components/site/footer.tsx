@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: '#platform', label: 'nav.platform' },
   { href: '#get-started', label: 'nav.get-started' },
   { href: '/compare', label: 'nav.compare' },
+  { href: '/blog', label: 'nav.blog' },
   { href: '#about', label: 'nav.about' },
   { href: '#roadmap', label: 'nav.roadmap' },
 ]

@@ -29,6 +29,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'Platform',
     'nav.get-started': 'Get Started',
     'nav.compare': 'Compare',
+    'nav.blog': 'Blog',
     'nav.about': 'About',
     'nav.roadmap': 'Roadmap',
     // Compare page
@@ -104,6 +105,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'Plattform',
     'nav.get-started': 'Loslegen',
     'nav.compare': 'Vergleichen',
+    'nav.blog': 'Blog',
     'nav.about': 'Über',
     'nav.roadmap': 'Roadmap',
     // Compare page
@@ -173,6 +175,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'Plataforma',
     'nav.get-started': 'Empezar',
     'nav.compare': 'Comparar',
+    'nav.blog': 'Blog',
     'nav.about': 'Acerca de',
     'nav.roadmap': 'Hoja de ruta',
     // Compare page
@@ -242,6 +245,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'Plateforme',
     'nav.get-started': 'Commencer',
     'nav.compare': 'Comparer',
+    'nav.blog': 'Blog',
     'nav.about': 'À propos',
     'nav.roadmap': 'Feuille de route',
     // Compare page
@@ -311,6 +315,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'Plataforma',
     'nav.get-started': 'Começar',
     'nav.compare': 'Comparar',
+    'nav.blog': 'Blog',
     'nav.about': 'Sobre',
     'nav.roadmap': 'Roteiro',
     // Compare page
@@ -380,6 +385,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': '平台',
     'nav.get-started': '开始使用',
     'nav.compare': '对比',
+    'nav.blog': '博客',
     'nav.about': '关于',
     'nav.roadmap': '路线图',
     // Compare page
@@ -449,6 +455,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'プラットフォーム',
     'nav.get-started': '始める',
     'nav.compare': '比較',
+    'nav.blog': 'ブログ',
     'nav.about': '概要',
     'nav.roadmap': 'ロードマップ',
     // Compare page
@@ -518,6 +525,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': '플랫폼',
     'nav.get-started': '시작하기',
     'nav.compare': '비교',
+    'nav.blog': '블로그',
     'nav.about': '소개',
     'nav.roadmap': '로드맵',
     // Compare page
@@ -587,6 +595,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'Платформа',
     'nav.get-started': 'Начать',
     'nav.compare': 'Сравнение',
+    'nav.blog': 'Блог',
     'nav.about': 'О проекте',
     'nav.roadmap': 'Дорожная карта',
     // Compare page
@@ -656,6 +665,7 @@ const DICTIONARY: Record<Locale, Record<string, string>> = {
     'nav.platform': 'المنصة',
     'nav.get-started': 'ابدأ',
     'nav.compare': 'مقارنة',
+    'nav.blog': 'المدونة',
     'nav.about': 'حول',
     'nav.roadmap': 'خارطة الطريق',
     // Compare page

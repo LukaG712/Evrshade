@@ -14,6 +14,7 @@ const NAV_KEYS = [
   { href: '#platform', key: 'nav.platform' },
   { href: '#get-started', key: 'nav.get-started' },
   { href: '/compare', key: 'nav.compare' },
+  { href: '/blog', key: 'nav.blog' },
   { href: '#about', key: 'nav.about' },
   { href: '#roadmap', key: 'nav.roadmap' },
 ]
