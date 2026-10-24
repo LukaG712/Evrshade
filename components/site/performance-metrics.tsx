@@ -53,8 +53,8 @@ export function PerformanceMetrics() {
       <SectionHeading
         id="metrics-title"
         label="Performance"
-        title={<>Real <span className="text-signal">numbers.</span></>}
-        lead="Evershade is designed to run on developer hardware. These metrics are collected from self-hosted instances via the Sneaker observability service."
+        title={<>Performance <span className="text-signal">targets.</span></>}
+        lead="Evershade is designed to run on developer hardware. These illustrative metrics show the expected performance profile based on the Sneaker observability service design."
       />
 
       <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
