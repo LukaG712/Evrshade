@@ -15,7 +15,7 @@ const NAV = [
 export function Header() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="flex h-16 items-center justify-between px-4 md:px-[max(24px,3vw)]">
+      <div className="flex h-14 items-center justify-between px-4 lg:h-16 lg:px-[max(24px,3vw)]">
         <a href="#top" className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-4">
           <span className="grid size-5 grid-cols-2 gap-px" aria-hidden="true">
             <span className="bg-foreground" />
@@ -39,18 +39,20 @@ export function Header() {
             ))}
           </ul>
         </nav>
-        <MobileNav />
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="hidden lg:inline-flex h-8 items-center gap-1.5 rounded-sm border border-foreground px-3.5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            GitHub
-            <ArrowUpRight className="size-3.5" aria-hidden="true" />
-          </a>
+          <MobileNav />
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="hidden lg:flex" />
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden lg:inline-flex h-8 items-center gap-1.5 rounded-sm border border-foreground px-3.5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              GitHub
+              <ArrowUpRight className="size-3.5" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </div>
     </header>

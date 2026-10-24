@@ -38,19 +38,19 @@ export function MobileNav() {
         {open ? <X className="size-4" /> : <Menu className="size-4" />}
       </button>
       <div
-        className={`absolute left-0 right-0 top-16 z-50 border-b border-border bg-background/95 backdrop-blur-md transition-all duration-200 ease-in-out ${
+        className={`absolute left-0 right-0 top-14 z-50 border-b border-border bg-background/95 backdrop-blur-md transition-all duration-200 ease-in-out ${
           open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
         style={{ transform: open ? 'translateY(0)' : 'translateY(-8px)' }}
       >
         <nav aria-label="Mobile" className="px-4 py-4">
-          <ul className="space-y-1">
+          <ul className="space-y-2">
             {NAV.map((item) => (
               <li key={item.href}>
                 <a
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-sm border border-border px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                  className="block rounded-lg px-3 py-3 text-base font-medium text-foreground transition-colors hover:bg-muted"
                 >
                   {item.label}
                 </a>
