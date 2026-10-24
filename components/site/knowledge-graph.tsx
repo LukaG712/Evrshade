@@ -55,7 +55,7 @@ export function KnowledgeGraph() {
       <SectionHeading
         id="kg-title"
         label="Knowledge Graph"
-        title={<>Gobber<span className="text-signal">'s</span> memory.</>}
+        title={<>Gobber's memory<span className="text-signal">.</span></>}
         lead="Every query enriches the system's memory. Gobber combines keyword search, vector embeddings, and graph relationships to surface context that no single method could find alone."
       />
 

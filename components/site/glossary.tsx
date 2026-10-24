@@ -17,10 +17,7 @@ export function Glossary() {
         id="glossary-title"
         label="Glossary"
         title={
-          <>
-            Learn the
-            <span className="text-signal"> language.</span>
-          </>
+          <>Learn the language<span className="text-signal">.</span></>
         }
         lead="Evershade uses specific terms for its concepts. Here's what they mean."
       />

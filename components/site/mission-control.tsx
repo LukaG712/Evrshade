@@ -45,7 +45,7 @@ export function MissionControl() {
           label="Mission Control"
           title={
             <>
-              Large tasks in.
+              Large tasks in<span className="text-signal">.</span>
               <br />
               <span className="text-muted-foreground">Validated work out.</span>
             </>

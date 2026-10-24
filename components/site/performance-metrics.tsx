@@ -41,10 +41,7 @@ export function PerformanceMetrics() {
         id="metrics-title"
         label="Design goals"
         title={
-          <>
-            Built for
-            <span className="text-signal"> your machine.</span>
-          </>
+          <>Built for your machine<span className="text-signal">.</span></>
         }
         lead="Evershade is designed to run locally, stay fast, and keep costs low. These are the principles that guide every architectural decision."
       />

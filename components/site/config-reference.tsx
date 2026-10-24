@@ -43,10 +43,7 @@ export function ConfigReference() {
         id="config-reference-title"
         label="Config"
         title={
-          <>
-            Environment
-            <span className="text-signal"> variables.</span>
-          </>
+          <>Environment variables<span className="text-signal">.</span></>
         }
         lead="Copy .env.example to .env and fill in the values you need. Only model API keys are required to get started."
       />

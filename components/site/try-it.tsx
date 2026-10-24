@@ -8,10 +8,7 @@ export function TryIt() {
         id="try-it-title"
         label="Try it"
         title={
-          <>
-            Start in
-            <span className="text-signal"> under a minute.</span>
-          </>
+          <>Start in under a minute<span className="text-signal">.</span></>
         }
         lead="No account needed. No cloud dependency. Just Docker and a terminal."
       />

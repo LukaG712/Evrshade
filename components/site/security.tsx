@@ -25,7 +25,7 @@ export function Security() {
         label="Trust & control"
         title={
           <>
-            Autonomy you can dial.
+            Autonomy you can dial<span className="text-signal">.</span>
             <br />
             <span className="text-muted-foreground">A kill switch you can pull.</span>
           </>

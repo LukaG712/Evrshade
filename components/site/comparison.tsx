@@ -41,7 +41,7 @@ export function Comparison() {
         label="Why Evershade"
         title={
           <>
-            Built different.
+            Built different<span className="text-signal">.</span>
             <br />
             <span className="text-muted-foreground">Built for you.</span>
           </>

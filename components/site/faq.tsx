@@ -76,10 +76,7 @@ export function Faq() {
         id="faq-title"
         label="FAQ"
         title={
-          <>
-            Common
-            <span className="text-signal"> questions.</span>
-          </>
+          <>Common questions<span className="text-signal">.</span></>
         }
         lead="Quick answers to the most frequent questions about running Evershade."
       />

@@ -16,10 +16,7 @@ export function ServicesGrid() {
         id="services-title"
         label="Services"
         title={
-          <>
-            Ten services,
-            <span className="text-signal"> one platform.</span>
-          </>
+          <>Ten services, one platform<span className="text-signal">.</span></>
         }
         lead="Each service has a single responsibility, a public API, and runs in its own container. Mix and match via compose profiles."
       />

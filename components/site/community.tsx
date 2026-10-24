@@ -40,7 +40,7 @@ export function Community() {
       <SectionHeading
         id="community-title"
         label="Community"
-        title={<>Build <span className="text-signal">together.</span></>}
+        title={<>Build together<span className="text-signal">.</span></>}
         lead="Evershade is open source and built by its community. Whether you fix a typo, add a skill, or contribute a new service - every pull request is welcome."
       />
 

@@ -5,8 +5,7 @@ export function ChangelogTicker() {
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Current status'}</p>
           <h2 className="mt-4 text-4xl font-semibold leading-[0.9] tracking-[-0.05em] text-balance md:text-6xl lg:text-7xl">
-            Under
-            <span className="text-signal"> development.</span>
+            Under development<span className="text-signal">.</span>
           </h2>
           <p className="mt-6 max-w-2xl text-pretty text-lg leading-snug text-muted-foreground">
             Evershade is under active development. Check the repo for the latest changes and open items.

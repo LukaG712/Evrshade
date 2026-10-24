@@ -24,7 +24,7 @@ export function Architecture() {
         label="Architecture"
         title={
           <>
-            Small services.
+            Small services<span className="text-signal">.</span>
             <br />
             <span className="text-muted-foreground">Clear boundaries.</span>
           </>
@@ -65,7 +65,7 @@ export function Architecture() {
                     <div className="mt-6">
                       <p className={cn('font-semibold tracking-tight', layer.tier === 'orchestrator' ? 'text-4xl md:text-6xl' : 'text-xl md:text-2xl')}>
                         {svc.name}
-                        {layer.tier === 'orchestrator' ? <span className="text-signal">.</span> : null}
+                        {layer.tier === 'orchestrator' ? '.' : null}
                       </p>
                       <p className="mt-1 text-sm leading-snug opacity-60">{svc.role}</p>
                       <p className="mt-3 font-mono text-[10px] opacity-50">{svc.stack}</p>

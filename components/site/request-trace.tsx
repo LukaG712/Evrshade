@@ -158,7 +158,7 @@ export function RequestTrace() {
           </p>
           <p key={active} className="mt-4 text-4xl font-semibold leading-[0.95] tracking-[-0.04em] animate-in fade-in slide-in-from-bottom-2 duration-500 md:text-5xl">
             {step.from}
-            <span className="text-signal">{' → '}</span>
+            {' → '}
             {step.to}
           </p>
           <code className="mt-5 inline-flex w-fit items-center gap-2 border border-foreground px-3 py-2 font-mono text-xs">

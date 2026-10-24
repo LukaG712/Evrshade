@@ -32,10 +32,7 @@ export function ProjectLayout() {
         id="project-layout-title"
         label="Project"
         title={
-          <>
-            Know the
-            <span className="text-signal"> layout.</span>
-          </>
+          <>Know the layout<span className="text-signal">.</span></>
         }
         lead="Every service lives in its own directory under services/. Compose configs and docs are at the root."
       />

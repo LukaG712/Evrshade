@@ -1,4 +1,4 @@
-﻿import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { OPEN_ITEMS, REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
@@ -24,7 +24,6 @@ const FOCUS_AREAS = [
     title: 'Observability',
     items: [
       'Sneaker metrics, traces, and logs',
-      'SQLite persistence for observability data',
       'Alert rules and deduplication',
     ],
   },
@@ -45,10 +44,7 @@ export function Roadmap() {
         id="roadmap-title"
         label="What's next"
         title={
-          <>
-            Under
-            <span className="text-signal"> construction.</span>
-          </>
+          <>Under construction<span className="text-signal">.</span></>
         }
         lead="Evershade is actively developed. These are the current focus areas and open items - not a list of finished features."
       />

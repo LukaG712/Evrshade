@@ -9,10 +9,7 @@ export function DockerCompose() {
         id="docker-compose-title"
         label="Setup"
         title={
-          <>
-            Up and running
-            <span className="text-signal"> in one command.</span>
-          </>
+          <>Up and running in one command<span className="text-signal">.</span></>
         }
         lead="Evershade uses Docker Compose profiles to let you start with just the core services or spin up the full platform."
       />

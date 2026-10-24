@@ -54,7 +54,7 @@ export function Harness() {
         label="Agent Harness"
         title={
           <>
-            Extend everything.
+            Extend everything<span className="text-signal">.</span>
             <br />
             <span className="text-muted-foreground">Fork nothing.</span>
           </>

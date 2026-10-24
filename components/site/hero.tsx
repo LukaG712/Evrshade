@@ -5,6 +5,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
 import { InstallDropdown } from './install-dropdown'
+import { DownloadDropdown } from './download-dropdown'
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const range = (v: number, a: number, b: number) => clamp((v - a) / (b - a))
@@ -197,6 +198,7 @@ export function Hero() {
             </span>
             {`v${VERSION}`}
           </span>
+          <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
         </div>
 
         <div className="relative px-3 sm:px-4">
@@ -205,8 +207,7 @@ export function Hero() {
             className="font-semibold leading-[0.85] tracking-[-0.05em] text-foreground"
             style={{ fontSize: 'clamp(2.5rem, 16vw, 6rem)' }}
           >
-            Evershade
-            <span className="text-signal">.</span>
+            Evershade<span className="text-signal">.</span>
           </h1>
 
           <p className="mt-3 max-w-md text-pretty text-sm leading-snug sm:mt-4 sm:text-base">
@@ -216,6 +217,7 @@ export function Hero() {
 
           <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:items-center">
             <InstallDropdown />
+            <DownloadDropdown />
             <a
               href={REPO_URL}
               target="_blank"
@@ -227,24 +229,29 @@ export function Hero() {
             </a>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8">
-            {SERVICES.map((svc, i) => (
-              <div key={svc.id} className="border border-border p-3">
-                <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                  <span className={`size-1 ${svc.tier === 'orchestrator' ? 'bg-signal' : svc.tier === 'core' ? 'bg-foreground' : 'border border-foreground'}`} />
-                  {String(i + 1).padStart(2, '0')}
-                </div>
-                <p className="mt-1 text-sm font-semibold tracking-tight">{svc.name}</p>
-                <p className="font-mono text-[10px] text-muted-foreground">{svc.port === 'CLI' ? 'CLI' : `:${svc.port}`}</p>
-              </div>
-            ))}
+          <div className="mt-6 border border-border p-4 sm:mt-8">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{'10 microservices'}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {SERVICES.filter(s => s.tier === 'orchestrator' || s.tier === 'core').map(svc => (
+                <span
+                  key={svc.id}
+                  className="inline-flex items-center gap-1.5 border border-border px-2 py-1 font-mono text-[10px] text-muted-foreground"
+                >
+                  <span className={`size-1 ${svc.tier === 'orchestrator' ? 'bg-signal' : 'bg-foreground'}`} />
+                  {svc.name}
+                </span>
+              ))}
+              <span className="inline-flex items-center px-2 py-1 font-mono text-[10px] text-muted-foreground">
+                +{SERVICES.filter(s => s.tier !== 'orchestrator' && s.tier !== 'core').length} more
+              </span>
+            </div>
           </div>
 
           <a
             href="#overview"
             className="mt-4 flex items-center gap-2 font-mono text-sm text-signal-ink underline underline-offset-4 sm:mt-8"
           >
-            Skip to content ↓
+            Explore all services ↓
           </a>
         </div>
       </section>
@@ -335,6 +342,7 @@ export function Hero() {
           </p>
           <div className="flex items-center gap-2">
             <InstallDropdown />
+            <DownloadDropdown />
             <a
               href={REPO_URL}
               target="_blank"
@@ -353,8 +361,7 @@ export function Hero() {
           className="absolute left-4 bottom-4 origin-bottom-left font-semibold leading-[0.78] tracking-[-0.075em] will-change-transform md:left-[max(24px,3vw)] md:bottom-[max(24px,3vw)]"
           style={{ fontSize: 'clamp(4.5rem, 21.5vw, 26rem)' }}
         >
-          Evershade
-          <span className="text-signal">.</span>
+          Evershade<span className="text-signal">.</span>
         </h1>
 
         <div className="absolute top-1/2 right-2 hidden -translate-y-1/2 flex-col items-center gap-3 md:flex" aria-hidden="true">
