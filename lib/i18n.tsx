@@ -120,3 +120,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 export function useI18n() {
   return useContext(I18nContext)
 }
+
+// Wrapper for use in Server Components — provides i18n context client-side.
+export function I18nClient({ children }: { children: React.ReactNode }) {
+  return <I18nProvider>{children}</I18nProvider>
+}

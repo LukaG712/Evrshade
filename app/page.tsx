@@ -1,8 +1,6 @@
-'use client'
-
 import dynamic from 'next/dynamic'
 import { SectionDivider } from '@/components/site/section-divider'
-import { useI18n } from '@/lib/i18n'
+import { I18nClient } from '@/lib/i18n'
 
 // Always-visible: load immediately
 const ScrollProgress = dynamic(() => import('@/components/site/scroll-progress').then(m => ({ default: m.ScrollProgress })))
@@ -47,66 +45,67 @@ const Contributing = dynamic(() => import('@/components/site/contributing').then
 const Community = dynamic(() => import('@/components/site/community').then(m => ({ default: m.Community })))
 
 export default function Page() {
-  const { t } = useI18n()
   return (
-    <>
-      <ScrollProgress />
-      <BackToTop />
-      <MobileToc />
-      <Header />
-      <main id="top">
-        <Hero />
+    <I18nClient>
+      <>
+        <ScrollProgress />
+        <BackToTop />
+        <MobileToc />
+        <Header />
+        <main id="top">
+          <Hero />
 
-        {/* 01 — Overview */}
-        <SectionDivider index="01" label={t('section.overview')} id="overview" />
-        <SectionReveal><ServicesGrid /></SectionReveal>
-        <SectionReveal><MissionConsole /></SectionReveal>
-        <SectionReveal><MissionControl /></SectionReveal>
+          {/* 01 — Overview */}
+          <SectionDivider index="01" id="overview" />
+          <SectionReveal><ServicesGrid /></SectionReveal>
+          <SectionReveal><MissionConsole /></SectionReveal>
+          <SectionReveal><MissionControl /></SectionReveal>
 
-        {/* 02 — How It Works */}
-        <SectionDivider index="02" label={t('section.how-it-works')} id="how-it-works" />
-        <SectionReveal><RequestTrace /></SectionReveal>
-        <SectionReveal><Architecture /></SectionReveal>
-        <SectionReveal><KnowledgeGraph /></SectionReveal>
-        <SectionReveal><ProjectLayout /></SectionReveal>
+          {/* 02 — How It Works */}
+          <SectionDivider index="02" id="how-it-works" />
+          <SectionReveal><RequestTrace /></SectionReveal>
+          <SectionReveal><Architecture /></SectionReveal>
+          <SectionReveal><KnowledgeGraph /></SectionReveal>
+          <SectionReveal><ProjectLayout /></SectionReveal>
 
-        {/* 03 — Platform */}
-        <SectionDivider index="03" label={t('section.platform')} id="platform" />
-        <SectionReveal><Harness /></SectionReveal>
-        <SectionReveal><Security /></SectionReveal>
-        <SectionReveal><Integrations /></SectionReveal>
-        <SectionReveal><SlammerPreview /></SectionReveal>
-        <SectionReveal><ConfigReference /></SectionReveal>
+          {/* 03 — Platform */}
+          <SectionDivider index="03" id="platform" />
+          <SectionReveal><Harness /></SectionReveal>
+          <SectionReveal><Security /></SectionReveal>
+          <SectionReveal><Integrations /></SectionReveal>
+          <SectionReveal><SlammerPreview /></SectionReveal>
+          <SectionReveal><ConfigReference /></SectionReveal>
 
-        {/* 04 — Get Started */}
-        <SectionDivider index="04" label={t('section.get-started')} id="get-started" />
-        <SectionReveal><Download /></SectionReveal>
-        <SectionReveal><SystemRequirements /></SectionReveal>
-        <SectionReveal><TryIt /></SectionReveal>
-        <SectionReveal><DockerCompose /></SectionReveal>
-        <SectionReveal><Cli /></SectionReveal>
-        <SectionReveal><Install /></SectionReveal>
-        <SectionReveal><UseCases /></SectionReveal>
+          {/* 04 — Get Started */}
+          <SectionDivider index="04" id="get-started" />
+          <SectionReveal><Download /></SectionReveal>
+          <SectionReveal><SystemRequirements /></SectionReveal>
+          <SectionReveal><TryIt /></SectionReveal>
+          <SectionReveal><DockerCompose /></SectionReveal>
+          <SectionReveal><Cli /></SectionReveal>
+          <SectionReveal><Install /></SectionReveal>
+          <SectionReveal><UseCases /></SectionReveal>
 
-        {/* 05 — About */}
-        <SectionDivider index="05" label={t('section.about')} id="about" />
-        <SectionReveal><Comparison /></SectionReveal>
-        <SectionReveal><MigrationGuide /></SectionReveal>
-        <SectionReveal><Pricing /></SectionReveal>
-        <SectionReveal><PerformanceMetrics /></SectionReveal>
-        <SectionReveal><ApiReference /></SectionReveal>
-        <SectionReveal><Glossary /></SectionReveal>
-        <SectionReveal><Faq /></SectionReveal>
-        <SectionReveal><Testimonials /></SectionReveal>
+          {/* 05 — About */}
+          <SectionDivider index="05" id="about" />
+          <SectionReveal><Comparison /></SectionReveal>
+          <SectionReveal><MigrationGuide /></SectionReveal>
+          <SectionReveal><Pricing /></SectionReveal>
+          <SectionReveal><PerformanceMetrics /></SectionReveal>
+          <SectionReveal><ApiReference /></SectionReveal>
+          <SectionReveal><Glossary /></SectionReveal>
+          <SectionReveal><Faq /></SectionReveal>
+          <SectionReveal><Testimonials /></SectionReveal>
 
-        {/* 06 — Roadmap */}
-        <SectionDivider index="06" label={t('section.roadmap')} id="roadmap" />
-        <SectionReveal><Changelog /></SectionReveal>
-        <SectionReveal><Roadmap /></SectionReveal>
-        <SectionReveal><Contributing /></SectionReveal>
-        <SectionReveal><Community /></SectionReveal>
-      </main>
-      <Footer />
-    </>
+          {/* 06 — Roadmap */}
+          <SectionDivider index="06" id="roadmap" />
+          <SectionReveal><Changelog /></SectionReveal>
+          <SectionReveal><Roadmap /></SectionReveal>
+          <SectionReveal><Contributing /></SectionReveal>
+          <SectionReveal><Community /></SectionReveal>
+        </main>
+        <Footer />
+      </>
+    </I18nClient>
   )
 }
