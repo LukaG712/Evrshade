@@ -42,9 +42,21 @@ export async function getPostData(slug: string) {
     .process(matterResult.content)
   const contentHtml = processedContent.toString()
 
+  // Extract headings for TOC
+  const headings: { id: string; text: string; level: number }[] = []
+  const headingRegex = /^(#{2,3})\s+(.+)$/gm
+  let match: RegExpExecArray | null
+  while ((match = headingRegex.exec(matterResult.content)) !== null) {
+    const level = match[1].length // 2 for h2, 3 for h3
+    const text = match[2].trim()
+    const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    headings.push({ id, text, level })
+  }
+
   return {
     slug: realSlug,
     contentHtml,
+    headings,
     ...matterResult.data,
   }
 }

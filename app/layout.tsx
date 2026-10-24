@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { HapticFeedback } from '@/components/site/haptic-feedback'
 import { PageTransition } from '@/components/site/page-transition'
+import { ServiceWorkerRegister } from '@/components/site/service-worker-register'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
@@ -88,6 +89,7 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <HapticFeedback />
+        <ServiceWorkerRegister />
         <PageTransition>{children}</PageTransition>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
