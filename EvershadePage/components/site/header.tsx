@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
+import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
   { href: '#console', label: 'Console', index: '02' },
@@ -44,15 +45,18 @@ export function Header() {
             ))}
           </ul>
         </nav>
-        <a
-          href={REPO_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex h-8 items-center gap-1.5 border border-foreground px-3 font-mono text-[11px] uppercase tracking-wider transition-colors hover:bg-foreground hover:text-background"
-        >
-          GitHub
-          <ArrowUpRight className="size-3.5" aria-hidden="true" />
-        </a>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-8 items-center gap-1.5 border border-foreground px-3 font-mono text-[11px] uppercase tracking-wider transition-colors hover:bg-foreground hover:text-background"
+          >
+            GitHub
+            <ArrowUpRight className="size-3.5" aria-hidden="true" />
+          </a>
+        </div>
       </div>
     </header>
   )
