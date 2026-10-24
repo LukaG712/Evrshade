@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react'
 import { REPO_URL } from '@/lib/evershade'
+import { MobileNav } from './mobile-nav'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
@@ -48,6 +49,7 @@ export function Header() {
             ))}
           </ul>
         </nav>
+        <MobileNav />
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <a
