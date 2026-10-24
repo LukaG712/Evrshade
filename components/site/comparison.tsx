@@ -4,20 +4,14 @@ import { SectionHeading } from './section-heading'
 const COMPARISON = [
   { feature: 'Self-hosted', evershade: true, cursor: false, copilot: false, aider: true, opendevin: true },
   { feature: 'Modular microservices', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
-  { feature: 'SQLite-first storage', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'No cloud dependency', evershade: true, cursor: false, copilot: false, aider: true, opendevin: true },
-  { feature: 'Mission-based workflow', evershade: true, cursor: false, copilot: false, aider: false, opendevin: true },
   { feature: 'Approval gates', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'Knowledge graph memory', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'Sandboxed execution', evershade: true, cursor: false, copilot: false, aider: false, opendevin: true },
-  { feature: 'Multi-model routing', evershade: true, cursor: false, copilot: false, aider: true, opendevin: true },
   { feature: 'Web dashboard', evershade: true, cursor: true, copilot: false, aider: false, opendevin: true },
   { feature: 'CLI interface', evershade: true, cursor: false, copilot: false, aider: true, opendevin: false },
-  { feature: 'Observability built-in', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
   { feature: 'Runs on dev hardware', evershade: true, cursor: true, copilot: true, aider: true, opendevin: true },
-  { feature: 'No Kubernetes needed', evershade: true, cursor: true, copilot: true, aider: true, opendevin: true },
   { feature: 'Secrets encryption', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
-  { feature: 'Prompt injection defense', evershade: true, cursor: false, copilot: false, aider: false, opendevin: false },
 ] as const
 
 const WHY_POINTS = [
@@ -64,42 +58,24 @@ export function Comparison() {
         ))}
       </div>
 
-      {/* Mobile: comparison cards */}
+      {/* Mobile: simplified comparison */}
       <div className="mt-12 md:hidden">
         <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Feature comparison'}</p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-6 space-y-3">
           {[
-            { name: 'Cursor', data: COMPARISON.map(r => r.cursor) },
-            { name: 'Copilot', data: COMPARISON.map(r => r.copilot) },
-            { name: 'Aider', data: COMPARISON.map(r => r.aider) },
-            { name: 'OpenDevin', data: COMPARISON.map(r => r.opendevin) },
+            { name: 'Cursor', count: COMPARISON.filter(r => r.cursor).length },
+            { name: 'Copilot', count: COMPARISON.filter(r => r.copilot).length },
+            { name: 'Aider', count: COMPARISON.filter(r => r.aider).length },
+            { name: 'OpenDevin', count: COMPARISON.filter(r => r.opendevin).length },
           ].map((competitor) => (
-            <div key={competitor.name} className="border border-border p-4">
-              <p className="font-semibold tracking-tight">{competitor.name}</p>
-              <div className="mt-3 space-y-2">
-                {COMPARISON.map((row, i) => (
-                  <div key={row.feature} className="flex items-center gap-2 text-sm">
-                    {competitor.data[i] ? (
-                      <Check className="size-4 shrink-0 text-signal" aria-hidden="true" />
-                    ) : (
-                      <X className="size-4 shrink-0 text-muted-foreground/40" aria-hidden="true" />
-                    )}
-                    <span className="text-muted-foreground">{row.feature}</span>
-                  </div>
-                ))}
-              </div>
+            <div key={competitor.name} className="flex items-center justify-between border border-border p-3">
+              <p className="font-medium text-sm">{competitor.name}</p>
+              <span className="font-mono text-xs text-muted-foreground">{competitor.count}/{COMPARISON.length}</span>
             </div>
           ))}
-        </div>
-        <div className="mt-4 border border-signal p-4">
-          <p className="font-semibold tracking-tight text-signal-ink">Evershade</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {COMPARISON.map((row) => (
-              <span key={row.feature} className="inline-flex items-center gap-1 rounded border border-signal/30 px-2 py-1 font-mono text-[10px] text-signal-ink">
-                <Check className="size-3" aria-hidden="true" />
-                {row.feature}
-              </span>
-            ))}
+          <div className="flex items-center justify-between border border-signal bg-signal/5 p-3">
+            <p className="font-semibold text-sm text-signal-ink">Evershade</p>
+            <span className="font-mono text-xs text-signal-ink">{COMPARISON.length}/{COMPARISON.length}</span>
           </div>
         </div>
       </div>

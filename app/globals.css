@@ -137,7 +137,7 @@
 
 @keyframes travel-r {
   0% {
-    left: 0%;
+    transform: translateX(0);
     opacity: 0;
   }
   15%,
@@ -145,14 +145,14 @@
     opacity: 1;
   }
   100% {
-    left: 100%;
+    transform: translateX(100%);
     opacity: 0;
   }
 }
 
 @keyframes travel-l {
   0% {
-    left: 100%;
+    transform: translateX(100%);
     opacity: 0;
   }
   15%,
@@ -160,7 +160,7 @@
     opacity: 1;
   }
   100% {
-    left: 0%;
+    transform: translateX(0);
     opacity: 0;
   }
 }

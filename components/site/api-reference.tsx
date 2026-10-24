@@ -6,33 +6,18 @@ import { SERVICES, REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
 const API_ENDPOINTS = [
-  { method: 'POST', path: '/api/missions', service: 'Greenie', description: 'Create a new mission with milestones and features' },
-  { method: 'GET', path: '/api/missions', service: 'Greenie', description: 'List all missions with pagination' },
+  { method: 'POST', path: '/api/missions', service: 'Greenie', description: 'Create a new mission with milestones' },
   { method: 'GET', path: '/api/missions/{id}', service: 'Greenie', description: 'Get mission details and current state' },
-  { method: 'POST', path: '/api/missions/{id}/plan', service: 'Greenie', description: 'Generate LLM-based plan via Shrewd' },
-  { method: 'POST', path: '/api/missions/{id}/execute', service: 'Greenie', description: 'Execute mission milestones with parallel workers' },
-  { method: 'POST', path: '/api/missions/{id}/validate', service: 'Greenie', description: 'Run test, lint, type and security checks' },
-  { method: 'POST', path: '/api/missions/{id}/fix-revalidate', service: 'Greenie', description: 'Auto-fix failures and re-run validation' },
-  { method: 'POST', path: '/api/missions/{id}/cancel', service: 'Greenie', description: 'Cancel a running mission' },
-  { method: 'POST', path: '/api/missions/{id}/pause', service: 'Greenie', description: 'Pause mission execution' },
-  { method: 'POST', path: '/api/missions/{id}/resume', service: 'Greenie', description: 'Resume a paused mission' },
-  { method: 'GET', path: '/api/missions/analytics', service: 'Greenie', description: 'Get mission completion analytics' },
+  { method: 'POST', path: '/api/missions/{id}/execute', service: 'Greenie', description: 'Execute mission milestones' },
+  { method: 'POST', path: '/api/missions/{id}/validate', service: 'Greenie', description: 'Run tests, lint, and security checks' },
   { method: 'GET', path: '/api/missions/{id}/logs', service: 'Greenie', description: 'Stream mission logs via SSE' },
-  { method: 'POST', path: '/api/agents', service: 'Greenie', description: 'Create a new agent configuration' },
-  { method: 'GET', path: '/api/agents', service: 'Greenie', description: 'List all agents' },
-  { method: 'POST', path: '/api/workflows', service: 'Greenie', description: 'Create a workflow with triggers' },
   { method: 'POST', path: '/api/secrets', service: 'Hider', description: 'Store an encrypted secret' },
-  { method: 'GET', path: '/api/secrets/{name}', service: 'Hider', description: 'Lease a secret (AES-256-GCM encrypted)' },
   { method: 'POST', path: '/api/notifications', service: 'Poltergeist', description: 'Send notification via configured channel' },
-  { method: 'GET', path: '/api/models', service: 'Shrewd', description: 'List available LLM providers' },
-  { method: 'POST', path: '/v1/chat/completions', service: 'Shrewd', description: 'OpenAI-compatible chat completions endpoint' },
+  { method: 'POST', path: '/v1/chat/completions', service: 'Shrewd', description: 'OpenAI-compatible chat completions' },
   { method: 'GET', path: '/api/metrics', service: 'Sneaker', description: 'Get platform metrics and traces' },
-  { method: 'POST', path: '/api/alerts', service: 'Sneaker', description: 'Configure alert rules' },
   { method: 'GET', path: '/api/graph/search', service: 'Gobber', description: 'Hybrid search across knowledge graph' },
-  { method: 'POST', path: '/api/graph/embed', service: 'Gobber', description: 'Embed and store text chunks' },
-  { method: 'POST', path: '/api/crawl', service: 'Trapper', description: 'Start a web crawl with SSRF protection' },
   { method: 'POST', path: '/api/execute', service: 'Slinker', description: 'Execute code in isolated sandbox' },
-  { method: 'GET', path: '/api/health', service: 'All', description: 'Health check endpoint for all services' },
+  { method: 'GET', path: '/api/health', service: 'All', description: 'Health check for all services' },
 ]
 
 const methodColor: Record<string, string> = {
