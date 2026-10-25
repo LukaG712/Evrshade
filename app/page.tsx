@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic'
 import { BackToTop } from '@/components/site/back-to-top'
+import { LoadingScreen } from '@/components/site/loading-screen'
 import { Architecture } from '@/components/site/architecture'
 import { Cli } from '@/components/site/cli'
 import { Faq } from '@/components/site/faq'
@@ -32,6 +33,7 @@ const SystemRequirements = dynamic(() => import('@/components/site/system-requir
 export default function Page() {
   return (
     <>
+      <LoadingScreen />
       <Header />
       <SwipeNavigation />
       <HapticFeedback />
