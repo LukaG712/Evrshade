@@ -1,6 +1,10 @@
-import { PRINCIPLES, SERVICES, TIER_LABEL, type ServiceTier } from '@/lib/evershade'
+'use client'
+
+import { useState } from 'react'
+import { PRINCIPLES, SERVICES, TIER_LABEL, type Service, type ServiceTier } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
 import { SectionHeading } from './section-heading'
+import { ServiceDetailModal } from './service-detail-modal'
 
 const LAYERS: { tier: ServiceTier; label: string; note: string }[] = [
   { tier: 'client', label: 'Access', note: 'Browser, CLI, HTTP' },
@@ -17,7 +21,10 @@ const DEPENDENCIES = [
 ]
 
 export function Architecture() {
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
+
   return (
+    <>
     <section id="architecture" aria-labelledby="architecture-title" className="px-4 pt-32 md:px-[max(24px,3vw)] md:pt-48">
       <SectionHeading
         id="architecture-title"
@@ -54,9 +61,19 @@ export function Architecture() {
                   <li
                     key={svc.id}
                     className={cn(
-                      'flex min-h-32 flex-col justify-between border-r border-b border-border p-4 md:p-5',
+                      'flex min-h-32 cursor-pointer flex-col justify-between border-r border-b border-border p-4 transition-colors md:p-5',
                       layer.tier === 'orchestrator' && 'bg-foreground text-background',
                     )}
+                    onClick={() => setSelectedService(svc)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedService(svc)
+                      }
+                    }}
+                    aria-label={`View details for ${svc.name}`}
                   >
                     <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider opacity-60">
                       <span>{TIER_LABEL[svc.tier]}</span>
@@ -126,5 +143,13 @@ export function Architecture() {
         </div>
       </div>
     </section>
+
+    {selectedService && (
+      <ServiceDetailModal
+        service={selectedService}
+        onClose={() => setSelectedService(null)}
+      />
+    )}
+    </>
   )
 }

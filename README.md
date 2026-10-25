@@ -45,9 +45,7 @@ app/
 ├── sitemap.ts          # Dynamic sitemap
 ├── api/
 │   ├── dashboard/route.ts      # Mock dashboard data (JSON)
-│   ├── github-stats/route.ts   # Live GitHub repo stats (1h ISR cache)
-│   ├── releases-json/route.ts  # Live GitHub releases (1h ISR cache)
-│   └── releases/route.ts       # Redirect to releases-json
+│   └── github-stats/route.ts   # Live GitHub repo stats (1h ISR cache)
 └── subpage/
     ├── layout.tsx              # Subpage wrapper layout
     ├── changelog/page.tsx
@@ -71,7 +69,7 @@ components/site/
 ├── knowledge-graph.tsx     # Gobber query pipeline (collapsible)
 ├── install.tsx             # Quickstart guide, .env variables
 ├── community.tsx           # Contributing paths + steps (merged section)
-├── changelog-ticker.tsx    # Live GitHub releases
+├── changelog.tsx         # Static development timeline from roadmap data
 ├── roadmap.tsx             # Shipped / In progress / Planned
 ├── faq.tsx                 # FAQ accordion
 ├── known-limitations.tsx   # Beta limitations
@@ -99,7 +97,6 @@ components/site/
 ├── counter.tsx             # Animated counter
 ├── discord-widget.tsx      # Discord server widget
 ├── docker-compose.tsx      # Docker Compose example
-├── download-dropdown.tsx   # Download platform selector
 ├── build-status.tsx        # CI build status badge
 ├── blog-toc.tsx            # Blog table of contents
 ├── comparison.tsx          # DEAD CODE — not used, keep deleted
@@ -125,7 +122,7 @@ public/
 The homepage is a long-scrolling single page with ~30 sections. Order matters for the hero scroll animation (380vh scroll height).
 
 **Lazy-loaded components** (performance optimization):
-- `ApiReference`, `ChangelogTicker`, `Community`, `KnownLimitations`, `Roadmap`, `SystemRequirements`
+- `ApiReference`, `Community`, `KnownLimitations`, `Roadmap`, `SystemRequirements`
 
 ### Hero Animation (`hero.tsx`)
 - Scroll-driven animation: `h-[380vh]` container
@@ -160,8 +157,6 @@ The homepage is a long-scrolling single page with ~30 sections. Order matters fo
 |---|---|---|
 | `GET /api/dashboard` | Mock dashboard data (JSON) | No cache |
 | `GET /api/github-stats` | Live GitHub repo stats (stars, forks, contributors, size) | 1h ISR |
-| `GET /api/releases-json` | Live GitHub releases (up to 10) | 1h ISR |
-| `GET /api/releases` | Redirects to `/api/releases-json` | — |
 
 GitHub API uses the public API (no auth required, rate-limited to 60 req/hour per IP).
 
@@ -172,7 +167,6 @@ GitHub API uses the public API (no auth required, rate-limited to 60 req/hour pe
 - **Services & versions:** `lib/evershade.ts` — manually maintained, verified against `version-manifest.json` in the real repo
 - **Version:** `1.14.0` (matches real manifest)
 - **GitHub stats:** Fetched live via API route
-- **Releases:** Fetched live via API route
 - **Mission replay script:** `lib/mission-script.ts` — uses real repo `LukaG712/Evershade`, branch `master`
 
 ---
@@ -214,6 +208,7 @@ These are in the code, not rendered in the UI:
 - **`/subpage/compare`** route exists but only shows the migration guide. Metadata is stale.
 - **`/api/github-stats`** route exists but is no longer used by the homepage (stats section was removed).
 - **`/api/dashboard`** route exists but is only used by the mock dashboard simulation.
+- **`changelog.tsx`** is now a static component using roadmap data — no longer fetches GitHub releases.
 
 ---
 

@@ -75,7 +75,7 @@ export function Security() {
         </div>
       </div>
 
-      {/* TODO(luka): Add links to SECURITY.md, prompt-injection test suite, and release signing verification. */}
+      {/* TODO(luka): Add links to SECURITY.md and prompt-injection test suite. */}
       <div className="mt-12">
         <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Secure defaults'}</p>
         <ul className="mt-4 flex flex-wrap gap-2">

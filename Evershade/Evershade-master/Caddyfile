@@ -1,0 +1,101 @@
+# Caddy reverse proxy for Evershade
+# Provides TLS termination and routes to all services
+# Slammer is the single dashboard; Greenie is API-only
+
+{
+	# Use internal CA for self-signed certificates
+	# Replace with acme_dns for production DNS-based certificates
+	auto_https on
+}
+
+# HTTP → HTTPS redirect
+:80 {
+	redir https://{host}{uri} permanent
+}
+
+# HTTPS → Unified dashboard gateway
+:443 {
+	# TLS with internal CA (self-signed)
+	tls internal
+
+	# Trust X-Forwarded-* headers only from internal Docker network
+	trusted_proxies range 172.16.0.0/12
+	trusted_proxies range 10.0.0.0/8
+	trusted_proxies range 192.168.0.0/16
+
+	# Security headers
+	header {
+		-X-Powered-By
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+	}
+
+	# Slammer static files (dashboard frontend)
+	reverse_proxy / Slammer:80 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	# API routes → Greenie (orchestration backend)
+	reverse_proxy /api/* Greenie:8080 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	# Service routes → individual backends
+	reverse_proxy /slinker/* Slinker:8000 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	reverse_proxy /trapper/* Trapper:3000 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	reverse_proxy /gobber/* Gobber:8085 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	reverse_proxy /sneaker/* Sneaker:8086 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	reverse_proxy /hider/* Hider:8087 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	reverse_proxy /poltergeist/* Poltergeist:8088 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	reverse_proxy /shrewd/* Shrewd:8089 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	# WebSocket support for terminals and real-time features
+	@ws {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	reverse_proxy @ws Greenie:8080 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-For {remote_host}
+	}
+}

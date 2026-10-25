@@ -26,7 +26,7 @@ const PLANNED = [
   'Container and workstation isolation',
   'Alert rules and deduplication',
   'Workflow triggers and visual builder',
-  'Agent eval suite and release signing',
+  'Agent eval suite',
   'Emergency stop and activity timeline',
 ]
 

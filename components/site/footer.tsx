@@ -3,8 +3,7 @@ import { REPO_URL, VERSION } from '@/lib/evershade'
 
 const LINKS = [
   ['Repository', REPO_URL],
-  ['Changelog', `${REPO_URL}/blob/master/CHANGELOG.md`],
-  ['Roadmap', `${REPO_URL}/blob/master/ROADMAP.md`],
+  ['Changelog', '/subpage/changelog'],
   ['Documentation', `${REPO_URL}/tree/master/docs`],
 ]
 
@@ -35,14 +34,21 @@ export function Footer() {
           ))}
         </ul>
         <ul className="grid grid-cols-2 gap-x-8 gap-y-3 md:col-span-2">
-          {LINKS.map(([label, href]) => (
-            <li key={label}>
-              <a href={href} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-1 text-sm hover:text-signal-ink">
-                {label}
-                <ArrowUpRight className="size-3.5 opacity-40 transition-opacity group-hover:opacity-100" aria-hidden="true" />
-              </a>
-            </li>
-          ))}
+          {LINKS.map(([label, href]) => {
+            const isExternal = href.startsWith('http')
+            return (
+              <li key={label}>
+                <a
+                  href={href}
+                  {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
+                  className="group inline-flex items-center gap-1 text-sm hover:text-signal-ink"
+                >
+                  {label}
+                  {isExternal && <ArrowUpRight className="size-3.5 opacity-40 transition-opacity group-hover:opacity-100" aria-hidden="true" />}
+                </a>
+              </li>
+            )
+          })}
         </ul>
         <div className="font-mono text-[11px] uppercase leading-relaxed tracking-wider text-muted-foreground md:col-span-2 md:text-right">
           <p>{`v${VERSION}`}</p>

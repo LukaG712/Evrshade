@@ -20,7 +20,7 @@ const FAQ = [
     a: (
       <>
         <strong className="font-semibold text-foreground">Yes, Evershade is fully modular.</strong>{' '}
-        Installation profiles let you pick exactly which services you need. The <code className="rounded bg-muted px-1 text-xs">minimal</code> profile runs just the 4 core services (Greenie, Slinker, Sneaker, Shrewd). The <code className="rounded bg-muted px-1 text-xs">standard</code> profile adds optional services like Gobber and Trapper but excludes the dashboard. The <code className="rounded bg-muted px-1 text-xs">full</code> profile includes everything, including the Slammer dashboard. You can also create a <code className="rounded bg-muted px-1 text-xs">custom</code> profile to enable only the services you want.
+        Installation profiles let you pick exactly which services you need. The <code className="rounded bg-muted px-1 text-xs">minimal</code> profile runs just the 4 core services (Greenie, Slinker, Trapper, Gobber). The <code className="rounded bg-muted px-1 text-xs">standard</code> profile adds optional services like Sneaker, Hider, Poltergeist, and Shrewd. The <code className="rounded bg-muted px-1 text-xs">full</code> profile includes everything, including the Slammer dashboard. You can also create a <code className="rounded bg-muted px-1 text-xs">custom</code> profile to pick individual services, or combine profiles such as <code className="rounded bg-muted px-1 text-xs">monitoring</code> for Grafana + Prometheus or <code className="rounded bg-muted px-1 text-xs">ollama</code> for local LLM support.
       </>
     ),
   },

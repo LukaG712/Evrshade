@@ -5,7 +5,7 @@ const LIMITATIONS = [
   {
     icon: ShieldAlert,
     title: 'Beta maturity',
-    description: 'All services are currently in beta. APIs may change between releases. Production use is at your own risk.',
+    description: 'All services are currently in beta. APIs may change between updates. Production use is at your own risk.',
   },
   {
     icon: Database,

@@ -24,7 +24,6 @@ import { UseCases } from '@/components/site/use-cases'
 
 // Lazy-load components further down the page
 const ApiReference = dynamic(() => import('@/components/site/api-reference').then(m => ({ default: m.ApiReference })))
-const ChangelogTicker = dynamic(() => import('@/components/site/changelog-ticker').then(m => ({ default: m.ChangelogTicker })))
 const Community = dynamic(() => import('@/components/site/community').then(m => ({ default: m.Community })))
 const KnownLimitations = dynamic(() => import('@/components/site/known-limitations').then(m => ({ default: m.KnownLimitations })))
 const Roadmap = dynamic(() => import('@/components/site/roadmap').then(m => ({ default: m.Roadmap })))
@@ -74,7 +73,6 @@ export default function Page() {
 
         {/* 06 — Roadmap */}
         <SectionDivider index="06" label="Roadmap" id="roadmap" />
-        <SectionReveal><ChangelogTicker /></SectionReveal>
         <SectionReveal><Roadmap /></SectionReveal>
         <SectionReveal><Community /></SectionReveal>
       </main>

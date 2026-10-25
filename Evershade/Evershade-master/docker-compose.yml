@@ -1,0 +1,782 @@
+# Evershade — Full Ecosystem
+#
+# Profiles:
+#   docker compose --profile minimal up      # Core services only
+#   docker compose --profile standard up     # All services except dashboard
+#   docker compose --profile full up         # Everything including Slammer
+#   docker compose --profile monitoring up   # Grafana + Prometheus + cAdvisor + node-exporter
+#   docker compose --profile opik up        # Opik for LLM observability
+#   docker compose --profile ollama up       # Ollama for local models
+#   docker compose --profile proxy up        # Caddy reverse proxy with TLS
+#   docker compose --profile dev up          # Development mode with all ports exposed
+#
+# Combined profiles:
+#   docker compose --profile full --profile monitoring up   # Everything + monitoring
+#
+# Modes:
+#   Set EVERSHADE_MODE=server in .env for headless server deployment
+#   Default (desktop) binds to loopback only
+
+name: evershade
+
+networks:
+  internal:
+    driver: bridge
+    internal: false
+  frontend:
+    driver: bridge
+
+volumes:
+  redis_data:
+  greenie_data:
+  slinker_logs:
+  gobber_data:
+  sneaker_data:
+  hider_data:
+  poltergeist_data:
+  ollama_data:
+  caddy_data:
+  caddy_config:
+  # Monitoring persistent storage
+  prometheus_data:
+  grafana_data:
+  # Opik persistent storage
+  opik_data:
+
+# ═══════════════════════════════════════════════════════════════════
+# Infrastructure
+# ═══════════════════════════════════════════════════════════════════
+
+services:
+  redis:
+    image: redis:8.10.2-alpine
+    networks:
+      - internal
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${EVERSHADE_REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${EVERSHADE_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+# ═══════════════════════════════════════════════════════════════════
+# Core Services (Required)
+# ═══════════════════════════════════════════════════════════════════
+
+  Greenie:
+    build: ./services/Greenie
+    profiles: ["minimal", "standard", "full", "dev"]
+    networks:
+      - internal
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:8080:8080"
+    environment:
+      # API Key (new naming + legacy alias)
+      - EVERSHADE_GREENIE_API_KEY=${EVERSHADE_GREENIE_API_KEY}
+      - HUB_API_KEY=${EVERSHADE_GREENIE_API_KEY}
+      - HUB_PORT=8080
+      - HUB_TIMEOUT=1800
+      - JUNIE_BIN=${EVERSHADE_JUNIE_BIN:-junie}
+      # Service URLs (internal network)
+      - SLINKER_URL=http://Slinker:8000
+      - TRAPPER_URL=http://Trapper-api:3000
+      - GOBBER_URL=http://Gobber:8085
+      - SNEAKER_URL=http://Sneaker:8086
+      - HIDER_URL=http://Hider:8087
+      - POLTERGEIST_URL=http://Poltergeist:8088
+      - SHREWD_URL=http://Shrewd:8089
+      # OpenTelemetry
+      - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+      # Service API Keys (new naming + legacy aliases)
+      - EVERSHADE_SLINKER_API_KEY=${EVERSHADE_SLINKER_API_KEY}
+      - SLINKER_API_KEY=${EVERSHADE_SLINKER_API_KEY}
+      - EVERSHADE_TRAPPER_API_KEY=${EVERSHADE_TRAPPER_API_KEY}
+      - TRAPPER_API_KEY=${EVERSHADE_TRAPPER_API_KEY}
+      - EVERSHADE_GOBBER_API_KEY=${EVERSHADE_GOBBER_API_KEY}
+      - GOBBER_API_KEY=${EVERSHADE_GOBBER_API_KEY}
+      - EVERSHADE_SNEAKER_API_KEY=${EVERSHADE_SNEAKER_API_KEY}
+      - SNEAKER_API_KEY=${EVERSHADE_SNEAKER_API_KEY}
+      - EVERSHADE_HIDER_API_KEY=${EVERSHADE_HIDER_API_KEY}
+      - HIDER_API_KEY=${EVERSHADE_HIDER_API_KEY}
+      - EVERSHADE_POLTERGEIST_API_KEY=${EVERSHADE_POLTERGEIST_API_KEY}
+      - POLTERGEIST_API_KEY=${EVERSHADE_POLTERGEIST_API_KEY}
+      - EVERSHADE_SHREWD_API_KEY=${EVERSHADE_SHREWD_API_KEY}
+      - SHREWD_API_KEY=${EVERSHADE_SHREWD_API_KEY}
+      # Ollama
+      - OLLAMA_URL=${EVERSHADE_OLLAMA_URL:-http://host.docker.internal:11434}
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${EVERSHADE_REDIS_PASSWORD}
+      - REDIS_DB=0
+      # Deployment
+      - EVERSHADE_MODE=${EVERSHADE_MODE:-desktop}
+      - EVERSHADE_PUBLIC_URL=${EVERSHADE_PUBLIC_URL:-http://localhost:8080}
+      # Logging
+      - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+    volumes:
+      - ./services/Greenie/hub.yaml:/app/hub.yaml:ro
+      - greenie_data:/app/data
+      - ./services/Greenie/skills:/app/skills:ro
+      - ${EVERSHADE_WORKSPACE_PATH:-./workspace}:/workspace
+    depends_on:
+      redis:
+        condition: service_healthy
+      Slinker:
+        condition: service_healthy
+      Trapper-api:
+        condition: service_healthy
+      Gobber:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health')"]
+      interval: 15s
+      timeout: 5s
+      start_period: 60s
+      retries: 4
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  Slinker:
+    build: ./services/Slinker
+    profiles: ["minimal", "standard", "full", "dev"]
+    networks:
+      - internal
+    # No host port — only accessible via Greenie or internal network
+    environment:
+      - API_KEY=${EVERSHADE_SLINKER_API_KEY}
+      - PORT=8000
+      - JUNIE_TIMEOUT=1800
+      - JUNIE_BIN=${EVERSHADE_JUNIE_BIN:-junie}
+      - WORKSPACE_PATH=/workspace
+      - MAX_CONCURRENT_WORKERS=${EVERSHADE_MAX_CONCURRENT_WORKERS:-1}
+      - ISOLATION_MODE=${EVERSHADE_ISOLATION_MODE:-container}
+      - OLLAMA_URL=${EVERSHADE_OLLAMA_URL:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${EVERSHADE_OLLAMA_MODEL:-gemma4:12b}
+      - REFINE_PROMPT=${EVERSHADE_REFINE_PROMPT:-false}
+      - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+      # OpenTelemetry
+      - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+    volumes:
+      - ${EVERSHADE_WORKSPACE_PATH:-./workspace}:/workspace
+      - slinker_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/logs
+
+  Trapper-api:
+    build: ./services/Trapper
+    profiles: ["minimal", "standard", "full", "dev"]
+    networks:
+      - internal
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - API_KEY=${EVERSHADE_TRAPPER_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RATE_LIMIT_MAX=60
+      - RATE_LIMIT_WINDOW_MS=60000
+      - SCRAPE_TIMEOUT=${EVERSHADE_SCRAPE_TIMEOUT:-30000}
+      - SCRAPE_ONLY_MAIN_CONTENT=true
+      - SCRAPE_BLOCK_ADS=true
+      - CRAWL_MAX_DEPTH=${EVERSHADE_CRAWL_MAX_DEPTH:-10}
+      - CRAWL_MAX_PAGES=${EVERSHADE_CRAWL_MAX_PAGES:-100}
+      - CRAWL_MAX_CONCURRENCY=${EVERSHADE_CRAWL_MAX_CONCURRENCY:-5}
+      - CRAWL_DELAY=1000
+      - BROWSER_HEADLESS=${EVERSHADE_BROWSER_HEADLESS:-true}
+      - LOG_LEVEL=info
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.50'
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  Trapper-worker:
+    build: ./services/Trapper
+    profiles: ["minimal", "standard", "full", "dev"]
+    networks:
+      - internal
+    command: node dist/worker.js
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - API_KEY=${EVERSHADE_TRAPPER_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SCRAPE_TIMEOUT=${EVERSHADE_SCRAPE_TIMEOUT:-30000}
+      - SCRAPE_ONLY_MAIN_CONTENT=true
+      - SCRAPE_BLOCK_ADS=true
+      - CRAWL_MAX_DEPTH=${EVERSHADE_CRAWL_MAX_DEPTH:-10}
+      - CRAWL_MAX_PAGES=${EVERSHADE_CRAWL_MAX_PAGES:-100}
+      - CRAWL_MAX_CONCURRENCY=${EVERSHADE_CRAWL_MAX_CONCURRENCY:-5}
+      - CRAWL_DELAY=1000
+      - BROWSER_HEADLESS=${EVERSHADE_BROWSER_HEADLESS:-true}
+      - LOG_LEVEL=info
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.50'
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  Gobber:
+    build: ./services/Gobber
+    profiles: ["minimal", "standard", "full", "dev"]
+    networks:
+      - internal
+    environment:
+      - API_KEY=${EVERSHADE_GOBBER_API_KEY}
+      - DB_PATH=/app/data/gobber.db
+      - REDIS_URL=redis://:${EVERSHADE_REDIS_PASSWORD}@redis:6379/1
+      - OBSIDIAN_VAULT_PATH=${EVERSHADE_OBSIDIAN_VAULT_PATH:-/app/vault}
+      - SHREWD_URL=http://Shrewd:8089
+      - SHREWD_API_KEY=${EVERSHADE_SHREWD_API_KEY}
+      - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+      # OpenTelemetry
+      - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+    volumes:
+      - gobber_data:/app/data
+      - ${EVERSHADE_OBSIDIAN_VAULT_PATH:-./obsidian-vault}:/app/vault:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8085/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/data
+
+# ═══════════════════════════════════════════════════════════════════
+# Supporting Services (Optional)
+# ═══════════════════════════════════════════════════════════════════
+
+  Sneaker:
+    build: ./services/Sneaker
+    profiles: ["standard", "full", "dev"]
+    networks:
+      - internal
+    environment:
+      - API_KEY=${EVERSHADE_SNEAKER_API_KEY}
+      - DB_PATH=/app/data/sneaker.db
+      - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+      # OpenTelemetry
+      - SNEAKER_OTLP_ENDPOINT=http://localhost:8086
+    volumes:
+      - sneaker_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8086/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  Hider:
+    build: ./services/Hider
+    profiles: ["standard", "full", "dev"]
+    networks:
+      - internal
+    environment:
+      - API_KEY=${EVERSHADE_HIDER_API_KEY}
+      - ENCRYPTION_KEY=${EVERSHADE_ENCRYPTION_KEY}
+      - DB_PATH=/app/data/hider.db
+      - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+      # OpenTelemetry
+      - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+    volumes:
+      - hider_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8087/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  Poltergeist:
+    build: ./services/Poltergeist
+    profiles: ["standard", "full", "dev"]
+    networks:
+      - internal
+    environment:
+      - API_KEY=${EVERSHADE_POLTERGEIST_API_KEY}
+      - DB_PATH=/app/data/poltergeist.db
+      - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+      # OpenTelemetry
+      - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+    volumes:
+      - poltergeist_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8088/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  Shrewd:
+    build: ./services/Shrewd
+    profiles: ["standard", "full", "dev"]
+    networks:
+      - internal
+    environment:
+      - API_KEY=${EVERSHADE_SHREWD_API_KEY}
+      - OPENAI_API_KEY=${EVERSHADE_OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${EVERSHADE_ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${EVERSHADE_GOOGLE_API_KEY:-}
+      - OLLAMA_URL=${EVERSHADE_OLLAMA_URL:-http://host.docker.internal:11434}
+      - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+      # OpenTelemetry
+      - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8089/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/data
+
+# ═══════════════════════════════════════════════════════════════════
+# Frontend
+# ═══════════════════════════════════════════════════════════════════
+
+  Slammer:
+    build: ./services/Slammer
+    profiles: ["full", "dev"]
+    networks:
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:5173:80"
+    depends_on:
+      - Greenie
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    cap_drop:
+      - ALL
+
+# ═══════════════════════════════════════════════════════════════════
+# Optional: Ollama (Local LLM)
+# ═══════════════════════════════════════════════════════════════════
+
+  ollama:
+    image: ollama/ollama:0.5.7
+    profiles: ["ollama"]
+    networks:
+      - internal
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 8G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+# ═══════════════════════════════════════════════════════════════════
+# Optional: Caddy Reverse Proxy (TLS)
+# ═══════════════════════════════════════════════════════════════════
+
+  caddy:
+    image: caddy:2.11.6-alpine
+    profiles: ["proxy"]
+    networks:
+      - frontend
+      - internal
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - Greenie
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+# ═══════════════════════════════════════════════════════════════════
+# Monitoring Stack (Optional — profile: monitoring)
+# ═══════════════════════════════════════════════════════════════════
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    profiles: ["monitoring"]
+    networks:
+      - internal
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    profiles: ["monitoring"]
+    networks:
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-http://localhost:3000}
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/lib/grafana/plugins
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    profiles: ["monitoring"]
+    networks:
+      - internal
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:8081:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    # cAdvisor requires SYS_ADMIN to read container cgroup stats.
+    # This is less privileged than privileged: true, but still elevated.
+    # For desktop use this is acceptable; for server deployments consider
+    # running cAdvisor only on trusted hosts with firewall restrictions.
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    devices:
+      - /dev/kmsg
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    profiles: ["monitoring"]
+    networks:
+      - internal
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /:/host:ro,rslave
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9100/metrics"]
+      interval: 15s
+      timeout: 5s
+      start_period: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.10'
+          memory: 64M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+# ═══════════════════════════════════════════════════════════════════
+# Opik — LLM Observability (Optional)
+# ═══════════════════════════════════════════════════════════════════
+
+  opik:
+    image: ghcr.io/comet-ml/opik:0.1.8
+    profiles: ["opik"]
+    networks:
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:9000:9000"
+    environment:
+      - OPIK_SERVER_PORT=9000
+    volumes:
+      - opik_data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9000/api/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1G
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

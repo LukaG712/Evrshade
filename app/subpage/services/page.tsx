@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ServicesGrid } from '@/components/site/services-grid'
+import { Architecture } from '@/components/site/architecture'
 import { Integrations } from '@/components/site/integrations'
 import { PerformanceMetrics } from '@/components/site/performance-metrics'
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <>
-      <ServicesGrid />
+      <Architecture />
       <Integrations />
       <PerformanceMetrics />
     </>

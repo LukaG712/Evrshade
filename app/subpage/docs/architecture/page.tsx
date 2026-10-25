@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Architecture } from '@/components/site/architecture'
 import { RequestTrace } from '@/components/site/request-trace'
 import { KnowledgeGraph } from '@/components/site/knowledge-graph'
-import { ServicesGrid } from '@/components/site/services-grid'
 
 export const metadata: Metadata = {
   title: 'Architecture — Evershade Docs',
@@ -15,7 +14,6 @@ export default function ArchitecturePage() {
       <Architecture />
       <RequestTrace />
       <KnowledgeGraph />
-      <ServicesGrid />
     </>
   )
 }

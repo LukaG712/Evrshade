@@ -1,0 +1,18 @@
+# Evershade Ruff Configuration
+
+exclude = [
+    ".junie",
+    ".git",
+    "__pycache__",
+    "node_modules",
+    "venv",
+    ".venv",
+]
+
+[lint]
+# Pre-existing issues in Greenie that require separate investigation
+# F821: Undefined names (_scheduled_tasks, run_agent) - these are real bugs
+# that need to be fixed in a dedicated PR
+[lint.per-file-ignores]
+"tests\\test_install_gui_security.py" = ["SIM117"]
+"tests\\test_shell_scripts_security.py" = ["SIM102"]

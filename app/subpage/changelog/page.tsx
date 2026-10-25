@@ -4,7 +4,7 @@ import { Roadmap } from '@/components/site/roadmap'
 
 export const metadata: Metadata = {
   title: 'Changelog — Evershade',
-  description: 'Evershade release history, auto-generated from GitHub releases, and the product roadmap.',
+  description: 'Evershade development timeline, changelog, and the product roadmap.',
 }
 
 export default function ChangelogPage() {

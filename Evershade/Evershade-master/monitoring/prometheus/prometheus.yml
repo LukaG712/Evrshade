@@ -1,0 +1,99 @@
+# Prometheus configuration for Evershade monitoring
+# Scrapes metrics from all Evershade services, containers, and host
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Greenie - API metrics (Prometheus format)
+  - job_name: 'greenie'
+    static_configs:
+      - targets: ['Greenie:8080']
+        labels:
+          service: 'Greenie'
+          component: 'api'
+
+  # Sneaker - Observability service metrics
+  - job_name: 'sneaker'
+    static_configs:
+      - targets: ['Sneaker:8086']
+        labels:
+          service: 'Sneaker'
+          component: 'observability'
+
+  # Trapper - Web scraping service
+  - job_name: 'trapper'
+    static_configs:
+      - targets: ['Trapper-api:3000']
+        labels:
+          service: 'Trapper'
+          component: 'scraper'
+
+  # Gobber - Knowledge graph service
+  - job_name: 'gobber'
+    static_configs:
+      - targets: ['Gobber:8085']
+        labels:
+          service: 'Gobber'
+          component: 'knowledge'
+
+  # Slinker - Code execution engine
+  - job_name: 'slinker'
+    static_configs:
+      - targets: ['Slinker:8000']
+        labels:
+          service: 'Slinker'
+          component: 'executor'
+
+  # Hider - Secrets management
+  - job_name: 'hider'
+    static_configs:
+      - targets: ['Hider:8087']
+        labels:
+          service: 'Hider'
+          component: 'secrets'
+
+  # Poltergeist - Notifications
+  - job_name: 'poltergeist'
+    static_configs:
+      - targets: ['Poltergeist:8088']
+        labels:
+          service: 'Poltergeist'
+          component: 'notifications'
+
+  # Shrewd - LLM provider abstraction
+  - job_name: 'shrewd'
+    static_configs:
+      - targets: ['Shrewd:8089']
+        labels:
+          service: 'Shrewd'
+          component: 'llm'
+
+  # Redis - Queue and cache
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+        labels:
+          service: 'Redis'
+          component: 'cache'
+
+  # cAdvisor - Container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          component: 'containers'
+
+  # Node Exporter - Host metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          component: 'host'
