@@ -56,74 +56,64 @@ export function ChangelogTicker() {
   }, [])
 
   const latest = releases[0]
-  const history = releases.slice(1, 6)
+  const history = releases.slice(1, 4)
 
   return (
     <section id="changelog" className="px-4 pt-24 md:px-[max(24px,3vw)] md:pt-40">
-      <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Latest release'}</p>
+      <div className="flex items-baseline justify-between">
+        <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Releases'}</p>
+        <a
+          href={`${REPO_URL}/releases`}
+          target="_blank"
+          rel="noreferrer"
+          className="group inline-flex items-center gap-1 text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+        >
+          View all
+          <ArrowUpRight className="size-3 opacity-40 transition-opacity group-hover:opacity-100" aria-hidden="true" />
+        </a>
+      </div>
 
       {loaded && latest && (
-        <div className="mt-4 border border-foreground p-4">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center rounded-full border border-signal bg-signal/10 px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase tracking-wider text-signal-ink">
-              {latest.tag}
-            </span>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {/* Latest release - prominent */}
+          <div className="border border-foreground p-4 md:col-span-2">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center rounded-full border border-signal bg-signal/10 px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase tracking-wider text-signal-ink">
+                {latest.tag}
+              </span>
+              {(() => {
+                const d = formatDate(latest.publishedAt)
+                return <time className="font-mono text-[11px] text-muted-foreground" dateTime={d.dateTime}>{d.label}</time>
+              })()}
+            </div>
             {(() => {
-              const d = formatDate(latest.publishedAt)
-              return <time className="font-mono text-[11px] text-muted-foreground" dateTime={d.dateTime}>{d.label}</time>
+              const changes = parseReleaseBody(latest.body)
+              if (changes.length === 0) return null
+              return (
+                <ul className="mt-3 space-y-1">
+                  {changes.slice(0, 3).map((change) => (
+                    <li key={change} className="flex items-start gap-2 text-sm leading-snug">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-signal-ink" />
+                      {change}
+                    </li>
+                  ))}
+                </ul>
+              )
             })()}
           </div>
-          {(() => {
-            const changes = parseReleaseBody(latest.body)
-            if (changes.length === 0) return null
-            return (
-              <ul className="mt-3 space-y-1">
-                {changes.slice(0, 4).map((change) => (
-                  <li key={change} className="flex items-start gap-2 text-sm leading-snug">
-                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-signal-ink" />
-                    {change}
-                  </li>
-                ))}
-              </ul>
-            )
-          })()}
-        </div>
-      )}
 
-      <p className="mt-8 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Release history'}</p>
-      <div className="mt-4 space-y-0">
-        {loaded && history.map((release) => {
-          const d = formatDate(release.publishedAt)
-          const note = (() => {
-            const lines = release.body.split('\n')
-            for (const line of lines) {
-              const trimmed = line.trim()
-              if (/^[-*]\s/.test(trimmed) && trimmed.length < 80) {
-                return trimmed.replace(/^[-*]\s+/, '')
-              }
-            }
-            return release.name
-          })()
-          return (
-            <div key={release.tag} className="border-b border-border py-3">
-              <div className="flex items-baseline justify-between gap-4">
+          {/* Release history - compact list */}
+          {history.map((release) => {
+            const d = formatDate(release.publishedAt)
+            return (
+              <div key={release.tag} className="flex items-center justify-between border border-border p-3">
                 <span className="font-mono text-sm font-semibold">{release.tag}</span>
                 <span className="font-mono text-[11px] text-muted-foreground">{d.label}</span>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{note}</p>
-            </div>
-          )
-        })}
-      </div>
-      <a
-        href={`${REPO_URL}/releases`}
-        target="_blank"
-        rel="noreferrer"
-        className="group mt-4 inline-flex items-center gap-1 text-sm font-medium underline underline-offset-2 hover:text-signal-ink"
-      >
-        Full changelog
-        <ArrowUpRight className="size-3.5 opacity-40 transition-opacity group-hover:opacity-100" aria-hidden="true" />
-      </a>
+            )
+          })}
+        </div>
+      )}
     </section>
   )
 }
