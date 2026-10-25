@@ -80,7 +80,7 @@ export function Architecture() {
 
       <div className="mt-24 grid gap-12 md:mt-32 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.1 — Design principles'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Design principles'}</p>
           <ol className="mt-6 border-t border-foreground">
             {PRINCIPLES.map(([title, body], i) => (
               <li key={title} className="grid grid-cols-[3rem_1fr] gap-4 border-b border-border py-6 md:grid-cols-[4rem_1fr_1fr] md:gap-8">
@@ -92,7 +92,7 @@ export function Architecture() {
           </ol>
         </div>
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'07.2 — Dependency map'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Dependency map'}</p>
           <ul className="mt-6 border-t border-foreground">
             {DEPENDENCIES.map((d) => (
               <li key={d.svc} className="border-b border-border py-4">

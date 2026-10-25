@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
-import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
+import { EDGES, LIVE_ACTIVITY, REPO_URL, SERVICES, SERVICE_MATURITY, TIER_LABEL, VERSION, type Service } from '@/lib/evershade'
 import { cn } from '@/lib/utils'
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
@@ -27,13 +27,12 @@ export function Hero() {
   const hudRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
   const barRef = useRef<HTMLDivElement>(null)
-  const pctRef = useRef<HTMLSpanElement>(null)
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([])
   const edgeRefs = useRef<(SVGLineElement | null)[]>([])
+  const pctRef = useRef<HTMLSpanElement>(null)
   const packetRefs = useRef<(SVGRectElement | null)[]>([])
   const edgeGroupRef = useRef<SVGGElement>(null)
   const liveRefs = useRef<(HTMLSpanElement | null)[]>([])
-  const liveTagRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -125,11 +124,8 @@ export function Hero() {
       const ch = Math.max(80, (gBottom - gTop) / rows)
 
       // Final phase: the grid becomes a live operations board.
-      const live = ease(range(p, 0.62, 0.78))
-      if (liveTagRef.current) {
-        liveTagRef.current.style.opacity = String(live)
-        liveTagRef.current.style.transform = `translate3d(0, ${(1 - live) * 12}px, 0)`
-      }
+      const _live = ease(range(p, 0.62, 0.78))
+      void _live
 
       const centers: Point[] = []
       SERVICES.forEach((svc, i) => {
@@ -140,7 +136,7 @@ export function Hero() {
           const txt = lines[k] ?? ''
           if (liveEl.textContent !== txt) liveEl.textContent = txt
         }
-        nodeRefs.current[i]?.style.setProperty('--l', live.toFixed(3))
+        nodeRefs.current[i]?.style.setProperty('--l', _live.toFixed(3))
         const node = nodeRefs.current[i]
         if (!node) return
         const g = ease(range(p, 0.22 + i * 0.018, 0.50 + i * 0.018))
@@ -200,11 +196,10 @@ export function Hero() {
         >
           <span className="hidden sm:inline">{'[ Self-hosted / Docker / MIT ]'}</span>
           <span className="flex items-center gap-2">
-            <span className="relative flex size-1.5">
-              <span className="animate-pulse-ring absolute inset-0 bg-signal" />
-              <span className="relative size-1.5 bg-signal" />
+            <span className="inline-flex items-center gap-1 rounded-full border border-signal bg-signal/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-signal-ink">
+              Beta
             </span>
-            {`v${VERSION} · Production ready`}
+            <span className="font-mono text-[11px] text-muted-foreground">{`v${VERSION}`}</span>
           </span>
         </div>
 
@@ -260,19 +255,6 @@ export function Hero() {
             Ten specialized microservices. Each has a single responsibility, talks over HTTP, and can run on its own
             while contributing to one platform.
           </p>
-          <p
-            ref={liveTagRef}
-            className="mt-4 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider opacity-0"
-          >
-            <span className="relative flex size-1.5">
-              <span className="animate-pulse-ring absolute inset-0 bg-signal" />
-              <span className="relative size-1.5 bg-signal" />
-            </span>
-            {'Live · mission m_7f3a executing'}
-            <a href="#console" className="ml-1 text-signal-ink underline underline-offset-4 hover:text-foreground">
-              {'Watch it run ↓'}
-            </a>
-          </p>
         </div>
 
         <div
@@ -280,10 +262,15 @@ export function Hero() {
           className="absolute inset-x-4 z-10 flex flex-col gap-5 md:inset-x-[max(24px,3vw)] md:flex-row md:items-end md:justify-between"
           style={{ bottom: 'calc(var(--head-h, 20vw) + max(16px, 3vw) + 24px)' }}
         >
-          <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
-            A self-hosted AI agent platform built as a collection of specialized microservices. Your agents. Your
-            hardware. Your data.
-          </p>
+          <div>
+            <p className="max-w-md text-pretty text-base leading-snug md:text-lg">
+              A self-hosted AI agent platform built as a collection of specialized microservices. Runs on your hardware.
+              Cloud models are optional.
+            </p>
+            <p className="mt-2 max-w-md text-sm leading-snug text-muted-foreground">
+              For developers and teams who want AI-powered coding assistants without handing their code to a third-party cloud.
+            </p>
+          </div>
           <div className="flex items-center gap-2">
             <a
               href="#install"
@@ -327,7 +314,7 @@ export function Hero() {
   )
 }
 
-function ServiceNode({
+const ServiceNode = memo(({
   svc,
   index,
   nodeRef,
@@ -337,7 +324,7 @@ function ServiceNode({
   index: number
   nodeRef: (el: HTMLDivElement | null) => void
   liveRef: (el: HTMLSpanElement | null) => void
-}) {
+}) => {
   const filled = svc.tier === 'core'
   const orchestrator = svc.tier === 'orchestrator'
 
@@ -392,7 +379,12 @@ function ServiceNode({
             <span className="tabular-nums">{svc.port === 'CLI' ? 'CLI' : `:${svc.port}`}</span>
           </div>
           <div>
-            <p className="text-xl font-semibold leading-none tracking-tight md:text-3xl">{svc.name}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xl font-semibold leading-none tracking-tight md:text-3xl">{svc.name}</p>
+              <span className="shrink-0 rounded-full border border-signal/40 bg-signal/10 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-signal-ink">
+                {SERVICE_MATURITY[svc.id] || 'beta'}
+              </span>
+            </div>
             <p className="mt-2 hidden text-sm leading-snug text-muted-foreground md:block">{svc.role}</p>
             <p
               className="mt-2 flex items-center gap-1.5 font-mono text-[10px] text-signal-ink md:mt-3 md:text-[11px]"
@@ -416,9 +408,9 @@ function ServiceNode({
       </div>
     </li>
   )
-}
+})
 
-function CornerMarks() {
+const CornerMarks = memo(() => {
   const base = 'pointer-events-none absolute size-3 border-foreground/40'
   return (
     <div aria-hidden="true">
@@ -428,4 +420,4 @@ function CornerMarks() {
       <span className={cn(base, 'bottom-2 right-2 border-b border-r')} />
     </div>
   )
-}
+})

@@ -1,9 +1,19 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { Activity, CheckCircle, Clock, AlertTriangle, Terminal, BarChart3, Shield, Play, Pause, ChevronDown, ChevronRight, X, Send } from 'lucide-react'
+import { memo, useState, useEffect, useCallback } from 'react'
+import { Activity, CheckCircle, Clock, AlertTriangle, Terminal, BarChart3, Shield, Play, Pause, ChevronDown, ChevronRight, X } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 import { DashboardData, Mission, Agent, Approval, LogEntry, generateInitialData } from '@/lib/dashboard'
+
+const StatItem = memo(({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Activity }) => (
+  <div className="flex items-center gap-3 bg-background px-6 py-4">
+    <Icon className="size-4 text-muted-foreground/60" aria-hidden="true" />
+    <div>
+      <p className="text-xl font-semibold tracking-tight">{value}</p>
+      <p className="font-mono text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  </div>
+))
 
 function statusColor(status: string) {
   switch (status) {
@@ -52,6 +62,31 @@ const SIMULATED_LOGS = [
 
 let logIndex = 0
 
+const STATS_CONFIG = [
+  { label: 'Active missions', icon: Activity },
+  { label: 'Workers', icon: Terminal },
+  { label: 'Pending approvals', icon: Shield },
+  { label: 'Model cost today', icon: BarChart3 },
+] as const
+
+const TABS = ['missions', 'agents', 'approvals'] as const
+const TAB_ICONS = { missions: Activity, agents: Terminal, approvals: Shield }
+
+const FEATURES = [
+  {
+    title: 'Mission overview',
+    body: "See every mission's status, progress, and timeline at a glance. Filter by status, search by name, and drill into details.",
+  },
+  {
+    title: 'Approval queue',
+    body: 'Sensitive operations wait here. Review the concrete action — not model-written justification — and approve or deny with one click.',
+  },
+  {
+    title: 'Demo logs',
+    body: 'Simulated Server-Sent Events stream showing what real-time logs look like. Secret redaction is applied automatically.',
+  },
+] as const
+
 function getNextLog(): LogEntry {
   const log = SIMULATED_LOGS[logIndex % SIMULATED_LOGS.length]
   logIndex++
@@ -65,7 +100,6 @@ export function SlammerPreview() {
   const [expandedMission, setExpandedMission] = useState<string | null>(null)
   const [paused, setPaused] = useState(false)
   const [activeTab, setActiveTab] = useState<'missions' | 'agents' | 'approvals'>('missions')
-  const logsEndRef = useRef<HTMLDivElement>(null)
   const [notification, setNotification] = useState<string | null>(null)
 
   // Simulate real-time updates
@@ -136,10 +170,6 @@ export function SlammerPreview() {
     return () => clearInterval(interval)
   }, [paused])
 
-  // Auto-scroll logs
-  useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [data.logs])
 
   const handleApprove = useCallback((approvalId: string, action: string) => {
     setData((prev) => ({
@@ -235,7 +265,7 @@ export function SlammerPreview() {
             <div className="flex items-center gap-4">
               <span className={`flex items-center gap-2 font-mono text-[11px] ${paused ? 'text-muted-foreground' : 'text-signal'}`}>
                 <span className={`size-2 rounded-full ${paused ? 'bg-muted-foreground' : 'animate-pulse bg-signal'}`} aria-hidden="true" />
-                {paused ? 'Paused' : 'Live'}
+                {paused ? 'Paused' : 'Demo'}
               </span>
               <span className="font-mono text-[11px] text-muted-foreground">{stats.workersBusy}/{stats.workersTotal} workers busy</span>
             </div>
@@ -269,29 +299,16 @@ export function SlammerPreview() {
 
           {/* Stats bar */}
           <div className="grid grid-cols-2 gap-px border-b border-border bg-border md:grid-cols-4">
-            {[
-              { label: 'Active missions', value: String(stats.activeMissions), icon: Activity },
-              { label: 'Workers', value: `${stats.workersBusy}/${stats.workersTotal}`, icon: Terminal },
-              { label: 'Pending approvals', value: String(stats.pendingApprovals), icon: Shield },
-              { label: 'Model cost today', value: `$${stats.modelCostToday.toFixed(2)}`, icon: BarChart3 },
-            ].map((stat) => {
-              const Icon = stat.icon
-              return (
-                <div key={stat.label} className="flex items-center gap-3 bg-background px-6 py-4">
-                  <Icon className="size-4 text-muted-foreground/60" aria-hidden="true" />
-                  <div>
-                    <p className="text-xl font-semibold tracking-tight">{stat.value}</p>
-                    <p className="font-mono text-[10px] text-muted-foreground">{stat.label}</p>
-                  </div>
-                </div>
-              )
-            })}
+            <StatItem label="Active missions" value={String(stats.activeMissions)} icon={Activity} />
+            <StatItem label="Workers" value={`${stats.workersBusy}/${stats.workersTotal}`} icon={Terminal} />
+            <StatItem label="Pending approvals" value={String(stats.pendingApprovals)} icon={Shield} />
+            <StatItem label="Model cost today" value={`$${stats.modelCostToday.toFixed(2)}`} icon={BarChart3} />
           </div>
 
           {/* Tab navigation */}
           <div className="flex border-b border-border">
-            {(['missions', 'agents', 'approvals'] as const).map((tab) => {
-              const TabIcon = tab === 'missions' ? Activity : tab === 'agents' ? Terminal : Shield
+            {TABS.map((tab) => {
+              const TabIcon = TAB_ICONS[tab]
               const count = tab === 'missions' ? missions.length : tab === 'agents' ? agents.length : approvals.length
               return (
                 <button
@@ -450,13 +467,13 @@ export function SlammerPreview() {
           {/* Bottom log area */}
           <div className="border-t border-border">
             <div className="flex items-center justify-between border-b border-border px-5 py-2">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Live logs</span>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Demo logs</span>
               <span className="flex items-center gap-2 font-mono text-[10px] text-muted-foreground/60">
                 <span className={`size-1.5 rounded-full ${paused ? 'bg-muted-foreground' : 'animate-pulse bg-signal'}`} />
                 SSE stream
               </span>
             </div>
-            <div className="max-h-32 overflow-y-auto bg-foreground/[0.02] p-4 font-mono text-[10px] leading-relaxed text-muted-foreground">
+            <div className="max-h-32 overflow-hidden bg-foreground/[0.02] p-4 font-mono text-[10px] leading-relaxed text-muted-foreground">
               {logs.map((log, i) => (
                 <p key={i}>
                   <span className="text-muted-foreground/40">{log.timestamp}</span>{' '}
@@ -464,7 +481,6 @@ export function SlammerPreview() {
                   {log.message}
                 </p>
               ))}
-              <div ref={logsEndRef} />
             </div>
           </div>
         </div>
@@ -474,20 +490,7 @@ export function SlammerPreview() {
 
       {/* Features list */}
       <div className="mt-16 grid gap-6 md:mt-24 md:grid-cols-3">
-        {[
-          {
-            title: 'Mission overview',
-            body: 'See every mission\'s status, progress, and timeline at a glance. Filter by status, search by name, and drill into details.',
-          },
-          {
-            title: 'Approval queue',
-            body: 'Sensitive operations wait here. Review the concrete action — not model-written justification — and approve or deny with one click.',
-          },
-          {
-            title: 'Live logs',
-            body: 'Server-Sent Events stream logs from all services in real time. Secret redaction is applied automatically.',
-          },
-        ].map((feature) => (
+        {FEATURES.map((feature) => (
           <div key={feature.title} className="border-t border-foreground pt-6">
             <h3 className="text-lg font-semibold tracking-tight">{feature.title}</h3>
             <p className="mt-2 text-sm leading-snug text-muted-foreground">{feature.body}</p>

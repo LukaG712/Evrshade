@@ -7,15 +7,23 @@ import { SectionHeading } from './section-heading'
 
 const COMMANDS = [
   { comment: '# clone', cmd: 'git clone https://github.com/LukaG712/Evershade.git && cd Evershade' },
-  { comment: '# install service repositories', cmd: './install.sh --profile minimal' },
+  { comment: '# install service repositories', cmd: './install.sh --profile full' },
   { comment: '# configure', cmd: 'cp .env.example .env' },
-  { comment: '# start', cmd: './start.sh --profile minimal' },
+  { comment: '# edit .env with your API keys and secrets', cmd: '' },
+  { comment: '# start', cmd: './start.sh --profile full' },
+]
+
+const REQUIRED_ENV_VARS = [
+  { var: 'OPENAI_API_KEY', description: 'OpenAI API key for cloud LLM access' },
+  { var: 'ANTHROPIC_API_KEY', description: 'Anthropic API key (optional, for Claude models)' },
+  { var: 'EVERSHADE_SECRET_KEY', description: 'Master secret for encrypting stored secrets' },
+  { var: 'DATABASE_URL', description: 'SQLite database path (defaults to local file)' },
 ]
 
 const STEPS = [
-  ['Install and start', 'Run the quick start. The API comes up at localhost:8080.'],
-  ['Create an agent', 'Dashboard → Agents → Create Agent. For example: researcher, runner junie.'],
-  ['Run a task', 'Open Chat, select your agent and type a prompt.'],
+  ['Install and start', 'Run the quick start. The API comes up at localhost:8080 and the dashboard at localhost:5173.'],
+  ['Create an agent', 'Open the dashboard, go to Agents, and create an agent. For example: researcher with the Junie runner.'],
+  ['Run a task', 'Open Chat in the dashboard, select your agent and type a prompt.'],
 ]
 
 export function Install() {
@@ -82,7 +90,7 @@ export function Install() {
         </div>
 
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'10.1 — Profiles'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Profiles'}</p>
           <ul className="mt-6 border-t border-foreground">
             {PROFILES.map((profile) => (
               <li key={profile.name} className="border-b border-border py-4">
@@ -94,6 +102,16 @@ export function Install() {
               </li>
             ))}
           </ul>
+
+          <p className="mt-8 font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Required .env variables'}</p>
+          <dl className="mt-4 space-y-3">
+            {REQUIRED_ENV_VARS.map((env) => (
+              <div key={env.var}>
+                <dt className="font-mono text-sm font-semibold">{env.var}</dt>
+                <dd className="text-sm text-muted-foreground">{env.description}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
     </section>

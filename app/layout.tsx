@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { SITE_URL } from '@/lib/evershade'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
@@ -15,7 +16,6 @@ export const metadata: Metadata = {
     'AI agent',
     'self-hosted',
     'microservices',
-    'mission control',
     'code automation',
     'LLM orchestration',
     'SQLite',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     siteName: 'Evershade',
     images: [
       {
-        url: '/og.png',
+        url: `${SITE_URL}/og.png`,
         width: 1200,
         height: 630,
         alt: 'Evershade — Self-hosted AI agent platform',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     title: 'Evershade: Self-hosted AI agent platform',
     description:
       'Orchestrate AI agents, run missions, and own your data. 10 modular microservices, SQLite-first, no heavy infrastructure.',
-    images: ['/og.png'],
+    images: [`${SITE_URL}/og.png`],
   },
   icons: {
     icon: [

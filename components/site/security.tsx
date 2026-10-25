@@ -40,7 +40,7 @@ export function Security() {
 
       <div className="mt-px grid gap-px border border-t-0 border-foreground bg-foreground lg:grid-cols-2">
         <div className="bg-background p-5 md:p-8">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.3 — Slinker isolation levels'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Slinker isolation levels'}</p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-3">
             {ISOLATION.map((iso) => (
               <li key={iso.level} className="flex flex-col">
@@ -59,7 +59,7 @@ export function Security() {
         </div>
 
         <div className="bg-background p-5 md:p-8">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.4 — Prompt-injection defense'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Prompt-injection defense'}</p>
           <p className="mt-6 text-pretty text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
             Scraped pages, repo files, notes and tool output are <span className="text-signal-ink">data</span>, never
             instructions.
@@ -75,8 +75,9 @@ export function Security() {
         </div>
       </div>
 
+      {/* TODO(luka): Add links to SECURITY.md, prompt-injection test suite, and release signing verification. */}
       <div className="mt-12">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Hardened by default'}</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{'Secure defaults'}</p>
         <ul className="mt-4 flex flex-wrap gap-2">
           {HARDENING.map((h) => (
             <li key={h} className="flex items-center gap-2 border border-foreground/20 px-2.5 py-1.5 font-mono text-[11px]">
@@ -97,7 +98,7 @@ function AutonomyDial() {
 
   return (
     <div className="bg-background p-5 md:p-8">
-      <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'06.1 — Autonomy levels'}</p>
+      <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Autonomy levels'}</p>
       <div role="radiogroup" aria-label="Autonomy level" className="mt-6 grid grid-cols-3 border border-foreground">
         {AUTONOMY.map((a, i) => {
           const on = a.id === level
@@ -167,7 +168,7 @@ function PanicPanel() {
   return (
     <div className={cn('flex flex-col p-5 transition-colors duration-500 md:p-8', engaged ? 'bg-foreground text-background' : 'bg-background')}>
       <p className={cn('font-mono text-[11px] uppercase tracking-wider', engaged ? 'text-signal' : 'text-signal-ink')}>
-        {'06.2 — Emergency stop'}
+        {'Emergency stop'}
       </p>
       <p className="mt-6 text-4xl font-semibold leading-[0.95] tracking-[-0.04em] md:text-5xl">
         {done ? 'Everything is stopped.' : engaged ? 'Stopping…' : 'One command halts it all.'}

@@ -1,3 +1,6 @@
+'use client'
+
+import { ChevronDown } from 'lucide-react'
 import { Brain, Database, Search, GitGraph, ArrowRight, Cpu, FileText, Network } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
@@ -34,6 +37,7 @@ const PIPELINE_STEPS = [
   },
   {
     icon: Database,
+    // TODO(luka): How is memory poisoning from untrusted scraped content prevented? Document the defense.
     title: 'Memory Update',
     description: 'New facts extracted from the query response are stored back into the graph, creating a feedback loop. Every mission enriches the knowledge base for the next one.',
     detail: 'Persistent graph growth',
@@ -59,9 +63,12 @@ export function KnowledgeGraph() {
         lead="Every query enriches the system's memory. Gobber combines keyword search, vector embeddings, and graph relationships to surface context that no single method could find alone."
       />
 
-      <div className="mt-16 md:mt-24">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.1 — Query pipeline'}</p>
-        <ol className="mt-8 grid gap-0 border-t border-foreground">
+      <details className="mt-16 group/details md:mt-24">
+        <summary className="mb-6 flex cursor-pointer items-center justify-between font-mono text-[11px] uppercase tracking-wider text-signal-ink">
+          {'Query pipeline'}
+          <ChevronDown className="size-4 transition-transform group-open/details:rotate-180" aria-hidden="true" />
+        </summary>
+        <ol className="grid gap-0 border-t border-foreground">
           {PIPELINE_STEPS.map((step, i) => {
             const Icon = step.icon
             return (
@@ -84,11 +91,11 @@ export function KnowledgeGraph() {
             )
           })}
         </ol>
-      </div>
+      </details>
 
       <div className="mt-24 grid gap-12 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-7">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.2 — Graph entities'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Graph entities'}</p>
           <ul className="mt-6 grid gap-3 border-t border-foreground sm:grid-cols-2">
             {GRAPH_ENTITIES.map((entity) => (
               <li
@@ -112,7 +119,7 @@ export function KnowledgeGraph() {
         </div>
 
         <div className="md:col-span-4 md:col-start-9">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'17.3 — Why hybrid?'}</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Why hybrid?'}</p>
           <dl className="mt-6 space-y-4 border-t border-foreground pt-6">
             <div>
               <dt className="font-semibold tracking-tight">Keyword (BM25)</dt>

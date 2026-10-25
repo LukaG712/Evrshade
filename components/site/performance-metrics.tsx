@@ -4,13 +4,13 @@ import { SectionHeading } from './section-heading'
 const GOALS = [
   {
     icon: Zap,
-    label: 'Fast validation',
-    description: 'Deterministic checks — tests, lint, type — run in parallel. Security review adds a diff-based pass on top.',
+    label: 'Validation',
+    description: 'Deterministic checks — tests, lint, type — run in parallel. Security review adds a diff-based pass on top. Results vary by project size.',
   },
   {
     icon: Server,
     label: 'Self-hosted',
-    description: 'Runs on developer hardware. No cloud dependency, no SaaS lock-in. Your data stays on your machine.',
+    description: 'Runs on developer hardware. Cloud models are optional, no SaaS lock-in. Your data stays on your machine.',
   },
   {
     icon: Cpu,
@@ -46,7 +46,7 @@ export function PerformanceMetrics() {
             <span className="text-signal"> your machine.</span>
           </>
         }
-        lead="Evershade is designed to run locally, stay fast, and keep costs low. These are the principles that guide every architectural decision."
+        lead="Evershade is designed to run locally, stay fast, and keep costs low. These are the principles that guide every architectural decision. Some terms and patterns were inspired by OpenDevin's Factory mode."
       />
 
       <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-24">
@@ -73,33 +73,33 @@ export function PerformanceMetrics() {
         <div className="md:col-span-7">
           <p className="font-mono text-[11px] uppercase tracking-wider text-signal-ink">{'Mission lifecycle'}</p>
           <div className="mt-6 overflow-hidden border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-card">
-                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Phase
-                  </th>
-                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    What happens
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { phase: 'Plan', detail: 'LLM breaks the task into milestones and features' },
-                  { phase: 'Execute', detail: 'Workers run features in parallel, streaming logs live' },
-                  { phase: 'Validate', detail: 'Tests, lint, type checks, and security review' },
-                  { phase: 'Fix', detail: 'Failures become fix features and re-run automatically' },
-                  { phase: 'Complete', detail: 'All checks pass, mission is recorded and archived' },
-                ].map((row, i, arr) => (
-                  <tr key={row.phase} className={i < arr.length - 1 ? 'border-b border-border' : ''}>
-                    <td className="px-4 py-3 font-semibold tracking-tight">{row.phase}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{row.detail}</td>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-card">
+                    <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Phase
+                    </th>
+                    <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                      What happens
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {[
+                    { phase: 'Plan', detail: 'LLM breaks the task into milestones and features' },
+                    { phase: 'Execute', detail: 'Workers run features in parallel, streaming logs live' },
+                    { phase: 'Validate', detail: 'Tests, lint, type checks, and security review' },
+                    { phase: 'Fix', detail: 'Failures become fix features and re-run automatically' },
+                    { phase: 'Complete', detail: 'All checks pass, mission is recorded and archived' },
+                  ].map((row, i, arr) => (
+                    <tr key={row.phase} className={i < arr.length - 1 ? 'border-b border-border' : ''}>
+                      <td className="px-4 py-3 font-semibold tracking-tight">{row.phase}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{row.detail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
         </div>
 
         <div className="md:col-span-4 md:col-start-9">
@@ -129,7 +129,7 @@ export function PerformanceMetrics() {
                 Minimal profile
               </dt>
               <dd className="mt-1 text-sm leading-snug text-muted-foreground">
-                {'Run only core services (4 instead of 8) to halve memory usage. Perfect for CI/CD pipelines.'}
+                {'Run only core services (4 instead of 8) to reduce memory usage. Useful for CI/CD pipelines.'}
               </dd>
             </div>
           </dl>

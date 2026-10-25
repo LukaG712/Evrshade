@@ -1,3 +1,6 @@
+'use client'
+
+import { ChevronDown } from 'lucide-react'
 import { SERVICES, MISSION_STAGES, VERSION, REPO_URL } from '@/lib/evershade'
 import { SectionHeading } from './section-heading'
 
@@ -52,30 +55,36 @@ export function ApiReference() {
         lead={`All ${SERVICES.length} services expose a REST API. Below are the core endpoints across the platform. Full OpenAPI specs are available in the repository.`}
       />
 
-      <div className="mt-16 border border-foreground md:mt-24">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-foreground">
-                <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Method</th>
-                <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Endpoint</th>
-                <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Service</th>
-                <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground hidden md:table-cell">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {API_ENDPOINTS.map((ep, i) => (
-                <tr key={ep.path} className={`border-b border-border ${i % 2 === 0 ? 'bg-muted/30' : ''}`}>
-                  <td className={`px-4 py-3 font-mono text-[11px] font-bold uppercase ${methodColor[ep.method] || ''}`}>{ep.method}</td>
-                  <td className="px-4 py-3 font-mono text-[13px]">{ep.path}</td>
-                  <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{ep.service}</td>
-                  <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{ep.description}</td>
+      <details className="mt-16 group/details md:mt-24">
+        <summary className="mb-4 flex cursor-pointer items-center justify-between font-mono text-[11px] uppercase tracking-wider text-signal-ink">
+          {'API endpoints'}
+          <ChevronDown className="size-4 transition-transform group-open/details:rotate-180" aria-hidden="true" />
+        </summary>
+        <div className="border border-foreground">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-foreground">
+                  <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Method</th>
+                  <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Endpoint</th>
+                  <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Service</th>
+                  <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground hidden md:table-cell">Description</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {API_ENDPOINTS.map((ep, i) => (
+                  <tr key={ep.path} className={`border-b border-border ${i % 2 === 0 ? 'bg-muted/30' : ''}`}>
+                    <td className={`px-4 py-3 font-mono text-[11px] font-bold uppercase ${methodColor[ep.method] || ''}`}>{ep.method}</td>
+                    <td className="px-4 py-3 font-mono text-[13px]">{ep.path}</td>
+                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{ep.service}</td>
+                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{ep.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      </details>
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         <div className="border border-foreground p-5">
@@ -92,8 +101,8 @@ export function ApiReference() {
 
       <p className="mt-6 text-xs text-muted-foreground">
         Full API documentation →{' '}
-        <a href={`${REPO_URL}/tree/main/docs`} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-signal-ink">
-          {REPO_URL}/tree/main/docs
+        <a href={`${REPO_URL}/tree/master/docs`} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-signal-ink">
+          {REPO_URL}/tree/master/docs
         </a>
       </p>
     </section>

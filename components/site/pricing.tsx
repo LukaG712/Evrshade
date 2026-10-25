@@ -31,7 +31,7 @@ export function Pricing() {
             <span className="text-muted-foreground">Forever.</span>
           </>
         }
-        lead="MIT License. Self-hosted. No telemetry. No credits. No rate limits. No vendor lock-in."
+        lead="MIT License. Self-hosted. No telemetry is sent. No credits, no rate limits, no vendor lock-in."
       />
 
       <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

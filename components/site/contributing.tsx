@@ -7,14 +7,14 @@ const STEPS = [
   { icon: Terminal, title: 'Set up', body: 'Run the install script with the minimal profile to get the dev environment ready.' },
   { icon: Code2, title: 'Code', body: 'Make your changes in a feature branch. Follow the existing code style.' },
   { icon: Bug, title: 'Test', body: 'Run the test suite and ensure all checks pass before submitting.' },
-  { icon: GitBranch, title: 'Pull request', body: 'Open a PR against main. Maintainers will review and merge.' },
+  { icon: GitBranch, title: 'Pull request', body: 'Open a PR against master. Maintainers will review and merge.' },
 ]
 
 const AREAS = [
   { title: 'Bug fixes', link: `${REPO_URL}/issues?q=is%3Aissue+is%3Aopen+label%3Abug`, label: 'Open bugs' },
   { title: 'Good first issues', link: `${REPO_URL}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22`, label: 'Explore' },
-  { title: 'Documentation', link: `${REPO_URL}/tree/main/docs`, label: 'Docs folder' },
-  { title: 'Plugins', link: `${REPO_URL}/tree/main/plugins`, label: 'Plugin registry' },
+  { title: 'Documentation', link: `${REPO_URL}/tree/master/docs`, label: 'Docs folder' },
+  { title: 'Plugins', link: `${REPO_URL}/tree/master/plugins`, label: 'Plugin registry' },
 ]
 
 export function Contributing() {

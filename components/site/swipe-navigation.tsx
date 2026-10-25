@@ -35,11 +35,11 @@ export function SwipeNavigation() {
       if (deltaX < 0 && currentSection < SECTIONS.length - 1) {
         // Swipe left → next section
         const target = document.getElementById(SECTIONS[currentSection + 1])
-        target?.scrollIntoView({ behavior: 'smooth' })
+        target?.scrollIntoView({ behavior: 'auto' })
       } else if (deltaX > 0 && currentSection > 0) {
         // Swipe right → previous section
         const target = document.getElementById(SECTIONS[currentSection - 1])
-        target?.scrollIntoView({ behavior: 'smooth' })
+        target?.scrollIntoView({ behavior: 'auto' })
       }
     }
 

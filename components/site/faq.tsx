@@ -16,7 +16,7 @@ const FAQ = [
   },
   {
     q: 'Is my data safe?',
-    a: 'Everything stays on your machine. No telemetry, no cloud dependency. Secrets are encrypted with AES-256-GCM at rest in Hider.',
+    a: 'Everything stays on your machine. No telemetry is sent. Cloud models are optional. Secrets are encrypted with AES-256-GCM at rest in Hider.',
   },
   {
     q: 'Which LLM providers are supported?',

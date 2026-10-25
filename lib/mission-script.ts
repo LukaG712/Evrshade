@@ -15,7 +15,7 @@ export type Feature = { id: string; title: string; initial: FeatureStatus }
 export const MISSION = {
   id: 'm_7f3a',
   title: 'Add rate limiting to the public API',
-  repo: 'acme/api',
+  repo: 'LukaG712/Evershade',
   branch: 'feat/rate-limit',
 }
 

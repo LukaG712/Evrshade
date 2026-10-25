@@ -12,7 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/#architecture',
     '/#knowledge-graph',
     '/#platform',
-    '/#harness',
     '/#security',
     '/#integrations',
     '/#slammer',

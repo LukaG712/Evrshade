@@ -1,10 +1,8 @@
+import dynamic from 'next/dynamic'
 import { BackToTop } from '@/components/site/back-to-top'
-import { ApiReference } from '@/components/site/api-reference'
 import { Architecture } from '@/components/site/architecture'
-import { ChangelogTicker } from '@/components/site/changelog-ticker'
 import { Cli } from '@/components/site/cli'
-import { Community } from '@/components/site/community'
-import { Comparison } from '@/components/site/comparison'
+import { Faq } from '@/components/site/faq'
 import { Footer } from '@/components/site/footer'
 import { HapticFeedback } from '@/components/site/haptic-feedback'
 import { Harness } from '@/components/site/harness'
@@ -14,17 +12,23 @@ import { Install } from '@/components/site/install'
 import { Integrations } from '@/components/site/integrations'
 import { KnowledgeGraph } from '@/components/site/knowledge-graph'
 import { MissionConsole } from '@/components/site/mission-console'
-import { MissionControl } from '@/components/site/mission-control'
 import { MobileToc } from '@/components/site/mobile-toc'
 import { PerformanceMetrics } from '@/components/site/performance-metrics'
 import { RequestTrace } from '@/components/site/request-trace'
-import { Roadmap } from '@/components/site/roadmap'
 import { SectionDivider } from '@/components/site/section-divider'
 import { SectionReveal } from '@/components/site/section-reveal'
 import { Security } from '@/components/site/security'
 import { SlammerPreview } from '@/components/site/slammer-preview'
 import { SwipeNavigation } from '@/components/site/swipe-navigation'
 import { UseCases } from '@/components/site/use-cases'
+
+// Lazy-load components further down the page
+const ApiReference = dynamic(() => import('@/components/site/api-reference').then(m => ({ default: m.ApiReference })))
+const ChangelogTicker = dynamic(() => import('@/components/site/changelog-ticker').then(m => ({ default: m.ChangelogTicker })))
+const Community = dynamic(() => import('@/components/site/community').then(m => ({ default: m.Community })))
+const KnownLimitations = dynamic(() => import('@/components/site/known-limitations').then(m => ({ default: m.KnownLimitations })))
+const Roadmap = dynamic(() => import('@/components/site/roadmap').then(m => ({ default: m.Roadmap })))
+const SystemRequirements = dynamic(() => import('@/components/site/system-requirements').then(m => ({ default: m.SystemRequirements })))
 
 export default function Page() {
   return (
@@ -40,7 +44,6 @@ export default function Page() {
         {/* 01 — Overview */}
         <SectionDivider index="01" label="Overview" id="overview" />
         <SectionReveal><MissionConsole /></SectionReveal>
-        <SectionReveal><MissionControl /></SectionReveal>
 
         {/* 02 — How It Works */}
         <SectionDivider index="02" label="How It Works" id="how-it-works" />
@@ -57,15 +60,17 @@ export default function Page() {
 
         {/* 04 — Get Started */}
         <SectionDivider index="04" label="Get Started" id="get-started" />
+        <SectionReveal><SystemRequirements /></SectionReveal>
         <SectionReveal><Cli /></SectionReveal>
         <SectionReveal><Install /></SectionReveal>
         <SectionReveal><UseCases /></SectionReveal>
+        <SectionReveal><Faq /></SectionReveal>
 
         {/* 05 — About */}
         <SectionDivider index="05" label="About" id="about" />
-        <SectionReveal><Comparison /></SectionReveal>
         <SectionReveal><PerformanceMetrics /></SectionReveal>
         <SectionReveal><ApiReference /></SectionReveal>
+        <SectionReveal><KnownLimitations /></SectionReveal>
 
         {/* 06 — Roadmap */}
         <SectionDivider index="06" label="Roadmap" id="roadmap" />

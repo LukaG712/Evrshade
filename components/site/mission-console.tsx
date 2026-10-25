@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, CircleDashed, Loader, Lock, Pause, Play, RotateCcw, ShieldCheck, X } from 'lucide-react'
 import {
   APPROVE_TAIL,
@@ -52,7 +52,6 @@ const fmt = (ms: number) => {
 
 export function MissionConsole() {
   const rootRef = useRef<HTMLDivElement>(null)
-  const logRef = useRef<HTMLOListElement>(null)
   const [step, setStep] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [started, setStarted] = useState(false)
@@ -91,10 +90,7 @@ export function MissionConsole() {
     return () => window.clearTimeout(id)
   }, [playing, atGate, step, script, speed])
 
-  useEffect(() => {
-    const el = logRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [state.logs.length])
+  // Logs are displayed in a fixed-height overflow-hidden container; no auto-scroll needed.
 
   const replay = () => {
     setDecision(null)
@@ -136,8 +132,8 @@ export function MissionConsole() {
               <span className="bg-foreground" />
               <span className="bg-signal" />
             </span>
-            <span className="font-semibold">Slammer</span>
-            <span className="truncate text-muted-foreground">{`:5173 / missions / ${MISSION.id}`}</span>
+            <span className="font-semibold">Mission Console</span>
+            <span className="truncate text-muted-foreground">{`replay / ${MISSION.id}`}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="mr-2 hidden border border-dashed border-foreground/50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">
@@ -242,8 +238,7 @@ export function MissionConsole() {
           <div className="flex min-w-0 flex-col border-b border-foreground md:col-span-5 md:border-r md:border-b-0">
             <PanelTitle left="GET /logs/stream" right="SSE" live={playing && !finished && !atGate} />
             <ol
-              ref={logRef}
-              className="h-72 overflow-y-auto overscroll-contain p-3 font-mono text-[11px] leading-relaxed md:h-[26rem] md:p-4 md:text-xs"
+              className="h-72 overflow-hidden p-3 font-mono text-[11px] leading-relaxed md:h-[26rem] md:p-4 md:text-xs"
               aria-label="Mission log"
             >
               {state.logs.length === 0 ? (
@@ -317,14 +312,14 @@ export function MissionConsole() {
 
       <p className="mt-4 max-w-3xl font-mono text-[11px] leading-relaxed text-muted-foreground">
         {
-          'Illustrative replay built on the real Mission Control model: milestones, features, parallel workers, a validation contract, fix-revalidate with configurable retries, approval gates and SSE log streaming. Repository, timings and output are examples.'
+          'Illustrative replay built on the real mission model: milestones, features, parallel workers, a validation contract, fix-revalidate with configurable retries, approval gates and SSE log streaming. Repository, timings and output are examples.'
         }
       </p>
     </section>
   )
 }
 
-function ApprovalBand({
+const ApprovalBand = memo(({
   decision,
   onApprove,
   onReject,
@@ -332,7 +327,7 @@ function ApprovalBand({
   decision: Decision
   onApprove: () => void
   onReject: () => void
-}) {
+}) => {
   return (
     <div
       role="region"
@@ -381,48 +376,42 @@ function ApprovalBand({
       ) : null}
     </div>
   )
-}
+})
 
-function ConsoleButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="grid size-7 place-items-center border border-foreground/20 transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
-    >
-      {children}
-    </button>
-  )
-}
+const ConsoleButton = memo(({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-label={label}
+    className="grid size-7 place-items-center border border-foreground/20 transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
+  >
+    {children}
+  </button>
+))
 
-function Stat({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-background px-3 py-2.5">
-      <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</dt>
-      <dd className="mt-1 truncate text-sm font-medium">{children}</dd>
-    </div>
-  )
-}
+const Stat = memo(({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="bg-background px-3 py-2.5">
+    <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</dt>
+    <dd className="mt-1 truncate text-sm font-medium">{children}</dd>
+  </div>
+))
 
-function PanelTitle({ left, right, live }: { left: string; right?: string; live?: boolean }) {
-  return (
-    <div className="flex items-center justify-between border-b border-foreground/15 px-4 py-2.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-      <span className="flex items-center gap-2">
-        {live ? (
-          <span className="relative flex size-1.5">
-            <span className="animate-pulse-ring absolute inset-0 bg-signal" />
-            <span className="relative size-1.5 bg-signal" />
-          </span>
-        ) : null}
-        {left}
-      </span>
-      {right ? <span>{right}</span> : null}
-    </div>
-  )
-}
+const PanelTitle = memo(({ left, right, live }: { left: string; right?: string; live?: boolean }) => (
+  <div className="flex items-center justify-between border-b border-foreground/15 px-4 py-2.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+    <span className="flex items-center gap-2">
+      {live ? (
+        <span className="relative flex size-1.5">
+          <span className="animate-pulse-ring absolute inset-0 bg-signal" />
+          <span className="relative size-1.5 bg-signal" />
+        </span>
+      ) : null}
+      {left}
+    </span>
+    {right ? <span>{right}</span> : null}
+  </div>
+))
 
-function StatusDot({ phase }: { phase: string }) {
+const StatusDot = memo(({ phase }: { phase: string }) => {
   const done = phase === 'Complete'
   const paused = phase === 'Paused' || phase === 'Awaiting approval' || phase === 'Queued'
   return (
@@ -431,9 +420,9 @@ function StatusDot({ phase }: { phase: string }) {
       className={cn('size-1.5 shrink-0', done ? 'bg-signal' : paused ? 'border border-foreground' : 'bg-foreground animate-pulse')}
     />
   )
-}
+})
 
-function FeatureIcon({ status }: { status: FeatureStatus }) {
+const FeatureIcon = memo(({ status }: { status: FeatureStatus }) => {
   const base = 'grid size-4 shrink-0 place-items-center'
   if (status === 'done')
     return (
@@ -455,9 +444,9 @@ function FeatureIcon({ status }: { status: FeatureStatus }) {
       </span>
     )
   return <CircleDashed className="size-4 shrink-0 text-foreground/30" aria-label="queued" />
-}
+})
 
-function CheckBadge({ status }: { status: CheckStatus }) {
+const CheckBadge = memo(({ status }: { status: CheckStatus }) => {
   const map: Record<CheckStatus, { label: string; cls: string }> = {
     idle: { label: 'idle', cls: 'border-foreground/15 text-foreground/40' },
     running: { label: 'run', cls: 'border-foreground text-foreground animate-pulse' },
@@ -470,4 +459,4 @@ function CheckBadge({ status }: { status: CheckStatus }) {
       {m.label}
     </span>
   )
-}
+})

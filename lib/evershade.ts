@@ -1,5 +1,25 @@
 export const VERSION = '1.14.0'
 export const REPO_URL = 'https://github.com/LukaG712/Evershade'
+export const SITE_URL = 'https://evrshade.netlify.app'
+
+/** Last verified date for comparison tables and documentation claims. */
+export const LAST_VERIFIED = 'October 2025'
+
+export type ServiceMaturity = 'stable' | 'beta' | 'experimental'
+
+/** Per-service maturity. TODO(luka): Confirm which services are stable vs beta. */
+export const SERVICE_MATURITY: Record<string, ServiceMaturity> = {
+  greenie: 'beta',
+  slinker: 'beta',
+  trapper: 'beta',
+  gobber: 'beta',
+  shrewd: 'beta',
+  sneaker: 'beta',
+  hider: 'beta',
+  poltergeist: 'beta',
+  slammer: 'beta',
+  speedy: 'beta',
+}
 
 export type ServiceTier = 'orchestrator' | 'core' | 'optional' | 'client'
 
@@ -15,7 +35,7 @@ export type Service = {
 export const SERVICES: Service[] = [
   { id: 'greenie', name: 'Greenie', port: '8080', role: 'Central orchestrator & API backend', stack: 'Python / FastAPI', tier: 'orchestrator' },
   { id: 'slinker', name: 'Slinker', port: '8000', role: 'Code execution engine', stack: 'Python / FastAPI', tier: 'core' },
-  { id: 'trapper', name: 'Trapper', port: '3000', role: 'Web scraping & crawling', stack: 'TypeScript / Fastify', tier: 'core' },
+  { id: 'trapper', name: 'Trapper', port: '3000', role: 'Web scraping & crawling (optional Redis for caching)', stack: 'TypeScript / Fastify', tier: 'core' },
   { id: 'gobber', name: 'Gobber', port: '8085', role: 'Persistent storage & knowledge graph', stack: 'Python / FastAPI', tier: 'core' },
   { id: 'shrewd', name: 'Shrewd', port: '8089', role: 'LLM provider abstraction', stack: 'Python / FastAPI', tier: 'optional' },
   { id: 'sneaker', name: 'Sneaker', port: '8086', role: 'Metrics, traces, logs', stack: 'Python / FastAPI', tier: 'optional' },
@@ -97,9 +117,9 @@ export const PRINCIPLES = [
 ] as const
 
 export const PROFILES = [
-  { name: 'Minimal', detail: 'Core only. 4 services', flag: '--profile minimal' },
-  { name: 'Standard', detail: 'All services. 8 services', flag: '--profile standard' },
-  { name: 'Full', detail: 'Standard + Slammer dashboard', flag: '--profile full' },
+  { name: 'Minimal', detail: 'Core only: Greenie, Slinker, Trapper, Gobber', flag: '--profile minimal' },
+  { name: 'Standard', detail: 'Core + optional services (no dashboard)', flag: '--profile standard' },
+  { name: 'Full', detail: 'All services including Slammer dashboard', flag: '--profile full' },
   { name: 'Custom', detail: 'Pick individual services', flag: '--profile custom' },
   { name: '+ Ollama', detail: 'Local LLM support', flag: '--profile ollama' },
   { name: '+ Proxy', detail: 'Caddy reverse proxy with TLS', flag: '--profile proxy' },
@@ -127,12 +147,12 @@ export const AUTONOMY = [
   },
   {
     id: 'restricted',
-    name: 'Restricted autonomous',
+    name: 'Restricted',
     rule: 'Only sensitive operations require approval.',
   },
   {
     id: 'full',
-    name: 'Full autonomous',
+    name: 'Full',
     rule: 'No approval gates.',
   },
 ] as const
@@ -262,7 +282,7 @@ export const ROADMAP = [
   { phase: 6, name: 'Quality & release', items: ['Security tests', 'Agent eval suite', 'Release signing'] },
   { phase: 7, name: 'UI & extensibility', items: ['Single dashboard', 'MCP + plugins', 'Ops dashboards'] },
   { phase: 8, name: 'Hardening', items: ['Emergency stop', 'Activity timeline', 'Credential rotation'] },
-  { phase: 9, name: 'Mission Control', items: ['Mission lifecycle', 'Fix-revalidate', 'SSE streaming'] },
+  { phase: 9, name: 'Mission lifecycle', items: ['Fix-revalidate', 'SSE streaming'] },
 ] as const
 
 export const OPEN_ITEMS = ['Sneaker: SQLite persistence for metrics, traces and logs'] as const

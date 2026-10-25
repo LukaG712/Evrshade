@@ -3,9 +3,9 @@ import { REPO_URL, VERSION } from '@/lib/evershade'
 
 const LINKS = [
   ['Repository', REPO_URL],
-  ['Changelog', `${REPO_URL}/blob/main/CHANGELOG.md`],
-  ['Roadmap', `${REPO_URL}/blob/main/ROADMAP.md`],
-  ['Documentation', `${REPO_URL}/tree/main/docs`],
+  ['Changelog', `${REPO_URL}/blob/master/CHANGELOG.md`],
+  ['Roadmap', `${REPO_URL}/blob/master/ROADMAP.md`],
+  ['Documentation', `${REPO_URL}/tree/master/docs`],
 ]
 
 const SUBPAGES = [
@@ -15,7 +15,6 @@ const SUBPAGES = [
   ['Security', '/subpage/docs/security'],
   ['Services', '/subpage/services'],
   ['Compare', '/subpage/compare'],
-  ['Pricing', '/subpage/pricing'],
   ['Community', '/subpage/community'],
 ]
 

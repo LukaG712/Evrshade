@@ -1,7 +1,7 @@
 import { SectionHeading } from './section-heading'
 
 const TERMS = [
-  { term: 'Mission', def: 'A large task broken into milestones and features. Missions are planned, executed, validated, and completed through the Mission Control lifecycle.' },
+  { term: 'Mission', def: 'A large task broken into milestones and features. Missions are planned, executed, validated, and completed through an automated lifecycle.' },
   { term: 'Milestone', def: 'A group of related features within a mission. Milestones run their features with parallel workers.' },
   { term: 'Feature', def: 'The smallest unit of work. A feature is a single change that can be planned, executed, and validated independently.' },
   { term: 'Agent', def: 'An AI-powered worker that executes features. Agents have their own isolated environment, tools, and optionally a browser.' },
