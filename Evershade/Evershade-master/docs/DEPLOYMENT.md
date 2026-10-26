@@ -1,7 +1,7 @@
 # Evershade Deployment Guide
 
-**Version:** 1.0.0
-**Last Updated:** 2026-10-23
+**Version:** 2.0.0 (Greenfield Rebuild)
+**Last Updated:** 2026-10-26
 
 ---
 

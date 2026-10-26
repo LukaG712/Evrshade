@@ -1,354 +1,284 @@
-# Monitoring with Grafana, Prometheus & OpenTelemetry
+# Evershade — Monitoring and Observability
 
-Evershade includes an optional monitoring stack that provides real-time visibility into all services through Grafana dashboards backed by Prometheus metrics, plus distributed tracing via OpenTelemetry.
+**Version:** 2.0.0 (Greenfield)
+**Date:** 2026-10-26
 
-## Quick Start
+---
 
-```bash
-# Start Evershade with monitoring enabled
-docker compose --profile full --profile monitoring up -d
+## Overview
 
-# Open Grafana
-# http://localhost:3000 (default: admin / admin)
-```
+Evershade uses a layered observability stack combining **OpenTelemetry** for distributed tracing, **Prometheus** for metrics collection, **Grafana** for visualization, and **Opik** (optional) for LLM-specific observability.
 
-## Architecture
+### Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Grafana (port 3000) — Dashboards & Visualisation           │
-│  └── Auto-provisioned dashboards from monitoring/grafana/   │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ scrapes
-┌──────────────────────────▼──────────────────────────────────┐
-│  Prometheus (port 9090) — Metrics Collection & Storage      │
-│  └── Config: monitoring/prometheus/prometheus.yml           │
-│  └── Data: persisted in prometheus_data volume              │
-└──┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬───────┘
-   │      │      │      │      │      │      │      │
-   ▼      ▼      ▼      ▼      ▼      ▼      ▼      ▼
- Greenie Sneaker Gobber Hider Polter Shrewd cAdvisor node-
-  :8080  :8086  :8085  :8087  :8088  :8089  :8081  exporter
-                                                :9100
+│                    Evershade Services                        │
+│  Greenie │ Slinker │ Trapper │ Gobber │ Shrewd │ ...        │
+│                                                 │           │
+│  Each service exposes:                            │           │
+│  - /health  (liveness)                            │           │
+│  - /ready   (readiness)                           │           │
+│  - /metrics (Prometheus format)                   │           │
+│  - OTLP traces (gRPC to Sneaker)                  │           │
+└─────────────────────────┬─────────────────────────┘                      │
+                          │                                                │
+              ┌───────────▼───────────┐                                    │
+              │   Sneaker (OTLP)      │                                    │
+              │   Port: 8086          │                                    │
+              │   - Trace collector   │                                    │
+              │   - Span storage      │                                    │
+              └───────────┬───────────┘                                    │
+                          │                                                │
+              ┌───────────▼───────────┐                                    │
+              │   Prometheus          │                                    │
+              │   Port: 9090          │◄──────────────────────────────────┤
+              │   - Scrapes /metrics  │   Every 15s                       │
+              │   - Time-series DB    │                                    │
+              └───────────┬───────────┘                                    │
+                          │                                                │
+              ┌───────────▼───────────┐                                    │
+              │   Grafana             │                                    │
+              │   Port: 3000          │                                    │
+              │   - Dashboards        │                                    │
+              │   - Alerting          │                                    │
+              └───────────────────────┘                                    │
+                          │                                                │
+              ┌───────────▼───────────┐                                    │
+              │   cAdvisor            │                                    │
+              │   Port: 8081          │                                    │
+              │   - Container metrics │                                    │
+              └───────────────────────┘                                    │
+                          │                                                │
+              ┌───────────▼───────────┐                                    │
+              │   node-exporter       │                                    │
+              │   Port: 9100          │                                    │
+              │   - Host metrics      │                                    │
+              └───────────────────────┘                                    │
+                          │                                                │
+      ┌──────────────────▼──────────────────┐                              │
+      │   Opik (optional, profile: opik)    │                              │
+      │   Port: 9000                        │                              │
+      │   - LLM trace observability         │                              │
+      │   - Prompt/version tracking         │                              │
+      │   - Cost and latency analytics      │                              │
+      └─────────────────────────────────────┘                              │
 ```
 
-## Components
+---
 
-| Service | Image | Port | Purpose |
-|---------|-------|------|---------|
-| **Prometheus** | `prom/prometheus:v2.53.0` | `9090` | Metrics collection and storage |
-| **Grafana** | `grafana/grafana:11.1.0` | `3000` | Dashboards and visualisation |
-| **cAdvisor** | `gcr.io/cadvisor/cadvisor:v0.49.1` | `8081` | Container resource metrics |
-| **node-exporter** | `prom/node-exporter:v1.8.2` | `9100` | Host hardware/OS metrics |
+## OpenTelemetry Integration
 
-## Dashboards
+### How It Works
 
-Two dashboards are auto-provisioned on first start:
+Every Python service in Evershade uses the shared `evershade_telemetry` module to initialize OpenTelemetry:
 
-### 1. Evershade Overview
+1. **Traces** are exported via OTLP gRPC to Sneaker (`SNEAKER_OTLP_ENDPOINT`).
+2. **Trace context** propagates across service boundaries using **B3 multi-format** headers.
+3. **HTTPX client** is auto-instrumented for outgoing requests.
+4. **FastAPI** is auto-instrumented for incoming requests.
 
-- **Service health** — Green status indicators for each service
-- **API request rates** — Requests per second per service
-- **Latency** — p50, p95, p99 request latency
-- **HTTP errors** — 5xx error rates by service and status code
-- **Active requests** — In-flight request count
-- **Agent runs** — Run outcomes over time
-- **Queue depth** — Background job queue size
-- **Container CPU & memory** — Per-container resource usage
-- **Host CPU, memory, disk** — System-level metrics
+### Configuration
 
-### 2. Evershade Containers & Infrastructure
-
-- **Container CPU, memory, network, disk** — Detailed per-container breakdown
-- **Host resources** — CPU, memory, disk with threshold alerts
-- **Network traffic** — RX/TX per interface
-- **Uptime** — System uptime gauge
-
-## Configuration
-
-### Environment Variables
-
-Add these to your `.env` file:
-
-```bash
-# Grafana admin credentials (CHANGE for production!)
-GRAFANA_ADMIN_USER=admin
-GRAFANA_ADMIN_PASSWORD=admin
-GRAFANA_ROOT_URL=http://localhost:3000
-```
-
-### Prometheus Targets
-
-Edit `monitoring/prometheus/prometheus.yml` to add or remove scrape targets. All Evershade services are pre-configured.
-
-### Scrape Interval
-
-Default is 15 seconds. Change in `prometheus.yml`:
+Set the `SNEAKER_OTLP_ENDPOINT` environment variable in each service:
 
 ```yaml
-global:
-  scrape_interval: 15s
+environment:
+  - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
 ```
 
-## Data Persistence
+If `SNEAKER_OTLP_ENDPOINT` is not set, telemetry is disabled (no-op) — the service runs normally without tracing.
 
-Monitoring data is stored in Docker volumes:
+### Trace Context Propagation
 
-| Volume | Purpose |
-|--------|---------|
-| `prometheus_data` | Time-series metrics (30-day retention by default) |
-| `grafana_data` | Dashboard edits, users, preferences |
+When Service A calls Service B via HTTPX:
 
-To backup:
-```bash
-docker run --rm -v evershade_prometheus_data:/data -v $(pwd):/backup alpine tar czf /backup/prometheus-backup.tar.gz -C /data .
-docker run --rm -v evershade_grafana_data:/data -v $(pwd):/backup alpine tar czf /backup/grafana-backup.tar.gz -C /data .
+1. OpenTelemetry injects B3 headers (`X-B3-TraceId`, `X-B3-SpanId`, `X-B3-ParentSpanId`) into the outgoing request.
+2. Service B's FastAPI instrumentation extracts these headers and continues the trace.
+3. All spans appear as a single distributed trace in the collector.
+
+To create a traced HTTPX client in your service code:
+
+```python
+from evershade_telemetry import create_traced_httpx_client
+
+async with create_traced_httpx_client(base_url="http://Shrewd:8089") as client:
+    resp = await client.post("/v1/chat/completions", json=payload)
 ```
 
-To restore:
-```bash
-docker compose --profile monitoring stop prometheus grafana
-docker run --rm -v evershade_prometheus_data:/data -v $(pwd):/backup alpine tar xzf /backup/prometheus-backup.tar.gz -C /data
-docker run --rm -v evershade_grafana_data:/data -v $(pwd):/backup alpine tar xzf /backup/grafana-backup.tar.gz -C /data
-docker compose --profile monitoring start prometheus grafana
-```
+### Prometheus Metrics
 
-## Security
+Each service exposes a `/metrics` endpoint in Prometheus text format. The `prometheus_client` library provides:
 
-### Default Configuration
+- **`{service}_http_requests_total`** — Counter with labels: `method`, `endpoint`, `status`.
+- **`{service}_http_request_duration_seconds`** — Histogram with labels: `method`, `endpoint`.
+- **`{service}_uptime_seconds`** — Gauge for process uptime.
+- **`{service}_ready`** — Gauge (1=ready, 0=not ready).
 
-- All monitoring ports bind to `127.0.0.1` by default (loopback only)
-- Grafana requires authentication (no anonymous access)
-- Prometheus has no authentication but is not exposed to the host network
-- **All Docker images are pinned to specific versions** — no `:latest` tags are used, ensuring reproducible deployments
-- **Redis requires authentication** — a password is set via `EVERSHADE_REDIS_PASSWORD`; services authenticate before accessing Redis
-- **No hardcoded API key defaults** — all services require API keys to be set in `.env`; services will fail to start if keys are missing
-- **Container security hardening** — monitoring services drop all Linux capabilities (`cap_drop: ALL`) and enable `no-new-privileges` where applicable
+Prometheus scrapes these endpoints every 15 seconds. See `monitoring/prometheus/prometheus.yml` for scrape configuration.
 
-### Server Mode
+---
 
-For server deployments, set `EVERSHADE_BIND_ADDRESS=0.0.0.0` in `.env`. In this case:
+## Prometheus
 
-1. **Change the Grafana admin password** immediately
-2. **Generate secure API keys** for all services using `openssl rand -hex 32`
-3. **Set a strong Redis password** via `EVERSHADE_REDIS_PASSWORD`
-4. **Use the Caddy proxy profile** to add TLS and authentication:
+### Access
+
+- **URL:** `http://localhost:9090`
+- **Profile:** `docker compose --profile monitoring up`
+
+### Scrape Targets
+
+| Service | Port | Metrics Path | Job Name |
+|---------|------|-------------|----------|
+| Greenie | 8080 | `/metrics` | `greenie` |
+| Slinker | 8000 | `/metrics` | `slinker` |
+| Trapper | 3000 | `/metrics` | `trapper` |
+| Gobber | 8085 | `/metrics` | `gobber` |
+| Sneaker | 8086 | `/metrics` | `sneaker` |
+| Hider | 8087 | `/metrics` | `hider` |
+| Poltergeist | 8088 | `/metrics` | `poltergeist` |
+| Shrewd | 8089 | `/metrics` | `shrewd` |
+| cAdvisor | 8080 | `/metrics` | `cadvisor` |
+| node-exporter | 9100 | `/metrics` | `node-exporter` |
+| Redis | 6379 | N/A | `redis` |
+
+### Configuration
+
+Edit `monitoring/prometheus/prometheus.yml` to add or modify scrape targets.
+
+---
+
+## Grafana
+
+### Access
+
+- **URL:** `http://localhost:3000`
+- **Default credentials:** Check `.env` for `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD`.
+- **Profile:** `docker compose --profile monitoring up`
+
+### Auto-Provisioned Data Sources
+
+Grafana auto-provisions Prometheus as a data source via `monitoring/grafana/provisioning/datasources/prometheus.yml`.
+
+### Dashboards
+
+Dashboard definitions are stored in `monitoring/grafana/dashboards/` and auto-provisioned via `monitoring/grafana/provisioning/dashboards/dashboards.yml`.
+
+---
+
+## Opik (Optional)
+
+### What is Opik?
+
+Opik (by Comet ML) provides LLM-specific observability:
+
+- **LLM call tracing** — Track individual model invocations with inputs, outputs, and metadata.
+- **Prompt versioning** — Track which prompt version was used for each call.
+- **Cost analytics** — Monitor token usage and costs per model/provider.
+- **Latency tracking** — Measure time-to-first-token and total response time.
+- **Evaluation** — Score LLM outputs against ground truth.
+
+### Setup
+
+1. Start Opik with the `opik` profile:
    ```bash
-   docker compose --profile full --profile monitoring --profile proxy up -d
+   docker compose --profile opik up -d
    ```
-5. **Restrict access** via firewall rules to trusted IPs only
 
-### Caddy Proxy Integration
+2. Access the Opik UI at `http://localhost:9000`.
 
-Add these routes to your `Caddyfile` to expose Grafana through the proxy:
+3. Configure Shrewd to send traces to Opik:
+   ```bash
+   export OPIK_ENDPOINT=http://opik:9000
+   ```
 
+   (Already configured in `docker-compose.yml` for the Shrewd service.)
+
+### Integration with Shrewd
+
+Shrewd reads the `OPIK_ENDPOINT` environment variable. When set, Shrewd can send LLM invocation traces to Opik. Check the integration status:
+
+```bash
+curl http://localhost:8089/api/capabilities | jq .integrations.opik
 ```
-grafana.yourdomain.com {
-    reverse_proxy grafana:3000
-    encode gzip
+
+Expected response when enabled:
+```json
+{
+  "enabled": true,
+  "endpoint": "http://opik:9000"
 }
 ```
 
-## Resource Usage
+### Persistent Storage
 
-Approximate resource consumption of the monitoring stack:
+Opik data is stored in the Docker volume `opik_data`. To preserve data across restarts, ensure the volume is not removed.
 
-| Service | CPU (limit) | Memory (limit) | Disk |
-|---------|-------------|----------------|------|
-| Prometheus | 1 core | 1 GB | ~500 MB/week |
-| Grafana | 0.5 core | 512 MB | ~50 MB |
-| cAdvisor | 0.5 core | 256 MB | Minimal |
-| node-exporter | 0.25 core | 128 MB | Minimal |
+---
 
-**Total monitoring overhead:** ~2 CPU cores, ~2 GB RAM, ~500 MB disk/week
+## cAdvisor
 
-## Service Metrics
+cAdvisor provides container-level metrics:
 
-Each Evershade service exposes a `/metrics` endpoint in Prometheus format:
+- CPU usage per container
+- Memory usage per container
+- Network I/O per container
+- Disk I/O per container
 
-| Service | Endpoint | Metrics |
-|---------|----------|---------|
-| Greenie | `/metrics` | HTTP requests, latency, agent runs, queue depth, store sizes |
-| Sneaker | `/metrics` | HTTP requests, latency, stored metrics/traces/logs count |
-| Gobber | `/metrics` | HTTP requests, latency |
-| Hider | `/metrics` | HTTP requests, latency |
-| Poltergeist | `/metrics` | HTTP requests, latency |
-| Shrewd | `/metrics` | HTTP requests, latency |
-| Slinker | `/metrics` | HTTP requests, latency, tasks, workers, chat completions, queue depth |
-| Trapper | `/metrics` | HTTP requests, latency, scrapes, crawls, browser sessions, queue depth |
+Access at `http://localhost:8081`.
 
-## Distributed Tracing (OpenTelemetry)
+---
 
-All Python services support OpenTelemetry for distributed tracing. When `SNEAKER_OTLP_ENDPOINT` is set, services automatically emit traces to Sneaker via OTLP.
+## node-exporter
 
-### How it works
+node-exporter provides host-level metrics:
 
-1. Each service instruments HTTP requests and outgoing calls using OpenTelemetry
-2. Traces are sent to Sneaker's OTLP endpoint
-3. Trace context propagates across service boundaries using B3 headers
-4. Sneaker stores traces and exposes them via the `/traces` API
+- CPU load averages
+- Memory usage
+- Disk usage and I/O
+- Network interfaces
 
-### Configuration
+Metrics available at `http://localhost:9100/metrics`.
 
-In Docker Compose mode, tracing is enabled automatically. For standalone services:
+---
+
+## Running the Monitoring Stack
+
+### Start all services with monitoring:
 
 ```bash
-# Set the OTLP endpoint to your Sneaker instance
-export SNEAKER_OTLP_ENDPOINT=http://sneaker:8086
+docker compose --profile full --profile monitoring up -d
 ```
 
-### Viewing Traces
-
-- Query traces via Sneaker API: `GET /api/traces?service=Shrewd&limit=10`
-- Grafana dashboards can be extended to show trace data from Sneaker
-
-> **Note:** OpenTelemetry is optional. If `SNEAKER_OTLP_ENDPOINT` is not set, services operate normally without tracing overhead.
-
-## Adding Custom Dashboards
-
-1. Create a JSON dashboard file in `monitoring/grafana/dashboards/`
-2. Restart Grafana: `docker compose --profile monitoring restart grafana`
-3. The dashboard will be auto-provisioned on next start
-
-You can also import Grafana.com dashboards by:
-1. Finding a dashboard at <https://grafana.com/grafana/dashboards/>
-2. Clicking "JSON view" and saving to `monitoring/grafana/dashboards/`
-3. Restarting Grafana
-
-## Upgrades
-
-To upgrade the monitoring stack:
+### Start with Opik as well:
 
 ```bash
-# Pull latest images
-docker compose --profile monitoring pull
+docker compose --profile full --profile monitoring --profile opik up -d
+```
 
-# Restart with new images
+### Start monitoring only (for debugging):
+
+```bash
 docker compose --profile monitoring up -d
 ```
 
-Prometheus and Grafana handle schema migrations automatically. Data is preserved across upgrades.
+---
 
-## Removal
+## Environment Variables
 
-To remove the monitoring stack while keeping Evershade running:
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SNEAKER_OTLP_ENDPOINT` | (empty) | OTLP gRPC endpoint for trace collection |
+| `OPIK_ENDPOINT` | `http://opik:9000` | Opik API endpoint for LLM observability |
+| `GRAFANA_ADMIN_USER` | `admin` | Grafana admin username |
+| `GRAFANA_ADMIN_PASSWORD` | `admin` | Grafana admin password |
+| `GRAFANA_ROOT_URL` | `http://localhost:3000` | Grafana root URL for alerts |
 
-```bash
-# Stop monitoring services
-docker compose --profile monitoring down
+---
 
-# Optionally remove persistent data
-docker volume rm evershade_prometheus_data evershade_grafana_data
-```
+## Security Considerations
 
-To remove everything including Evershade:
-
-```bash
-./stop.sh
-./uninstall.sh --remove-data
-```
-
-## Troubleshooting
-
-### Grafana shows "No data" for services
-
-1. Verify services are running: `docker compose ps`
-2. Check Prometheus targets: open `http://localhost:9090/targets`
-3. Look for "DOWN" targets — these indicate connectivity issues
-4. Verify the service's `/metrics` endpoint is accessible from Prometheus
-
-### Prometheus can't reach a service
-
-- Ensure the service is on the `internal` Docker network
-- Check the service name in `prometheus.yml` matches the Docker Compose service name
-- Verify the port matches the service's exposed port
-
-### Grafana login fails
-
-- Check `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` in `.env`
-- Restart Grafana: `docker compose --profile monitoring restart grafana`
-
-### High disk usage from Prometheus
-
-Reduce retention in `docker-compose.yml`:
-```yaml
-command:
-  - '--storage.tsdb.retention.time=7d'  # Change from 30d to 7d
-```
-
-## LLM Observability with Opik
-
-Opik provides LLM-specific observability: prompt management, evaluations, token tracking, and agent debugging. It runs as an optional Docker Compose profile.
-
-### Quick Start
-
-```bash
-# Start Opik
-docker compose --profile opik up -d
-
-# Open Opik UI
-# http://localhost:9000
-```
-
-### Configuration
-
-Opik is configured automatically in Docker Compose mode. To integrate with Shrewd:
-
-```bash
-# Set the Opik endpoint (Docker Compose does this automatically)
-export OPIK_BASE_URL=http://opik:9000
-```
-
-### Resource Usage
-
-| Service | CPU (limit) | Memory (limit) | Disk |
-|---------|-------------|----------------|------|
-| Opik | 1 core | 1 GB | ~200 MB |
-
-### Removal
-
-```bash
-docker compose --profile opik down
-docker volume rm evershade_opik_data
-```
-
-## Service Capabilities Registry
-
-Every Evershade service exposes a `/api/capabilities` endpoint that returns:
-- Service name and version
-- List of supported features
-- Health status (implicit — endpoint responds only when service is running)
-
-### Querying Capabilities
-
-```bash
-# Via Speedy CLI
-speedy capabilities
-
-# Via API
-curl http://localhost:8080/api/capabilities
-```
-
-### Speedy Monitoring Diagnostics
-
-The Speedy CLI includes a `monitoring` command group for checking the monitoring stack:
-
-```bash
-# Check Prometheus and Grafana status
-speedy monitoring status
-```
-
-This displays:
-- Prometheus and Grafana health
-- Active scrape targets and their status
-- Configured Grafana datasources
-- Direct links to Grafana and Prometheus UIs
-
-## Loki & Tempo (Not Included)
-
-We evaluated Loki (logs) and Tempo (traces) but decided not to include them by default:
-
-- **Loki** would add ~500 MB RAM and duplicate what Docker logs already provide. Use `docker logs <service>` or the Sneaker API for log queries.
-- **Tempo** would add ~1 GB RAM. Sneaker already handles OTLP trace ingestion. For distributed tracing, forward OTLP data from Sneaker to an external collector.
-
-If you need these, they can be added to the monitoring profile later without architectural changes.
+- **Traces** are sent over gRPC without TLS (`insecure=True`) — acceptable for local development. For production, configure mTLS between services and Sneaker.
+- **Prometheus and Grafana** bind to `127.0.0.1` by default — not exposed to the network.
+- **Opik** binds to `127.0.0.1:9000` by default — not exposed to the network.
+- Use the `Caddy` reverse proxy (`--profile proxy`) for TLS-terminated access in production.

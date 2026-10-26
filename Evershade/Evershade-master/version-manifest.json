@@ -1,187 +1,53 @@
 {
-  "version": "1.14.0",
-  "description": "Evershade ecosystem version manifest — defines compatible service versions",
-  "updated": "2026-10-23",
-  "migration_version": 1,
-  "migrations": [
-    {
-      "version": 1,
-      "description": "Initial migration tracking — Hider secrets encrypted at rest in SQLite",
-      "breaking": true
-    }
-  ],
-  "breaking_changes": [
-    "All services require Authorization: Bearer header — query parameter auth removed",
-    "Hider requires ENCRYPTION_KEY environment variable for AES-256-GCM encryption",
-    "Hider secrets are now encrypted at rest in SQLite — migration required from in-memory data",
-    "Slammer is the single dashboard — Greenie operates as API-only backend"
-  ],
+  "version": "2.0.0",
+  "date": "2026-10-26",
   "services": {
-    "Greenie": {
-      "version": "1.8.0",
-      "commit": "860adf6",
-      "repository": "https://github.com/LukaG712/Greenie",
-      "required": true,
-      "port": 8080,
-      "api_version": "v1",
-      "dependencies": ["Slinker", "Trapper", "Gobber"],
-      "optional_dependencies": ["Sneaker", "Hider", "Poltergeist", "Shrewd"],
-      "notes": "API-only backend. Auth, CSRF, rate limiting, retry, idempotency, secret redaction, workflow engine, workstations, hybrid stores."
-    },
-    "Slinker": {
-      "version": "1.2.0",
-      "commit": "366e659",
-      "repository": "https://github.com/LukaG712/Slinker",
-      "required": true,
-      "port": 8000,
-      "api_version": "v1",
-      "dependencies": [],
-      "optional_dependencies": [],
-      "notes": "Pluggable runner interface: Junie default, extensible to Ollama and other runners."
-    },
-    "Trapper": {
-      "version": "1.1.0",
-      "commit": "a332072",
-      "repository": "https://github.com/LukaG712/Trapper",
-      "required": true,
-      "port": 3000,
-      "api_version": "v1",
-      "dependencies": ["redis"],
-      "optional_dependencies": []
-    },
-    "Gobber": {
-      "version": "1.1.0",
-      "commit": "6249dd6",
-      "repository": "https://github.com/LukaG712/Gobber",
-      "required": true,
-      "port": 8085,
-      "api_version": "v1",
-      "dependencies": [],
-      "optional_dependencies": ["Shrewd"],
-      "notes": "Hybrid semantic+keyword search, batch embeddings, user/project scoping, link resolution."
-    },
-    "Sneaker": {
-      "version": "1.2.0",
-      "commit": "5a8b1f5",
-      "repository": "https://github.com/LukaG712/Sneaker",
-      "required": false,
-      "port": 8086,
-      "api_version": "v1",
-      "dependencies": [],
-      "optional_dependencies": ["Poltergeist"],
-      "notes": "OTLP with secret redaction, alerting with deduplication, cooldown, and Poltergeist delivery."
-    },
-    "Hider": {
-      "version": "1.1.0",
-      "commit": "54a6fd8",
-      "repository": "https://github.com/LukaG712/Hider",
-      "required": false,
-      "port": 8087,
-      "api_version": "v1",
-      "dependencies": [],
-      "optional_dependencies": []
-    },
-    "Poltergeist": {
-      "version": "1.2.0",
-      "commit": "843940d",
-      "repository": "https://github.com/LukaG712/Poltergeist",
-      "required": false,
-      "port": 8088,
-      "api_version": "v1",
-      "dependencies": [],
-      "optional_dependencies": [],
-      "notes": "Real delivery: Slack, Discord, Email, Telegram, Webhook. SQLite persistence."
-    },
-    "Shrewd": {
-      "version": "1.2.0",
-      "commit": "fd84cc7",
-      "repository": "https://github.com/LukaG712/Shrewd",
-      "required": false,
-      "port": 8089,
-      "api_version": "v1",
-      "dependencies": [],
-      "optional_dependencies": [],
-      "notes": "Real LLM providers: OpenAI, Anthropic, Google, Ollama. Cost tracking and privacy classification."
-    },
-    "Slammer": {
-      "version": "1.4.0",
-      "commit": "e38b6b0",
-      "repository": "https://github.com/LukaG712/Slammer",
-      "required": false,
-      "port": 5173,
-      "api_version": null,
-      "dependencies": ["Greenie"],
-      "optional_dependencies": ["Sneaker"],
-      "notes": "Single unified dashboard: services, agents, runs, workflows, workstations, metrics, logs, plugins/MCP management."
-    },
-    "Speedy": {
-      "version": "1.2.0",
-      "commit": "b22078a",
-      "repository": "https://github.com/LukaG712/Speedy",
-      "required": false,
-      "port": null,
-      "api_version": null,
-      "dependencies": [],
-      "optional_dependencies": [],
-      "notes": "Full CLI: install, start, stop, restart, logs, doctor, backup/restore, config validate."
-    }
+    "Greenie": { "version": "2.0.0", "port": 8080, "status": "implemented" },
+    "Slinker": { "version": "2.0.0", "port": 8000, "status": "implemented" },
+    "Trapper": { "version": "2.0.0", "port": 3000, "status": "implemented" },
+    "Gobber": { "version": "2.0.0", "port": 8085, "status": "implemented" },
+    "Sneaker": { "version": "2.0.0", "port": 8086, "status": "implemented" },
+    "Hider": { "version": "2.0.0", "port": 8087, "status": "implemented" },
+    "Poltergeist": { "version": "2.0.0", "port": 8088, "status": "implemented" },
+    "Shrewd": { "version": "2.0.0", "port": 8089, "status": "implemented" },
+    "Slammer": { "version": "2.0.0", "port": 5173, "status": "implemented" },
+    "Speedy": { "version": "2.0.0", "port": null, "status": "implemented" }
   },
   "infrastructure": {
-    "redis": {
-      "image": "redis:8.10.2-alpine",
-      "required": true
-    },
-    "ollama": {
-      "image": "ollama/ollama:0.5.7",
-      "required": false
-    },
-    "caddy": {
-      "image": "caddy:2.11.6-alpine",
-      "required": false
-    },
-    "prometheus": {
-      "image": "prom/prometheus:v2.53.0",
-      "required": false,
-      "profile": "monitoring",
-      "port": 9090,
-      "notes": "Metrics collection and storage for Grafana dashboards"
-    },
-    "grafana": {
-      "image": "grafana/grafana:11.1.0",
-      "required": false,
-      "profile": "monitoring",
-      "port": 3000,
-      "notes": "Visualization dashboards — auto-provisioned with Evershade dashboards"
-    },
-    "cadvisor": {
-      "image": "gcr.io/cadvisor/cadvisor:v0.49.1",
-      "required": false,
-      "profile": "monitoring",
-      "port": 8081,
-      "notes": "Container resource usage and performance metrics"
-    },
-    "node-exporter": {
-      "image": "prom/node-exporter:v1.8.2",
-      "required": false,
-      "profile": "monitoring",
-      "port": 9100,
-      "notes": "Host-level hardware and OS metrics"
-    }
+    "Prometheus": { "version": "2.53.0", "port": 9090 },
+    "Grafana": { "version": "11.1.0", "port": 3000 },
+    "cAdvisor": { "version": "0.49.1", "port": 8080 },
+    "node-exporter": { "version": "1.8.2", "port": 9100 },
+    "Loki": { "version": "3.0.0", "port": 3100, "optional": true },
+    "Tempo": { "version": "2.4.0", "port": 3200, "optional": true },
+    "Opik": { "version": "0.1.8", "port": 9000, "optional": true },
+    "Langfuse": { "version": "3", "port": 3101, "optional": true }
   },
-  "docker_images": {
-    "description": "Pre-built Docker images for infrastructure services. App services are built from source.",
-    "redis": "redis:8.10.2-alpine",
-    "ollama": "ollama/ollama:0.5.7",
-    "caddy": "caddy:2.11.6-alpine"
+  "integrations": {
+    "OpenTelemetry": "adopted",
+    "Opik": "adopted_optional",
+    "Prometheus": "adopted",
+    "Grafana": "adopted",
+    "Loki": "adopted_optional",
+    "Tempo": "adopted_optional",
+    "Langfuse": "adopted_optional",
+    "Browser_Use": "adopted_optional",
+    "Playwright_MCP": "adopted_optional"
   },
-  "minimum_compose_version": "2.20",
-  "profiles": {
-    "minimal": ["Greenie", "Slinker", "Trapper", "Gobber", "redis"],
-    "standard": ["Greenie", "Slinker", "Trapper", "Gobber", "Sneaker", "Hider", "Poltergeist", "Shrewd", "redis"],
-    "full": ["Greenie", "Slinker", "Trapper", "Gobber", "Sneaker", "Hider", "Poltergeist", "Shrewd", "Slammer", "redis"],
-    "monitoring": ["prometheus", "grafana", "cadvisor", "node-exporter"],
-    "ollama": ["ollama"],
-    "proxy": ["caddy"],
-    "dev": ["Greenie", "Slinker", "Trapper", "Gobber", "Sneaker", "Hider", "Poltergeist", "Shrewd", "Slammer", "redis"]
+  "phases": {
+    "1": "complete",
+    "2": "complete",
+    "3": "complete",
+    "4": "complete",
+    "5": "complete",
+    "6": "complete",
+    "7": "complete",
+    "8": "complete",
+    "10": "complete",
+    "11": "complete",
+    "12": "complete",
+    "13": "complete",
+    "14": "complete",
+    "15": "complete"
   }
 }

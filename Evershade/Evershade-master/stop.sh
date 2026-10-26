@@ -1,40 +1,27 @@
 #!/bin/bash
-# Unified Workflow — Stop Script (Linux/macOS)
+# Evershade — Stop all services
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 
-PROFILE="full"
+PROFILE="${1:-full}"
+VOLUMES=false
 
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --profile)
-            PROFILE="$2"
-            shift 2
-            ;;
-        --help|-h)
-            echo "Usage: ./stop.sh [OPTIONS]"
-            echo ""
-            echo "Options:"
-            echo "  --profile NAME   Compose profile: minimal, standard, full (default: full)"
-            echo "  --help, -h       Show this help message"
-            exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-    esac
-done
+if [[ "$2" == "--volumes" ]] || [[ "$2" == "-v" ]]; then
+    VOLUMES=true
+fi
 
-echo "Stopping all services (profile: $PROFILE)..."
-
-docker compose --profile "$PROFILE" down
-
-echo "Services stopped."
+echo "🛑 Stopping Evershade (profile: $PROFILE)..."
 echo ""
-echo "To remove volumes and data: docker compose --profile $PROFILE down -v"
-echo "To start again: ./start.sh --profile $PROFILE"
+
+ARGS=("down" "--profile" "$PROFILE")
+if [ "$VOLUMES" = true ]; then
+    ARGS+=("--volumes")
+fi
+
+docker compose -f "$COMPOSE_FILE" "${ARGS[@]}"
+
+echo ""
+echo "✅ Services stopped."
