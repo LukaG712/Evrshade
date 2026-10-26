@@ -1,15 +1,13 @@
 """Tests for evershade.registry — Service registry."""
 
-import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
 from evershade.registry import (
+    ServiceInfo,
     ServiceRegistry,
     ServiceStatus,
-    ServiceInfo,
     register_service_routes,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 class TestServiceRegistry:
@@ -91,8 +89,9 @@ class TestServiceRegistry:
 
     def test_capabilities(self):
         registry = ServiceRegistry()
-        registry.register("Greenie", "http://localhost:8080", "2.0.0",
-                         capabilities=["agents", "chat"])
+        registry.register(
+            "Greenie", "http://localhost:8080", "2.0.0", capabilities=["agents", "chat"]
+        )
         info = registry.get("Greenie")
         assert "agents" in info.capabilities
 
@@ -128,11 +127,14 @@ class TestRegistryRoutes:
     def test_register_via_api(self):
         app = self.setup_app()
         with TestClient(app) as client:
-            resp = client.post("/api/registry/Greenie", json={
-                "url": "http://localhost:8080",
-                "version": "2.0.0",
-                "capabilities": ["agents"],
-            })
+            resp = client.post(
+                "/api/registry/Greenie",
+                json={
+                    "url": "http://localhost:8080",
+                    "version": "2.0.0",
+                    "capabilities": ["agents"],
+                },
+            )
             assert resp.status_code == 200
             data = resp.json()
             assert data["name"] == "Greenie"
@@ -140,10 +142,13 @@ class TestRegistryRoutes:
     def test_get_service(self):
         app = self.setup_app()
         with TestClient(app) as client:
-            client.post("/api/registry/Greenie", json={
-                "url": "http://localhost:8080",
-                "version": "2.0.0",
-            })
+            client.post(
+                "/api/registry/Greenie",
+                json={
+                    "url": "http://localhost:8080",
+                    "version": "2.0.0",
+                },
+            )
             resp = client.get("/api/registry/Greenie")
             assert resp.status_code == 200
             assert resp.json()["name"] == "Greenie"
@@ -157,29 +162,40 @@ class TestRegistryRoutes:
     def test_deregister_via_api(self):
         app = self.setup_app()
         with TestClient(app) as client:
-            client.post("/api/registry/Greenie", json={
-                "url": "http://localhost:8080",
-                "version": "2.0.0",
-            })
+            client.post(
+                "/api/registry/Greenie",
+                json={
+                    "url": "http://localhost:8080",
+                    "version": "2.0.0",
+                },
+            )
             resp = client.delete("/api/registry/Greenie")
             assert resp.status_code == 200
 
     def test_heartbeat(self):
         app = self.setup_app()
         with TestClient(app) as client:
-            client.post("/api/registry/Greenie", json={
-                "url": "http://localhost:8080",
-                "version": "2.0.0",
-            })
+            client.post(
+                "/api/registry/Greenie",
+                json={
+                    "url": "http://localhost:8080",
+                    "version": "2.0.0",
+                },
+            )
             resp = client.post("/api/registry/Greenie/heartbeat")
             assert resp.status_code == 200
 
     def test_update_status(self):
         app = self.setup_app()
         with TestClient(app) as client:
-            client.post("/api/registry/Greenie", json={
-                "url": "http://localhost:8080",
-                "version": "2.0.0",
-            })
-            resp = client.post("/api/registry/Greenie/status", json={"status": "unhealthy"})
+            client.post(
+                "/api/registry/Greenie",
+                json={
+                    "url": "http://localhost:8080",
+                    "version": "2.0.0",
+                },
+            )
+            resp = client.post(
+                "/api/registry/Greenie/status", json={"status": "unhealthy"}
+            )
             assert resp.status_code == 200

@@ -23,21 +23,21 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp, Receive, Scope, Send
 
 logger = logging.getLogger("evershade.errors")
 
 
 class ErrorCode(str, Enum):
     """Standard error codes for Evershade services."""
+
     VALIDATION_ERROR = "VALIDATION_ERROR"
     UNAUTHORIZED = "UNAUTHORIZED"
     FORBIDDEN = "FORBIDDEN"
@@ -72,7 +72,7 @@ class EvershadeError(Exception):
         code: ErrorCode,
         message: str,
         *,
-        details: Optional[Any] = None,
+        details: Any | None = None,
     ) -> None:
         self.code = code
         self.message = message
@@ -84,8 +84,8 @@ def error_response(
     code: ErrorCode,
     message: str,
     *,
-    details: Optional[Any] = None,
-    request_id: Optional[str] = None,
+    details: Any | None = None,
+    request_id: str | None = None,
 ) -> dict[str, Any]:
     """Build a standard error response envelope."""
     return {
@@ -97,14 +97,14 @@ def error_response(
             "details": details,
         },
         "requestId": request_id or str(uuid.uuid4()),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
 def success_response(
     data: Any,
     *,
-    request_id: Optional[str] = None,
+    request_id: str | None = None,
 ) -> dict[str, Any]:
     """Build a standard success response envelope."""
     return {
@@ -112,7 +112,7 @@ def success_response(
         "data": data,
         "error": None,
         "requestId": request_id or str(uuid.uuid4()),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
@@ -124,14 +124,20 @@ def register_error_handlers(app: FastAPI) -> None:
     """
 
     @app.exception_handler(EvershadeError)
-    async def evershade_error_handler(request: Request, exc: EvershadeError) -> Response:
+    async def evershade_error_handler(
+        request: Request, exc: EvershadeError
+    ) -> Response:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
-        body = error_response(exc.code, exc.message, details=exc.details, request_id=request_id)
+        body = error_response(
+            exc.code, exc.message, details=exc.details, request_id=request_id
+        )
         status = ERROR_CODE_TO_STATUS.get(exc.code, 500)
         return JSONResponse(status_code=status, content=body)
 
     @app.exception_handler(RequestValidationError)
-    async def validation_error_handler(request: Request, exc: RequestValidationError) -> Response:
+    async def validation_error_handler(
+        request: Request, exc: RequestValidationError
+    ) -> Response:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
         body = error_response(
             ErrorCode.VALIDATION_ERROR,
@@ -178,10 +184,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
-        start = datetime.now(timezone.utc)
+        start = datetime.now(UTC)
         try:
             response = await call_next(request)
-            duration = (datetime.now(timezone.utc) - start).total_seconds() * 1000
+            duration = (datetime.now(UTC) - start).total_seconds() * 1000
             logger.info(
                 "req_id=%s %s %s %s %.1fms",
                 request_id,
@@ -192,7 +198,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
             return response
         except Exception:
-            duration = (datetime.now(timezone.utc) - start).total_seconds() * 1000
+            duration = (datetime.now(UTC) - start).total_seconds() * 1000
             logger.error(
                 "req_id=%s %s %s ERROR %.1fms",
                 request_id,

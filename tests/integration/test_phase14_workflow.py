@@ -6,9 +6,6 @@ and notification delivery across Greenie, Sneaker, Hider, and Poltergeist.
 
 from __future__ import annotations
 
-import unittest
-from typing import Any, Dict
-
 from tests.integration.base_test import BaseIntegrationTest
 
 
@@ -66,7 +63,14 @@ class TestPhase14Workflow(BaseIntegrationTest):
         # First create a workflow
         workflow = {
             "name": "Webhook Test",
-            "steps": [{"step_id": "s1", "name": "Delay", "type": "delay", "config": {"delay_seconds": 0}}],
+            "steps": [
+                {
+                    "step_id": "s1",
+                    "name": "Delay",
+                    "type": "delay",
+                    "config": {"delay_seconds": 0},
+                }
+            ],
             "status": "active",
         }
         wf_resp = self.make_request("POST", "/api/workflows", json=workflow)
@@ -206,7 +210,9 @@ class TestPhase14Notifications(BaseIntegrationTest):
 
     def test_get_user_preferences(self) -> None:
         """Test getting user preferences."""
-        resp = self.make_request("GET", "/api/notify/preferences/test-user", service="Poltergeist")
+        resp = self.make_request(
+            "GET", "/api/notify/preferences/test-user", service="Poltergeist"
+        )
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(data["user_id"], "test-user")

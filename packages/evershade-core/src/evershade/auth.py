@@ -16,7 +16,7 @@ Usage:
 from __future__ import annotations
 
 import time
-from typing import Any, Optional
+from typing import Any
 
 import jwt
 from fastapi import HTTPException, Request
@@ -25,7 +25,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Public paths that don't require authentication
-PUBLIC_PATHS = {"/health", "/ready", "/metrics", "/api/status", "/docs", "/openapi.json"}
+PUBLIC_PATHS = {
+    "/health",
+    "/ready",
+    "/metrics",
+    "/api/status",
+    "/docs",
+    "/openapi.json",
+}
 
 
 def create_service_token(
@@ -94,7 +101,7 @@ class ServiceAuthMiddleware(BaseHTTPMiddleware):
         self,
         app,
         secret: str,
-        public_paths: Optional[set[str]] = None,
+        public_paths: set[str] | None = None,
     ):
         super().__init__(app)
         self.secret = secret
@@ -124,7 +131,9 @@ class ServiceAuthMiddleware(BaseHTTPMiddleware):
         except jwt.ExpiredSignatureError:
             return JSONResponse(status_code=401, content={"detail": "Token expired"})
         except jwt.InvalidTokenError as e:
-            return JSONResponse(status_code=401, content={"detail": f"Invalid token: {e}"})
+            return JSONResponse(
+                status_code=401, content={"detail": f"Invalid token: {e}"}
+            )
 
         return await call_next(request)
 
@@ -133,9 +142,9 @@ security = HTTPBearer(auto_error=False)
 
 
 async def require_service_auth(
-    credentials: Optional[HTTPAuthorizationCredentials] = None,
+    credentials: HTTPAuthorizationCredentials | None = None,
     secret: str = "",
-) -> Optional[str]:
+) -> str | None:
     """Dependency for protecting individual endpoints.
 
     Args:

@@ -14,7 +14,6 @@ Usage:
 from __future__ import annotations
 
 import os
-from typing import Optional
 
 
 class ServiceConfig:
@@ -34,7 +33,7 @@ class ServiceConfig:
         service_name: str,
         port: int,
         *,
-        api_key_env: Optional[str] = None,
+        api_key_env: str | None = None,
     ) -> None:
         self.service_name = service_name
         self.port = port

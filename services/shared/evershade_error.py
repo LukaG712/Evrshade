@@ -23,9 +23,9 @@ Usage:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class ErrorCode(str, Enum):
@@ -66,7 +66,7 @@ class EvershadeError(Exception):
         code: ErrorCode,
         message: str,
         *,
-        details: Optional[Any] = None,
+        details: Any | None = None,
     ) -> None:
         self.code = code
         self.message = message
@@ -78,8 +78,8 @@ def error_response(
     code: ErrorCode,
     message: str,
     *,
-    details: Optional[Any] = None,
-    request_id: Optional[str] = None,
+    details: Any | None = None,
+    request_id: str | None = None,
 ) -> dict[str, Any]:
     """Build a standard error response envelope.
 
@@ -101,14 +101,14 @@ def error_response(
             "details": details,
         },
         "requestId": request_id or str(uuid.uuid4()),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
 def success_response(
     data: Any,
     *,
-    request_id: Optional[str] = None,
+    request_id: str | None = None,
 ) -> dict[str, Any]:
     """Build a standard success response envelope.
 
@@ -124,5 +124,5 @@ def success_response(
         "data": data,
         "error": None,
         "requestId": request_id or str(uuid.uuid4()),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }

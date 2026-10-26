@@ -4,11 +4,10 @@ Provides common utilities for HTTP requests and assertions.
 """
 
 import os
-import time
-from typing import Optional
 
 try:
     import httpx
+
     HAS_HTTPX = True
 except ImportError:
     HAS_HTTPX = False
@@ -32,7 +31,7 @@ class BaseIntegrationTest:
     def check_service_health(self, service_name: str, port: int) -> bool:
         """Check if a service is healthy."""
         if not self.client:
-            print(f"  ⊘ httpx not available, skipping health check")
+            print("  ⊘ httpx not available, skipping health check")
             return False
 
         try:
@@ -51,7 +50,7 @@ class BaseIntegrationTest:
     def check_service_metrics(self, service_name: str, port: int) -> bool:
         """Check if a service exposes Prometheus /metrics endpoint."""
         if not self.client:
-            print(f"  ⊘ httpx not available, skipping metrics check")
+            print("  ⊘ httpx not available, skipping metrics check")
             return False
 
         try:
@@ -61,19 +60,23 @@ class BaseIntegrationTest:
                 print(f"  ✓ {service_name} /metrics endpoint accessible (port {port})")
                 return True
             else:
-                print(f"  ℹ {service_name} /metrics returned status {response.status_code}")
+                print(
+                    f"  ℹ {service_name} /metrics returned status {response.status_code}"
+                )
                 return False
         except Exception as e:
             print(f"  ℹ {service_name} /metrics not reachable: {e}")
             return False
 
-    def make_request(self, method: str, url: str, check_correlation_id: bool = True, **kwargs) -> Optional[dict]:
+    def make_request(
+        self, method: str, url: str, check_correlation_id: bool = True, **kwargs
+    ) -> dict | None:
         """Make an HTTP request and return the JSON response.
 
         Optionally verifies the X-Request-Id correlation ID header is present.
         """
         if not self.client:
-            print(f"  ⊘ httpx not available, skipping request")
+            print("  ⊘ httpx not available, skipping request")
             return None
 
         try:
@@ -83,9 +86,7 @@ class BaseIntegrationTest:
                 if corr_id:
                     print(f"  ℹ Correlation ID: {corr_id[:12]}...")
                 # Don't fail the test if correlation ID is missing — it's a nice-to-have
-            if response.status_code == 200:
-                return response.json()
-            elif response.status_code == 201:
+            if response.status_code == 200 or response.status_code == 201:
                 return response.json()
             else:
                 # Try to parse error response from evershade-core error envelope
@@ -114,4 +115,3 @@ class BaseIntegrationTest:
     def run(self) -> bool:
         """Override in subclass to run the test."""
         raise NotImplementedError
-

@@ -7,8 +7,7 @@ that every service exposes. Import and register with any FastAPI application:
     register_health_routes(app, service_name="MyService", version="2.0.0")
 """
 
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Response
 
@@ -17,7 +16,7 @@ def register_health_routes(
     app,
     service_name: str,
     version: str = "2.0.0",
-    dependencies: Optional[list[str]] = None,
+    dependencies: list[str] | None = None,
 ) -> None:
     """Register standard health check routes on a FastAPI application.
 
@@ -29,7 +28,7 @@ def register_health_routes(
     """
     router = APIRouter(tags=["health"])
 
-    _start_time = datetime.now(timezone.utc)
+    _start_time = datetime.now(UTC)
     _ready = True
     _request_count = 0
 
@@ -58,7 +57,7 @@ def register_health_routes(
         """Detailed status — version, uptime, capabilities, dependency health."""
         nonlocal _request_count
         _request_count += 1
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         uptime_seconds = (now - _start_time).total_seconds()
 
         result = {
@@ -86,11 +85,12 @@ def register_health_routes(
         """
         nonlocal _request_count
         _request_count += 1
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         uptime_seconds = (now - _start_time).total_seconds()
 
         try:
-            from prometheus_client import generate_latest, REGISTRY
+            from prometheus_client import REGISTRY, generate_latest
+
             body = generate_latest(REGISTRY).decode("utf-8")
             return Response(
                 content=body,

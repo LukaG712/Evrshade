@@ -12,11 +12,7 @@ services are unreachable. Mocked tests are clearly labeled.
 
 from __future__ import annotations
 
-import asyncio
-import time
 import unittest
-
-import httpx
 
 from tests.integration.base_test import BaseIntegrationTest
 

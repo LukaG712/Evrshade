@@ -109,14 +109,14 @@ class TestIntegrationFlow(BaseIntegrationTest):
             return True
 
         try:
-            response = self.client.get(
-                "http://localhost:3100/ready", timeout=5.0
-            )
+            response = self.client.get("http://localhost:3100/ready", timeout=5.0)
             if response.status_code == 200:
                 print("  ✓ Loki is healthy (port 3100)")
                 return True
             else:
-                print(f"  ℹ Loki returned status {response.status_code} (optional service)")
+                print(
+                    f"  ℹ Loki returned status {response.status_code} (optional service)"
+                )
                 return True
         except Exception as e:
             print(f"  ℹ Loki not reachable: {e} (optional service)")
@@ -130,14 +130,14 @@ class TestIntegrationFlow(BaseIntegrationTest):
             return True
 
         try:
-            response = self.client.get(
-                "http://localhost:3200", timeout=5.0
-            )
+            response = self.client.get("http://localhost:3200", timeout=5.0)
             if response.status_code == 200:
                 print("  ✓ Tempo is healthy (port 3200)")
                 return True
             else:
-                print(f"  ℹ Tempo returned status {response.status_code} (optional service)")
+                print(
+                    f"  ℹ Tempo returned status {response.status_code} (optional service)"
+                )
                 return True
         except Exception as e:
             print(f"  ℹ Tempo not reachable: {e} (optional service)")

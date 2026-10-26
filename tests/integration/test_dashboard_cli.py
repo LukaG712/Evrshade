@@ -5,6 +5,7 @@ These tests verify that the dashboard displays real data and CLI commands work c
 """
 
 import unittest
+
 from .base_test import BaseIntegrationTest
 
 
@@ -89,9 +90,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_status(self):
         """Test CLI status command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "status", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -100,9 +103,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_validate(self):
         """Test CLI validate command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "validate", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -111,9 +116,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_diagnose(self):
         """Test CLI diagnose command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "diagnose", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -122,9 +129,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_version(self):
         """Test CLI version command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "version", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -133,9 +142,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_integrations(self):
         """Test CLI integrations command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "integrations", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -144,9 +155,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_workflows(self):
         """Test CLI workflows command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "workflows", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -155,9 +168,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_knowledge(self):
         """Test CLI knowledge command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "knowledge", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -166,9 +181,11 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_models(self):
         """Test CLI models command."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "models", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
@@ -177,17 +194,33 @@ class TestCLICommands(BaseIntegrationTest):
     def test_cli_help(self):
         """Test CLI help shows all commands."""
         import subprocess
+
         result = subprocess.run(
             ["python", "-m", "evershade_cli.main", "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(self.project_root / "services" / "Speedy"),
         )
         self.assertEqual(result.returncode, 0)
         expected_commands = [
-            "status", "agents", "tasks", "config", "secrets",
-            "capabilities", "registry", "monitoring", "install",
-            "start", "stop", "validate", "diagnose", "version",
-            "integrations", "workflows", "knowledge", "models",
+            "status",
+            "agents",
+            "tasks",
+            "config",
+            "secrets",
+            "capabilities",
+            "registry",
+            "monitoring",
+            "install",
+            "start",
+            "stop",
+            "validate",
+            "diagnose",
+            "version",
+            "integrations",
+            "workflows",
+            "knowledge",
+            "models",
         ]
         for cmd in expected_commands:
             self.assertIn(cmd, result.stdout, f"Missing command: {cmd}")

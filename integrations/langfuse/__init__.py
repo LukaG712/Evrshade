@@ -12,34 +12,36 @@ from typing import Any, Dict, List, Optional
 @dataclass
 class LangfuseSpan:
     """Represents a Langfuse trace span."""
+
     trace_id: str
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = ""
     type: str = "span"
-    input: Optional[Dict[str, Any]] = None
-    output: Optional[Dict[str, Any]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    input: dict[str, Any] | None = None
+    output: dict[str, Any] | None = None
+    metadata: dict[str, Any] | None = None
     start_time: float = field(default_factory=time.time)
-    end_time: Optional[float] = None
+    end_time: float | None = None
     level: str = "DEFAULT"
-    status_message: Optional[str] = None
-    parent_observation_id: Optional[str] = None
+    status_message: str | None = None
+    parent_observation_id: str | None = None
 
 
 @dataclass
 class LangfuseTrace:
     """Represents a Langfuse trace."""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = ""
-    input: Optional[Dict[str, Any]] = None
-    output: Optional[Dict[str, Any]] = None
-    metadata: Optional[Dict[str, Any]] = None
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
-    release: Optional[str] = None
-    version: Optional[str] = None
-    tags: Optional[List[str]] = None
-    spans: List[LangfuseSpan] = field(default_factory=list)
+    input: dict[str, Any] | None = None
+    output: dict[str, Any] | None = None
+    metadata: dict[str, Any] | None = None
+    user_id: str | None = None
+    session_id: str | None = None
+    release: str | None = None
+    version: str | None = None
+    tags: list[str] | None = None
+    spans: list[LangfuseSpan] = field(default_factory=list)
 
 
 class LangfuseClient:
@@ -51,15 +53,15 @@ class LangfuseClient:
 
     def __init__(
         self,
-        endpoint: Optional[str] = None,
-        public_key: Optional[str] = None,
-        secret_key: Optional[str] = None,
+        endpoint: str | None = None,
+        public_key: str | None = None,
+        secret_key: str | None = None,
     ):
         self.endpoint = endpoint or os.getenv("LANGFUSE_ENDPOINT")
         self.public_key = public_key or os.getenv("LANGFUSE_PUBLIC_KEY")
         self.secret_key = secret_key or os.getenv("LANGFUSE_SECRET_KEY")
         self.enabled = bool(self.endpoint and self.public_key and self.secret_key)
-        self._traces: Dict[str, LangfuseTrace] = {}
+        self._traces: dict[str, LangfuseTrace] = {}
         self._http_client = None
 
     def _get_httpx(self):
@@ -67,6 +69,7 @@ class LangfuseClient:
         if self._http_client is None:
             try:
                 import httpx
+
                 self._http_client = httpx.Client(
                     base_url=self.endpoint,
                     headers={
@@ -91,8 +94,8 @@ class LangfuseClient:
         trace_id: str,
         name: str,
         span_type: str = "span",
-        input_data: Optional[Dict[str, Any]] = None,
-        parent_observation_id: Optional[str] = None,
+        input_data: dict[str, Any] | None = None,
+        parent_observation_id: str | None = None,
     ) -> LangfuseSpan:
         """Create a span within a trace."""
         trace = self._traces.get(trace_id)
@@ -110,7 +113,12 @@ class LangfuseClient:
         trace.spans.append(span)
         return span
 
-    def end_span(self, span: LangfuseSpan, output: Optional[Dict[str, Any]] = None, error: Optional[str] = None):
+    def end_span(
+        self,
+        span: LangfuseSpan,
+        output: dict[str, Any] | None = None,
+        error: str | None = None,
+    ):
         """Mark a span as completed."""
         span.end_time = time.time()
         span.output = output
@@ -125,9 +133,9 @@ class LangfuseClient:
         model: str,
         input_messages: Any,
         output: Any,
-        tokens: Optional[int] = None,
-        cost: Optional[float] = None,
-        parent_observation_id: Optional[str] = None,
+        tokens: int | None = None,
+        cost: float | None = None,
+        parent_observation_id: str | None = None,
     ):
         """Log an LLM generation event."""
         span = self.create_span(
@@ -147,7 +155,7 @@ class LangfuseClient:
         span.output = output
         self.end_span(span, output={"content": output})
 
-    def _send_batch(self, traces: List[LangfuseTrace]):
+    def _send_batch(self, traces: list[LangfuseTrace]):
         """Send traces to Langfuse API."""
         if not self.enabled:
             return
@@ -158,35 +166,39 @@ class LangfuseClient:
             # Convert traces to Langfuse batch format
             items = []
             for trace in traces:
-                items.append({
-                    "type": "trace",
-                    "id": trace.id,
-                    "name": trace.name,
-                    "input": trace.input,
-                    "output": trace.output,
-                    "metadata": trace.metadata,
-                    "userId": trace.user_id,
-                    "sessionId": trace.session_id,
-                    "release": trace.release,
-                    "version": trace.version,
-                    "tags": trace.tags,
-                })
+                items.append(
+                    {
+                        "type": "trace",
+                        "id": trace.id,
+                        "name": trace.name,
+                        "input": trace.input,
+                        "output": trace.output,
+                        "metadata": trace.metadata,
+                        "userId": trace.user_id,
+                        "sessionId": trace.session_id,
+                        "release": trace.release,
+                        "version": trace.version,
+                        "tags": trace.tags,
+                    }
+                )
                 for span in trace.spans:
-                    items.append({
-                        "type": "span",
-                        "id": span.id,
-                        "traceId": span.trace_id,
-                        "name": span.name,
-                        "spanType": span.type,
-                        "input": span.input,
-                        "output": span.output,
-                        "metadata": span.metadata,
-                        "startTime": span.start_time,
-                        "endTime": span.end_time,
-                        "level": span.level,
-                        "statusMessage": span.status_message,
-                        "parentObservationId": span.parent_observation_id,
-                    })
+                    items.append(
+                        {
+                            "type": "span",
+                            "id": span.id,
+                            "traceId": span.trace_id,
+                            "name": span.name,
+                            "spanType": span.type,
+                            "input": span.input,
+                            "output": span.output,
+                            "metadata": span.metadata,
+                            "startTime": span.start_time,
+                            "endTime": span.end_time,
+                            "level": span.level,
+                            "statusMessage": span.status_message,
+                            "parentObservationId": span.parent_observation_id,
+                        }
+                    )
             if items:
                 client.post("/api/public/batch", json={"batch": items})
         except Exception:
@@ -201,7 +213,7 @@ class LangfuseClient:
 
 
 # Module-level singleton
-_default_client: Optional[LangfuseClient] = None
+_default_client: LangfuseClient | None = None
 
 
 def get_langfuse_client() -> LangfuseClient:

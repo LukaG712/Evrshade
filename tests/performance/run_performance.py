@@ -12,6 +12,7 @@ from pathlib import Path
 
 try:
     import httpx
+
     HAS_HTTPX = True
 except ImportError:
     HAS_HTTPX = False
@@ -42,25 +43,33 @@ def check_health_response_times():
     print("Performance Check: Health Check Response Times")
     print("=" * 70)
     print(f"  Threshold: < {HEALTH_CHECK_TIMEOUT}s")
-    
+
     if not HAS_HTTPX:
         print("  ⊘ httpx not available, skipping")
         return False
-    
+
     all_passed = True
     results = []
-    
+
     with httpx.Client(timeout=HEALTH_CHECK_TIMEOUT) as client:
         for name, port in SERVICES:
             try:
                 start = time.perf_counter()
                 resp = client.get(f"http://localhost:{port}/health")
                 elapsed = time.perf_counter() - start
-                
+
                 if resp.status_code == 200:
                     status = "✓" if elapsed < HEALTH_CHECK_TIMEOUT else "✗"
-                    results.append((name, elapsed, resp.status_code == 200 and elapsed < HEALTH_CHECK_TIMEOUT))
-                    print(f"  {status} {name}: {elapsed:.3f}s (status {resp.status_code})")
+                    results.append(
+                        (
+                            name,
+                            elapsed,
+                            resp.status_code == 200 and elapsed < HEALTH_CHECK_TIMEOUT,
+                        )
+                    )
+                    print(
+                        f"  {status} {name}: {elapsed:.3f}s (status {resp.status_code})"
+                    )
                     if elapsed >= HEALTH_CHECK_TIMEOUT:
                         all_passed = False
                 else:
@@ -70,7 +79,7 @@ def check_health_response_times():
             except Exception as e:
                 print(f"  ⊘ {name}: not reachable ({e})")
                 results.append((name, None, False))
-    
+
     return all_passed
 
 
@@ -80,28 +89,28 @@ def check_api_latency():
     print("Performance Check: API Call Latency")
     print("=" * 70)
     print(f"  Threshold: < {API_CALL_TIMEOUT}s")
-    
+
     if not HAS_HTTPX:
         print("  ⊘ httpx not available, skipping")
         return False
-    
+
     all_passed = True
-    
+
     # Test Greenie API endpoints
     with httpx.Client(timeout=API_CALL_TIMEOUT) as client:
         endpoints = [
-            ("Greenie /api/status", f"http://localhost:8080/api/status"),
-            ("Greenie /api/agents", f"http://localhost:8080/api/agents"),
-            ("Slinker /api/v1/tasks", f"http://localhost:8000/api/v1/tasks"),
-            ("Shrewd /api/models", f"http://localhost:8089/api/models"),
+            ("Greenie /api/status", "http://localhost:8080/api/status"),
+            ("Greenie /api/agents", "http://localhost:8080/api/agents"),
+            ("Slinker /api/v1/tasks", "http://localhost:8000/api/v1/tasks"),
+            ("Shrewd /api/models", "http://localhost:8089/api/models"),
         ]
-        
+
         for name, url in endpoints:
             try:
                 start = time.perf_counter()
                 resp = client.get(url)
                 elapsed = time.perf_counter() - start
-                
+
                 if resp.status_code == 200:
                     status = "✓" if elapsed < API_CALL_TIMEOUT else "✗"
                     print(f"  {status} {name}: {elapsed:.3f}s")
@@ -110,9 +119,9 @@ def check_api_latency():
                 else:
                     print(f"  ✗ {name}: status {resp.status_code}")
                     all_passed = False
-            except Exception as e:
+            except Exception:
                 print(f"  ⊘ {name}: not reachable")
-    
+
     return all_passed
 
 
@@ -121,22 +130,22 @@ def check_resource_limits():
     print("\n" + "=" * 70)
     print("Performance Check: Resource Limits")
     print("=" * 70)
-    
+
     compose_file = project_root / "docker-compose.yml"
     if not compose_file.exists():
         print("  ✗ docker-compose.yml not found")
         return False
-    
+
     content = compose_file.read_text()
-    
+
     has_deploy = "deploy" in content
     has_resources = "resources" in content
     has_memory = "memory" in content
-    
+
     print(f"  {'✓' if has_deploy else 'ℹ'} Deploy section defined")
     print(f"  {'✓' if has_resources else 'ℹ'} Resource limits defined")
     print(f"  {'✓' if has_memory else 'ℹ'} Memory limits defined")
-    
+
     # Resource limits are recommended but not required for dev
     return True
 
@@ -148,12 +157,21 @@ def check_sqlite_wal_mode():
     print("=" * 70)
 
     # Check evershade-db package for WAL mode
-    db_package = project_root / "packages" / "evershade-db" / "src" / "evershade_db" / "__init__.py"
+    db_package = (
+        project_root
+        / "packages"
+        / "evershade-db"
+        / "src"
+        / "evershade_db"
+        / "__init__.py"
+    )
     if db_package.exists():
         content = db_package.read_text()
         has_wal = "wal" in content.lower() or "WAL" in content
         status = "✓" if has_wal else "✗"
-        print(f"  {status} evershade-db package: WAL mode {'configured' if has_wal else 'not found'}")
+        print(
+            f"  {status} evershade-db package: WAL mode {'configured' if has_wal else 'not found'}"
+        )
     else:
         print("  ✗ evershade-db package not found")
 
@@ -245,21 +263,21 @@ def run_all_checks():
         "SQLite WAL Mode": check_sqlite_wal_mode(),
         "Metrics Endpoints": check_metrics_endpoints(),
     }
-    
+
     print("\n" + "=" * 70)
     print("Performance Validation Summary")
     print("=" * 70)
-    
+
     passed = sum(1 for v in results.values() if v)
     total = len(results)
-    
+
     for name, result in results.items():
         status = "✓ PASSED" if result else "✗ FAILED"
         print(f"  {status}: {name}")
-    
+
     print(f"\n  Total: {passed}/{total} checks passed")
     print("=" * 70)
-    
+
     return passed == total
 
 

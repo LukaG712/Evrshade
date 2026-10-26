@@ -1,18 +1,31 @@
-# Evershade Ruff Configuration
+# Ruff configuration for Evershade
+
+target-version = "py312"
 
 exclude = [
     ".junie",
     ".git",
     "__pycache__",
     "node_modules",
-    "venv",
-    ".venv",
+    "dist",
+    "build",
 ]
 
 [lint]
-# Pre-existing issues in Greenie that require separate investigation
-# F821: Undefined names (_scheduled_tasks, run_agent) - these are real bugs
-# that need to be fixed in a dedicated PR
-[lint.per-file-ignores]
-"tests\\test_install_gui_security.py" = ["SIM117"]
-"tests\\test_shell_scripts_security.py" = ["SIM102"]
+# Ignore rules that are too noisy for this codebase:
+# BLE001 - Blind except Exception (common in network/error handling)
+# S110   - try/except/pass (used for graceful degradation)
+# PLW1510 - subprocess.run without check (test code)
+# F401   - Unused imports (some are for re-exports in __init__.py)
+# UP035  - Deprecated typing imports (Dict, List) — gradual migration
+# SIM117 - Nested with statements (readable in test code)
+# SIM102 - Nested if statements (readable in test code)
+ignore = [
+    "BLE001",
+    "S110",
+    "PLW1510",
+    "F401",
+    "UP035",
+    "SIM117",
+    "SIM102",
+]

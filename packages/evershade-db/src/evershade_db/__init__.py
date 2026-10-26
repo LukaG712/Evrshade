@@ -15,9 +15,10 @@ from __future__ import annotations
 import asyncio
 import os
 import sqlite3
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Optional
+from typing import Any, Optional
 
 import aiosqlite
 
@@ -68,7 +69,7 @@ class Database:
 
     def __init__(self, db_path: str = "./app.db"):
         self.db_path = ensure_db_path(db_path)
-        self._pool: Optional[aiosqlite.Connection] = None
+        self._pool: aiosqlite.Connection | None = None
 
     async def connect(self) -> aiosqlite.Connection:
         """Get a database connection with WAL mode enabled."""
@@ -94,12 +95,14 @@ class Database:
             await conn.rollback()
             raise
 
-    async def execute(self, sql: str, params: Optional[tuple] = None) -> aiosqlite.Cursor:
+    async def execute(self, sql: str, params: tuple | None = None) -> aiosqlite.Cursor:
         """Execute a SQL statement."""
         conn = await self.connect()
         return await conn.execute(sql, params or ())
 
-    async def fetchall(self, sql: str, params: Optional[tuple] = None) -> list[dict[str, Any]]:
+    async def fetchall(
+        self, sql: str, params: tuple | None = None
+    ) -> list[dict[str, Any]]:
         """Execute a query and return all rows as dictionaries."""
         conn = await self.connect()
         conn.row_factory = aiosqlite.Row
@@ -107,7 +110,9 @@ class Database:
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
 
-    async def fetchone(self, sql: str, params: Optional[tuple] = None) -> Optional[dict[str, Any]]:
+    async def fetchone(
+        self, sql: str, params: tuple | None = None
+    ) -> dict[str, Any] | None:
         """Execute a query and return a single row as a dictionary."""
         conn = await self.connect()
         conn.row_factory = aiosqlite.Row

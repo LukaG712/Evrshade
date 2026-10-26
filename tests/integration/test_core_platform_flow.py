@@ -31,7 +31,7 @@ class TestCorePlatformFlow(BaseIntegrationTest):
         registry = self.make_request("get", "/api/registry")
         registry_ok = self.assert_true(
             registry is not None and "services" in registry,
-            "Service registry endpoint accessible"
+            "Service registry endpoint accessible",
         )
 
         # Check registry details endpoint
@@ -40,8 +40,7 @@ class TestCorePlatformFlow(BaseIntegrationTest):
             first_service = registry["services"][0]["name"]
             details = self.make_request("get", f"/api/registry/{first_service}")
             details_ok = self.assert_true(
-                details is not None,
-                f"Registry details for {first_service} accessible"
+                details is not None, f"Registry details for {first_service} accessible"
             )
         else:
             details_ok = True
@@ -55,7 +54,7 @@ class TestCorePlatformFlow(BaseIntegrationTest):
                 corr_id = resp.headers.get("x-request-id", "")
                 corr_ok = self.assert_true(
                     len(corr_id) > 0,
-                    f"Correlation ID present in response: {corr_id[:12]}..."
+                    f"Correlation ID present in response: {corr_id[:12]}...",
                 )
             except Exception:
                 corr_ok = False
@@ -68,25 +67,25 @@ class TestCorePlatformFlow(BaseIntegrationTest):
         print("\n  Step 5: Check error handling envelope")
         if self.client:
             try:
-                resp = self.client.get("http://localhost:8080/api/nonexistent-endpoint", timeout=5.0)
+                resp = self.client.get(
+                    "http://localhost:8080/api/nonexistent-endpoint", timeout=5.0
+                )
                 # evershade-core should return a standard error envelope
                 if resp.status_code in (404, 500):
                     try:
                         error_body = resp.json()
                         has_error_key = "error" in error_body or "detail" in error_body
                         error_ok = self.assert_true(
-                            has_error_key,
-                            "Error response uses standard envelope"
+                            has_error_key, "Error response uses standard envelope"
                         )
                     except Exception:
                         error_ok = self.assert_true(
-                            True,
-                            "Error response returned (non-JSON, may be valid)"
+                            True, "Error response returned (non-JSON, may be valid)"
                         )
                 else:
                     error_ok = self.assert_true(
                         resp.status_code == 404,
-                        f"Unknown endpoint returns 404 (got {resp.status_code})"
+                        f"Unknown endpoint returns 404 (got {resp.status_code})",
                     )
             except Exception as e:
                 error_ok = False
@@ -104,7 +103,7 @@ class TestCorePlatformFlow(BaseIntegrationTest):
         status = self.make_request("get", "/api/status")
         status_ok = self.assert_true(
             status is not None and "service" in status,
-            "Service status endpoint accessible"
+            "Service status endpoint accessible",
         )
 
         # Check /api/capabilities endpoint
@@ -112,7 +111,7 @@ class TestCorePlatformFlow(BaseIntegrationTest):
         capabilities = self.make_request("get", "/api/capabilities")
         capabilities_ok = self.assert_true(
             capabilities is not None and "capabilities" in capabilities,
-            "Service capabilities endpoint accessible"
+            "Service capabilities endpoint accessible",
         )
 
         # Check other services' health and metrics
@@ -137,10 +136,19 @@ class TestCorePlatformFlow(BaseIntegrationTest):
         other_services_health = any(health_results) or not health_results
         other_services_metrics = any(metrics_results) or not metrics_results
 
-        all_passed = all([
-            greenie_ok, registry_ok, details_ok, corr_ok, error_ok,
-            metrics_ok, status_ok, capabilities_ok,
-            other_services_health, other_services_metrics
-        ])
+        all_passed = all(
+            [
+                greenie_ok,
+                registry_ok,
+                details_ok,
+                corr_ok,
+                error_ok,
+                metrics_ok,
+                status_ok,
+                capabilities_ok,
+                other_services_health,
+                other_services_metrics,
+            ]
+        )
 
         return all_passed
