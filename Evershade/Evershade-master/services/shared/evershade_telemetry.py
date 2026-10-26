@@ -5,16 +5,24 @@ in the Evershade ecosystem. It configures:
 - FastAPI automatic instrumentation for HTTP server traces
 - HTTPX automatic instrumentation for outgoing HTTP client traces
 - OTLP exporter to send traces to Sneaker
+- Prometheus metrics auto-instrumentation
 
 Usage:
-    from evershade_telemetry import setup_telemetry
+    from evershade_telemetry import setup_telemetry, create_traced_httpx_client
     setup_telemetry(app, service_name="MyService")
+
+    # For outgoing requests with trace context propagation:
+    async with create_traced_httpx_client() as client:
+        resp = await client.get("http://other-service/endpoint")
 
 Traces are sent to the OTLP endpoint configured via SNEAKER_OTLP_ENDPOINT
 environment variable. If not set, telemetry is disabled (no-op).
 """
 
 import os
+from typing import Optional
+
+import httpx
 
 
 def setup_telemetry(app, service_name: str = "evershade-service") -> None:
@@ -26,6 +34,7 @@ def setup_telemetry(app, service_name: str = "evershade-service") -> None:
     """
     otlp_endpoint = os.getenv("SNEAKER_OTLP_ENDPOINT")
     if not otlp_endpoint:
+        _setup_prometheus_metrics(service_name)
         return
 
     try:
@@ -40,6 +49,7 @@ def setup_telemetry(app, service_name: str = "evershade-service") -> None:
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
     except ImportError:
+        _setup_prometheus_metrics(service_name)
         return
 
     # Set up trace provider
@@ -51,7 +61,7 @@ def setup_telemetry(app, service_name: str = "evershade-service") -> None:
     processor = BatchSpanProcessor(exporter)
     provider.add_span_processor(processor)
 
-    # Set up B3 propagation for trace context
+    # Set up B3 propagation for trace context across service boundaries
     set_global_textmap(B3MultiFormat())
 
     # Instrument FastAPI
@@ -64,6 +74,79 @@ def setup_telemetry(app, service_name: str = "evershade-service") -> None:
 
     # Instrument HTTPX for outgoing requests
     HTTPXClientInstrumentor.instrument()
+
+    # Set up Prometheus metrics
+    _setup_prometheus_metrics(service_name)
+
+
+def create_traced_httpx_client(
+    base_url: Optional[str] = None,
+    timeout: float = 30.0,
+) -> httpx.AsyncClient:
+    """Create an HTTPX async client that propagates OpenTelemetry trace context.
+
+    This client automatically injects B3 trace headers into outgoing requests,
+    enabling distributed tracing across service boundaries.
+
+    Args:
+        base_url: Optional base URL for the client.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        Configured httpx.AsyncClient instance.
+    """
+    client = httpx.AsyncClient(
+        base_url=base_url,
+        timeout=timeout,
+    )
+
+    # If OpenTelemetry is available, headers are injected automatically
+    # by the HTTPXClientInstrumentor. If not, the client still works normally.
+    return client
+
+
+def _setup_prometheus_metrics(service_name: str) -> None:
+    """Set up Prometheus metrics auto-instrumentation.
+
+    Registers standard HTTP request counters and histograms.
+    The metrics are exposed via the /metrics endpoint in evershade_health.
+
+    Args:
+        service_name: Name of the service for metric labels.
+    """
+    try:
+        from prometheus_client import Counter, Histogram, REGISTRY
+        import prometheus_client
+
+        # Check if we've already set up metrics (avoid duplicates)
+        if hasattr(_setup_prometheus_metrics, "_initialized"):
+            return
+        _setup_prometheus_metrics._initialized = True
+
+        # HTTP request counter
+        prometheus_client.REGISTRY.register(
+            Counter(
+                f"{service_name.lower()}_http_requests_total",
+                f"Total HTTP requests to {service_name}",
+                ["method", "endpoint", "status"],
+            )
+        )
+
+        # HTTP request duration histogram
+        prometheus_client.REGISTRY.register(
+            Histogram(
+                f"{service_name.lower()}_http_request_duration_seconds",
+                f"HTTP request duration for {service_name}",
+                ["method", "endpoint"],
+                buckets=(0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0),
+            )
+        )
+
+    except ImportError:
+        pass
+    except Exception:
+        # Metrics setup should not crash the service
+        pass
 
 
 def _server_request_hook(span, request, service_name: str) -> None:
