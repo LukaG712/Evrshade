@@ -176,7 +176,7 @@ class TestPinnedImageTags(unittest.TestCase):
         # Parse YAML to find images that also have a build section
         data = yaml.safe_load(self.content)
         build_images = set()
-        for svc_name, svc_config in data.get("services", {}).items():
+        for svc_config in data.get("services", {}).values():
             if "build" in svc_config and "image" in svc_config:
                 build_images.add(svc_config["image"])
         image_pattern = re.compile(r"image:\s*(\S+)")
