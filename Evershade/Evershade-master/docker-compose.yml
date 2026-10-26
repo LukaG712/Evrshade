@@ -4,8 +4,11 @@
 #   docker compose --profile minimal up      # Core services only
 #   docker compose --profile standard up     # All services except dashboard
 #   docker compose --profile full up         # Everything including Slammer
-#   docker compose --profile monitoring up   # Grafana + Prometheus + cAdvisor + node-exporter
+#   docker compose --profile monitoring up   # Grafana + Prometheus + Loki + Tempo + cAdvisor + node-exporter
 #   docker compose --profile opik up        # Opik for LLM observability
+#   docker compose --profile langfuse up    # Langfuse for AI observability
+#   docker compose --profile browser-use up # Browser Use for LLM browser automation
+#   docker compose --profile playwright-mcp up # Playwright MCP for MCP browser automation
 #   docker compose --profile ollama up       # Ollama for local models
 #   docker compose --profile proxy up        # Caddy reverse proxy with TLS
 #   docker compose --profile dev up          # Development mode with all ports exposed
@@ -42,6 +45,13 @@ volumes:
   grafana_data:
   # Opik persistent storage
   opik_data:
+  # Loki persistent storage
+  loki_data:
+  # Tempo persistent storage
+  tempo_data:
+  # Langfuse persistent storage
+  langfuse_data:
+  langfuse_postgres_data:
 
 # ═══════════════════════════════════════════════════════════════════
 # Infrastructure
@@ -80,7 +90,10 @@ services:
 # ═══════════════════════════════════════════════════════════════════
 
   Greenie:
-    build: ./services/Greenie
+    image: evershade-greenie
+    build:
+      context: .
+      dockerfile: services/Greenie/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -104,6 +117,8 @@ services:
       - SHREWD_URL=http://Shrewd:8089
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+      # Tempo (optional distributed tracing)
+      - TEMPO_OTLP_ENDPOINT=http://tempo:4317
       # Service API Keys (new naming + legacy aliases)
       - EVERSHADE_SLINKER_API_KEY=${EVERSHADE_SLINKER_API_KEY}
       - SLINKER_API_KEY=${EVERSHADE_SLINKER_API_KEY}
@@ -146,7 +161,7 @@ services:
       Gobber:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
       interval: 15s
       timeout: 5s
       start_period: 60s
@@ -169,9 +184,13 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+      - /data
 
   Slinker:
-    build: ./services/Slinker
+    image: evershade-slinker
+    build:
+      context: .
+      dockerfile: services/Slinker/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -190,9 +209,10 @@ services:
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+      # Tempo (optional distributed tracing)
+      - TEMPO_OTLP_ENDPOINT=http://tempo:4317
     volumes:
       - ${EVERSHADE_WORKSPACE_PATH:-./workspace}:/workspace
-      - slinker_logs:/app/logs
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 15s
@@ -218,9 +238,13 @@ services:
     tmpfs:
       - /tmp
       - /app/logs
+      - /data
 
   Trapper-api:
-    build: ./services/Trapper
+    image: evershade-trapper-api
+    build:
+      context: .
+      dockerfile: services/Trapper/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -268,7 +292,10 @@ services:
       - /tmp
 
   Trapper-worker:
-    build: ./services/Trapper
+    image: evershade-trapper-worker
+    build:
+      context: .
+      dockerfile: services/Trapper/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -309,7 +336,10 @@ services:
       - /tmp
 
   Gobber:
-    build: ./services/Gobber
+    image: evershade-gobber
+    build:
+      context: .
+      dockerfile: services/Gobber/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -323,8 +353,9 @@ services:
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+      # Tempo (optional distributed tracing)
+      - TEMPO_OTLP_ENDPOINT=http://tempo:4317
     volumes:
-      - gobber_data:/app/data
       - ${EVERSHADE_OBSIDIAN_VAULT_PATH:-./obsidian-vault}:/app/vault:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8085/health')"]
@@ -349,13 +380,17 @@ services:
     tmpfs:
       - /tmp
       - /app/data
+      - /data
 
 # ═══════════════════════════════════════════════════════════════════
 # Supporting Services (Optional)
 # ═══════════════════════════════════════════════════════════════════
 
   Sneaker:
-    build: ./services/Sneaker
+    image: evershade-sneaker
+    build:
+      context: .
+      dockerfile: services/Sneaker/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -365,8 +400,6 @@ services:
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://localhost:8086
-    volumes:
-      - sneaker_data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8086/health')"]
       interval: 30s
@@ -389,9 +422,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+      - /app/data
+      - /data
 
   Hider:
-    build: ./services/Hider
+    image: evershade-hider
+    build:
+      context: .
+      dockerfile: services/Hider/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -402,8 +440,8 @@ services:
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
-    volumes:
-      - hider_data:/app/data
+      # Tempo (optional distributed tracing)
+      - TEMPO_OTLP_ENDPOINT=http://tempo:4317
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8087/health')"]
       interval: 30s
@@ -426,9 +464,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+      - /app/data
+      - /data
 
   Poltergeist:
-    build: ./services/Poltergeist
+    image: evershade-poltergeist
+    build:
+      context: .
+      dockerfile: services/Poltergeist/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -438,8 +481,8 @@ services:
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
-    volumes:
-      - poltergeist_data:/app/data
+      # Tempo (optional distributed tracing)
+      - TEMPO_OTLP_ENDPOINT=http://tempo:4317
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8088/health')"]
       interval: 30s
@@ -462,9 +505,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+      - /app/data
+      - /data
 
   Shrewd:
-    build: ./services/Shrewd
+    image: evershade-shrewd
+    build:
+      context: .
+      dockerfile: services/Shrewd/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -477,6 +525,14 @@ services:
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
+      # Tempo (optional distributed tracing)
+      - TEMPO_OTLP_ENDPOINT=http://tempo:4317
+      # Opik (optional LLM observability)
+      - OPIK_ENDPOINT=${OPIK_ENDPOINT:-http://opik:9000}
+      # Langfuse (optional AI observability)
+      - LANGFUSE_ENDPOINT=${LANGFUSE_ENDPOINT:-http://langfuse:3000}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8089/health')"]
       interval: 30s
@@ -502,13 +558,17 @@ services:
     tmpfs:
       - /tmp
       - /app/data
+      - /data
 
 # ═══════════════════════════════════════════════════════════════════
 # Frontend
 # ═══════════════════════════════════════════════════════════════════
 
   Slammer:
-    build: ./services/Slammer
+    image: evershade-slammer
+    build:
+      context: .
+      dockerfile: services/Slammer/Dockerfile
     profiles: ["full", "dev"]
     networks:
       - frontend
@@ -530,6 +590,11 @@ services:
     read_only: true
     cap_drop:
       - ALL
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+      - /etc/nginx/conf.d
 
 # ═══════════════════════════════════════════════════════════════════
 # Optional: Ollama (Local LLM)
@@ -709,8 +774,6 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
-    security_opt:
-      - no-new-privileges:true
 
   node-exporter:
     image: prom/node-exporter:v1.8.2
@@ -747,6 +810,86 @@ services:
       - /tmp
 
 # ═══════════════════════════════════════════════════════════════════
+# Loki — Log Aggregation (Optional — profile: monitoring)
+# ═══════════════════════════════════════════════════════════════════
+
+  loki:
+    image: grafana/loki:3.0.0
+    profiles: ["monitoring"]
+    networks:
+      - internal
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:3100:3100"
+    volumes:
+      - loki_data:/loki
+      - ./monitoring/loki/loki.yml:/etc/loki/loki.yml:ro
+    command: -config.file=/etc/loki/loki.yml
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+# ═══════════════════════════════════════════════════════════════════
+# Tempo — Distributed Tracing (Optional — profile: monitoring)
+# ═══════════════════════════════════════════════════════════════════
+
+  tempo:
+    image: grafana/tempo:2.4.0
+    profiles: ["monitoring"]
+    networks:
+      - internal
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:3200:3200"   # HTTP
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:4317:4317"  # OTLP gRPC
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:4318:4318"  # OTLP HTTP
+    volumes:
+      - tempo_data:/tmp/tempo
+      - ./monitoring/tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+    command: -config.file=/etc/tempo/tempo.yml
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+# ═══════════════════════════════════════════════════════════════════
 # Opik — LLM Observability (Optional)
 # ═══════════════════════════════════════════════════════════════════
 
@@ -754,6 +897,7 @@ services:
     image: ghcr.io/comet-ml/opik:0.1.8
     profiles: ["opik"]
     networks:
+      - internal
       - frontend
     ports:
       - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:9000:9000"
@@ -776,6 +920,152 @@ services:
         reservations:
           cpus: '0.50'
           memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+# ═══════════════════════════════════════════════════════════════════
+# Langfuse — AI Observability (Optional)
+# ═══════════════════════════════════════════════════════════════════
+
+  langfuse-postgres:
+    image: postgres:16-alpine
+    profiles: ["langfuse"]
+    networks:
+      - internal
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD:-langfuse_local_password}
+      - POSTGRES_DB=langfuse
+    volumes:
+      - langfuse_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  langfuse:
+    image: langfuse/langfuse:3
+    profiles: ["langfuse"]
+    networks:
+      - internal
+      - frontend
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:3101:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:${LANGFUSE_DB_PASSWORD:-langfuse_local_password}@langfuse-postgres:5432/langfuse
+      - SALT="evershade-salt"
+      - AUTH_DISABLE_SIGNUP_WITHOUT_AUTH=true
+      - AUTH_USERNAME=${LANGFUSE_USERNAME:-admin}
+      - AUTH_PASSWORD=${LANGFUSE_PASSWORD:-admin}
+      - TELEMETRY_ENABLED=false
+    depends_on:
+      langfuse-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/public/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1G
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+# ═══════════════════════════════════════════════════════════════════
+# Browser Use — LLM Browser Automation (Optional)
+# ═══════════════════════════════════════════════════════════════════
+
+  browser-use:
+    image: python:3.12-slim
+    profiles: ["browser-use"]
+    networks:
+      - internal
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:8091:8091"
+    environment:
+      - OPENAI_API_KEY=${EVERSHADE_OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${EVERSHADE_ANTHROPIC_API_KEY:-}
+      - BROWSER_USE_MODEL=${EVERSHADE_BROWSER_USE_MODEL:-gpt-4o}
+      - BROWSER_USE_HEADLESS=true
+    volumes:
+      - ./integrations/browser-use:/app:ro
+    command: >
+      sh -c "pip install -q browser-use && python -m browser_use.server --host 0.0.0.0 --port 8091"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8091/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+# ═══════════════════════════════════════════════════════════════════
+# Playwright MCP — MCP Browser Automation (Optional)
+# ═══════════════════════════════════════════════════════════════════
+
+  playwright-mcp:
+    image: mcr.microsoft.com/playwright:mcp-latest
+    profiles: ["playwright-mcp"]
+    networks:
+      - internal
+    ports:
+      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:8092:8092"
+    environment:
+      - PORT=8092
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8092/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     security_opt:
       - no-new-privileges:true
     cap_drop:

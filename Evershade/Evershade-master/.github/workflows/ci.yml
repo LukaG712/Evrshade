@@ -107,3 +107,41 @@ jobs:
                  tests/test_round2_config_security.py \
                  tests/test_shell_scripts_security.py \
                  -v --tb=short
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install evershade-core
+        run: |
+          pip install -e "packages/evershade-core[dev]"
+
+      - name: Install evershade-events
+        run: |
+          pip install -e "packages/evershade-events[dev]"
+
+      - name: Install evershade-db
+        run: |
+          pip install -e "packages/evershade-db[dev]"
+
+      - name: Run evershade-core tests
+        run: |
+          cd packages/evershade-core && pytest tests/ -v --tb=short
+
+      - name: Run evershade-events tests
+        run: |
+          cd packages/evershade-events && pytest tests/ -v --tb=short
+
+      - name: Run evershade-db tests
+        run: |
+          cd packages/evershade-db && pytest tests/ -v --tb=short

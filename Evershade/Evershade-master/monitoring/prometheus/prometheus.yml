@@ -14,6 +14,7 @@ scrape_configs:
 
   # Greenie - API metrics (Prometheus format)
   - job_name: 'greenie'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Greenie:8080']
         labels:
@@ -22,6 +23,7 @@ scrape_configs:
 
   # Sneaker - Observability service metrics
   - job_name: 'sneaker'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Sneaker:8086']
         labels:
@@ -30,6 +32,7 @@ scrape_configs:
 
   # Trapper - Web scraping service
   - job_name: 'trapper'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Trapper-api:3000']
         labels:
@@ -38,6 +41,7 @@ scrape_configs:
 
   # Gobber - Knowledge graph service
   - job_name: 'gobber'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Gobber:8085']
         labels:
@@ -46,6 +50,7 @@ scrape_configs:
 
   # Slinker - Code execution engine
   - job_name: 'slinker'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Slinker:8000']
         labels:
@@ -54,6 +59,7 @@ scrape_configs:
 
   # Hider - Secrets management
   - job_name: 'hider'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Hider:8087']
         labels:
@@ -62,6 +68,7 @@ scrape_configs:
 
   # Poltergeist - Notifications
   - job_name: 'poltergeist'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Poltergeist:8088']
         labels:
@@ -70,6 +77,7 @@ scrape_configs:
 
   # Shrewd - LLM provider abstraction
   - job_name: 'shrewd'
+    metrics_path: /metrics
     static_configs:
       - targets: ['Shrewd:8089']
         labels:
@@ -97,3 +105,17 @@ scrape_configs:
       - targets: ['node-exporter:9100']
         labels:
           component: 'host'
+
+  # Loki - Log aggregation metrics
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+        labels:
+          component: 'logs'
+
+  # Tempo - Distributed tracing metrics
+  - job_name: 'tempo'
+    static_configs:
+      - targets: ['tempo:3200']
+        labels:
+          component: 'traces'
