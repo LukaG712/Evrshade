@@ -260,7 +260,7 @@ evershade start
 bash backup.sh
 
 # 2. Pull latest code
-git pull origin main
+git pull origin master
 
 # 3. Rebuild images
 docker compose build

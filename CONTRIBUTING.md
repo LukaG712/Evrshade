@@ -28,7 +28,7 @@ Be respectful, constructive, and inclusive. Harassment or abusive behavior will 
 ### Pull Requests
 
 1. Fork the repository
-2. Create a feature branch from `main`
+2. Create a feature branch from `master`
 3. Make your changes
 4. Run tests: `pytest` (Python) or `npm test` (TypeScript)
 5. Lint and format code
