@@ -1,5 +1,0 @@
-[build]
-  command = "pnpm build"
-  publish = ".next"
-  functions = "netlify/functions"
-  cache = [".next/cache", "node_modules/.cache"]
