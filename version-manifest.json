@@ -21,7 +21,20 @@
     "Loki": { "version": "3.0.0", "port": 3100, "optional": true },
     "Tempo": { "version": "2.4.0", "port": 3200, "optional": true },
     "Opik": { "version": "0.1.8", "port": 9000, "optional": true },
-    "Langfuse": { "version": "3", "port": 3101, "optional": true }
+    "Langfuse": { "version": "3", "port": 3101, "optional": true },
+    "Ollama": { "version": "0.5.7", "image": "ollama/ollama:0.5.7", "port": 11434, "optional": true }
+  },
+  "docker_images": {
+    "redis": "redis:8.10.2-alpine",
+    "prometheus": "prom/prometheus:2.53.0",
+    "grafana": "grafana/grafana:11.1.0",
+    "cAdvisor": "gcr.io/cadvisor/cadvisor:0.49.1",
+    "node-exporter": "prom/node-exporter:1.8.2",
+    "loki": "grafana/loki:3.0.0",
+    "tempo": "grafana/tempo:2.4.0",
+    "opik": "ghcr.io/comet-ml/opik:0.1.8",
+    "langfuse": "langfuse/langfuse:3",
+    "ollama": "ollama/ollama:0.5.7"
   },
   "integrations": {
     "OpenTelemetry": "adopted",

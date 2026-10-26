@@ -171,10 +171,20 @@ class TestPinnedImageTags(unittest.TestCase):
         )
 
     def test_all_images_have_version_tags(self):
-        """All images should have explicit version tags."""
+        """All external images should have explicit version tags.
+        Build-context images (evershade-*) are skipped as they're built locally."""
+        # Parse YAML to find images that also have a build section
+        data = yaml.safe_load(self.content)
+        build_images = set()
+        for svc_name, svc_config in data.get("services", {}).items():
+            if "build" in svc_config and "image" in svc_config:
+                build_images.add(svc_config["image"])
         image_pattern = re.compile(r"image:\s*(\S+)")
         images = image_pattern.findall(self.content)
         for image in images:
+            # Skip build-context images — they're built locally, not pulled
+            if image in build_images:
+                continue
             self.assertIn(
                 ":",
                 image,

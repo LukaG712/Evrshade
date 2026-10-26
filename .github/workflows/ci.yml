@@ -68,7 +68,7 @@ jobs:
         run: |
           # Check all requirements.txt files for known CVEs
           find . -name "requirements.txt" -not -path "*/node_modules/*" -not -path "*/.junie/*" | \
-            xargs -I {} safety check --json --full-report -r {} || true
+            xargs -I {} safety check -r {} || true
 
       - name: TruffleHog secret scan
         uses: trufflesecurity/trufflehog@v3.82.11
