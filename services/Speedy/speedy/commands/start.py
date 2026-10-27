@@ -21,7 +21,9 @@ def start(profiles):
 
     compose = find_compose_file()
     if compose is None:
-        print_error("docker-compose.yml not found. Run from the Evershade project root.")
+        print_error(
+            "docker-compose.yml not found. Run from the Evershade project root."
+        )
         return
 
     profile_list = list(profiles) if profiles else ["standard"]

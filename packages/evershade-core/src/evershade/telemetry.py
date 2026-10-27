@@ -73,7 +73,9 @@ def setup_telemetry(app, service_name: str = "evershade-service") -> None:
     # Instrument FastAPI
     FastAPIInstrumentor.instrument_app(
         app,
-        server_request_hook=lambda span, request: _server_request_hook(span, request, service_name),
+        server_request_hook=lambda span, request: _server_request_hook(
+            span, request, service_name
+        ),
     )
 
     # Instrument HTTPX for outgoing requests

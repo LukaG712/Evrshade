@@ -64,7 +64,9 @@ class Storage:
                     notification.recipient,
                     notification.title,
                     notification.message,
-                    json.dumps(notification.metadata) if notification.metadata else None,
+                    json.dumps(notification.metadata)
+                    if notification.metadata
+                    else None,
                     notification.status.value,
                     notification.created_at.isoformat(),
                     notification.sent_at.isoformat() if notification.sent_at else None,
@@ -90,7 +92,9 @@ class Storage:
                 updates.append("error = ?")
                 values.append(error)
             values.append(str(notification_id))
-            conn.execute(f"UPDATE notifications SET {', '.join(updates)} WHERE id = ?", values)
+            conn.execute(
+                f"UPDATE notifications SET {', '.join(updates)} WHERE id = ?", values
+            )
             conn.commit()
             return conn.total_changes > 0
 
@@ -116,7 +120,9 @@ class Storage:
 
     def get_notification(self, notification_id: str) -> dict | None:
         with self._get_conn() as conn:
-            row = conn.execute("SELECT * FROM notifications WHERE id = ?", (str(notification_id),)).fetchone()
+            row = conn.execute(
+                "SELECT * FROM notifications WHERE id = ?", (str(notification_id),)
+            ).fetchone()
             return dict(row) if row else None
 
     # ─── Templates ──────────────────────────────────────────────
@@ -138,7 +144,9 @@ class Storage:
 
     def get_template(self, name: str) -> dict | None:
         with self._get_conn() as conn:
-            row = conn.execute("SELECT * FROM templates WHERE name = ?", (name,)).fetchone()
+            row = conn.execute(
+                "SELECT * FROM templates WHERE name = ?", (name,)
+            ).fetchone()
             return dict(row) if row else None
 
     def list_templates(self) -> list[dict]:

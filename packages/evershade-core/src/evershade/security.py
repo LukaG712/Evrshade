@@ -94,7 +94,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         window_start = now - self._window
 
         # Clean old entries
-        self._requests[client_ip] = [ts for ts in self._requests[client_ip] if ts > window_start]
+        self._requests[client_ip] = [
+            ts for ts in self._requests[client_ip] if ts > window_start
+        ]
 
         # Check limit
         return len(self._requests[client_ip]) >= self.requests_per_minute

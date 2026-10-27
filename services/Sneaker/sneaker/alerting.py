@@ -25,8 +25,12 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = os.getenv("SNEAKER_DATA_DIR", os.path.join(os.path.dirname(__file__), "..", "data"))
-ALERTS_DB_PATH = os.getenv("SNEAKER_ALERTS_DB_PATH", os.path.join(DATA_DIR, "alerts.db"))
+DATA_DIR = os.getenv(
+    "SNEAKER_DATA_DIR", os.path.join(os.path.dirname(__file__), "..", "data")
+)
+ALERTS_DB_PATH = os.getenv(
+    "SNEAKER_ALERTS_DB_PATH", os.path.join(DATA_DIR, "alerts.db")
+)
 
 
 class AlertSeverity(StrEnum):
@@ -191,7 +195,9 @@ class AlertManager:
     def list_rules(self) -> list[dict]:
         conn = _get_connection()
         try:
-            rows = conn.execute("SELECT * FROM alert_rules ORDER BY severity, name").fetchall()
+            rows = conn.execute(
+                "SELECT * FROM alert_rules ORDER BY severity, name"
+            ).fetchall()
             return [dict(r) for r in rows]
         finally:
             conn.close()
@@ -199,7 +205,9 @@ class AlertManager:
     def get_rule(self, rule_id: str) -> dict | None:
         conn = _get_connection()
         try:
-            row = conn.execute("SELECT * FROM alert_rules WHERE id = ?", (rule_id,)).fetchone()
+            row = conn.execute(
+                "SELECT * FROM alert_rules WHERE id = ?", (rule_id,)
+            ).fetchone()
             return dict(row) if row else None
         finally:
             conn.close()
@@ -236,12 +244,16 @@ class AlertManager:
         values.append(rule_id)
         conn = _get_connection()
         try:
-            conn.execute(f"UPDATE alert_rules SET {', '.join(sets)} WHERE id = ?", values)
+            conn.execute(
+                f"UPDATE alert_rules SET {', '.join(sets)} WHERE id = ?", values
+            )
             conn.commit()
         finally:
             conn.close()
 
-    def evaluate(self, condition: str, value: float = 1.0, context: dict | None = None) -> Alert | None:
+    def evaluate(
+        self, condition: str, value: float = 1.0, context: dict | None = None
+    ) -> Alert | None:
         """Evaluate alert rules against a condition and value.
 
         Returns a fired alert if any rule matches, None otherwise.
@@ -338,7 +350,9 @@ class AlertManager:
 
     def _deliver(self, alert: Alert):
         """Deliver alert via Poltergeist if available."""
-        poltergeist_url = os.getenv("EVERSHADE_POLTERGEIST_URL", "http://Poltergeist:8088")
+        poltergeist_url = os.getenv(
+            "EVERSHADE_POLTERGEIST_URL", "http://Poltergeist:8088"
+        )
         poltergeist_key = os.getenv("EVERSHADE_POLTERGEIST_API_KEY", "")
         if not poltergeist_key:
             return
@@ -398,14 +412,18 @@ class AlertManager:
     def stats(self) -> dict:
         conn = _get_connection()
         try:
-            total = conn.execute("SELECT COUNT(*) as c FROM alert_fired").fetchone()["c"]
-            by_severity = {}
-            for row in conn.execute("SELECT severity, COUNT(*) as c FROM alert_fired GROUP BY severity").fetchall():
-                by_severity[row["severity"]] = row["c"]
-
-            unacknowledged = conn.execute("SELECT COUNT(*) as c FROM alert_fired WHERE acknowledged = 0").fetchone()[
+            total = conn.execute("SELECT COUNT(*) as c FROM alert_fired").fetchone()[
                 "c"
             ]
+            by_severity = {}
+            for row in conn.execute(
+                "SELECT severity, COUNT(*) as c FROM alert_fired GROUP BY severity"
+            ).fetchall():
+                by_severity[row["severity"]] = row["c"]
+
+            unacknowledged = conn.execute(
+                "SELECT COUNT(*) as c FROM alert_fired WHERE acknowledged = 0"
+            ).fetchone()["c"]
 
             return {
                 "total_alerts": total,

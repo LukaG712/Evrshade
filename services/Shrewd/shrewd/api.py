@@ -111,8 +111,12 @@ if HAS_PROMETHEUS:
             status = "500"
         finally:
             duration = time.time() - start
-            shrewd_http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
-            shrewd_http_request_duration.labels(method=method, endpoint=endpoint).observe(duration)
+            shrewd_http_requests_total.labels(
+                method=method, endpoint=endpoint, status=status
+            ).inc()
+            shrewd_http_request_duration.labels(
+                method=method, endpoint=endpoint
+            ).observe(duration)
         return response
 
     @app.get("/metrics")
@@ -145,7 +149,9 @@ async def capabilities() -> dict:
 
 
 @app.post("/api/chat")
-async def chat(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def chat(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     """Route a chat request to the appropriate LLM provider.
 
     Supports real providers: OpenAI, Anthropic, Google Gemini, and Ollama.
@@ -158,7 +164,9 @@ async def chat(data: dict[str, Any], authorization: str | None = Header(None)) -
     require_private = data.get("require_private", False)
     messages_data = data.get("messages", [])
 
-    messages = [ChatMessage(role=m["role"], content=m["content"]) for m in messages_data]
+    messages = [
+        ChatMessage(role=m["role"], content=m["content"]) for m in messages_data
+    ]
 
     try:
         response = await route_chat(
@@ -188,7 +196,9 @@ async def chat(data: dict[str, Any], authorization: str | None = Header(None)) -
 
 
 @app.get("/api/models")
-async def list_models(provider: str | None = None, authorization: str | None = Header(None)) -> list[dict[str, Any]]:
+async def list_models(
+    provider: str | None = None, authorization: str | None = Header(None)
+) -> list[dict[str, Any]]:
     """List available models with provider and privacy info."""
     verify_bearer(authorization)
     results = []

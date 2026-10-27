@@ -108,7 +108,9 @@ class ServiceConfig(BaseSettings):
     port: int = Field(..., ge=1, le=65535)
     version: str = Field(default="2.0.0", min_length=1)
     environment: Environment = Field(default=Environment.DEV)
-    log_level: str = Field(default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
+    log_level: str = Field(
+        default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$"
+    )
     host: str = Field(default="0.0.0.0")
 
     # API key for external authentication

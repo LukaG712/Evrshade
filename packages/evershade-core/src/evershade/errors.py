@@ -124,14 +124,20 @@ def register_error_handlers(app: FastAPI) -> None:
     """
 
     @app.exception_handler(EvershadeError)
-    async def evershade_error_handler(request: Request, exc: EvershadeError) -> Response:
+    async def evershade_error_handler(
+        request: Request, exc: EvershadeError
+    ) -> Response:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
-        body = error_response(exc.code, exc.message, details=exc.details, request_id=request_id)
+        body = error_response(
+            exc.code, exc.message, details=exc.details, request_id=request_id
+        )
         status = ERROR_CODE_TO_STATUS.get(exc.code, 500)
         return JSONResponse(status_code=status, content=body)
 
     @app.exception_handler(RequestValidationError)
-    async def validation_error_handler(request: Request, exc: RequestValidationError) -> Response:
+    async def validation_error_handler(
+        request: Request, exc: RequestValidationError
+    ) -> Response:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
         body = error_response(
             ErrorCode.VALIDATION_ERROR,

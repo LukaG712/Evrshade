@@ -38,7 +38,9 @@ async def add_mcp_server(data: dict):
         raise HTTPException(status_code=400, detail="Name and URL are required")
     existing = await db.fetchone("SELECT * FROM mcp_servers WHERE name = ?", (name,))
     if existing:
-        raise HTTPException(status_code=409, detail="MCP server with this name already exists")
+        raise HTTPException(
+            status_code=409, detail="MCP server with this name already exists"
+        )
     server_id = str(uuid.uuid4())
     transport = "stdio"
     if url.startswith(("http://", "https://")):
@@ -55,7 +57,9 @@ async def add_mcp_server(data: dict):
 @router.delete("/servers/{server_name}")
 async def remove_mcp_server(server_name: str):
     """Remove an MCP server."""
-    existing = await db.fetchone("SELECT * FROM mcp_servers WHERE name = ?", (server_name,))
+    existing = await db.fetchone(
+        "SELECT * FROM mcp_servers WHERE name = ?", (server_name,)
+    )
     if not existing:
         raise HTTPException(status_code=404, detail="MCP server not found")
     await db.execute("DELETE FROM mcp_servers WHERE name = ?", (server_name,))

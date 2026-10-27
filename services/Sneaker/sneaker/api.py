@@ -124,7 +124,9 @@ def _load_from_db():
     """Load previously stored data from SQLite into in-memory lists."""
     with _get_db() as conn:
         # Load metrics
-        for row in conn.execute("SELECT name, value, labels, timestamp FROM metrics ORDER BY id"):
+        for row in conn.execute(
+            "SELECT name, value, labels, timestamp FROM metrics ORDER BY id"
+        ):
             _metrics.append(
                 MetricPoint(
                     name=row[0],
@@ -150,7 +152,9 @@ def _load_from_db():
                 )
             )
         # Load logs
-        for row in conn.execute("SELECT level, message, service, attributes, timestamp FROM logs ORDER BY id"):
+        for row in conn.execute(
+            "SELECT level, message, service, attributes, timestamp FROM logs ORDER BY id"
+        ):
             _logs.append(
                 LogEntry(
                     level=row[0],
@@ -226,8 +230,12 @@ async def prometheus_middleware(request, call_next):
         raise
     finally:
         duration = time.time() - start
-        sneaker_http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
-        sneaker_http_request_duration.labels(method=method, endpoint=endpoint).observe(duration)
+        sneaker_http_requests_total.labels(
+            method=method, endpoint=endpoint, status=status
+        ).inc()
+        sneaker_http_request_duration.labels(method=method, endpoint=endpoint).observe(
+            duration
+        )
 
 
 @app.get("/metrics")
@@ -283,9 +291,13 @@ async def capabilities() -> dict:
 
 
 @app.post("/api/metrics")
-async def record_metric(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def record_metric(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
-    metric = MetricPoint(name=data["name"], value=float(data["value"]), labels=data.get("labels"))
+    metric = MetricPoint(
+        name=data["name"], value=float(data["value"]), labels=data.get("labels")
+    )
     _metrics.append(metric)
     # Evict oldest entries if over max size
     if len(_metrics) > _MAX_METRICS:
@@ -383,7 +395,9 @@ async def metrics_summary(authorization: str | None = Header(None)) -> dict[str,
 
 
 @app.post("/api/traces")
-async def record_trace(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def record_trace(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     span = TraceSpan(
         trace_id=data["trace_id"],
@@ -437,7 +451,9 @@ async def query_traces(
 
 
 @app.post("/api/logs")
-async def record_log(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def record_log(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     entry = LogEntry(
         level=data["level"],

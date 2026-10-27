@@ -1,9 +1,5 @@
 """Tests for evershade.errors — Error handling and middleware."""
 
-from fastapi import FastAPI, Request
-from fastapi.testclient import TestClient
-from pydantic import BaseModel, Field
-
 from evershade.errors import (
     ERROR_CODE_TO_STATUS,
     CorrelationIdMiddleware,
@@ -14,6 +10,9 @@ from evershade.errors import (
     register_error_handlers,
     success_response,
 )
+from fastapi import FastAPI, Request
+from fastapi.testclient import TestClient
+from pydantic import BaseModel, Field
 
 
 class TestErrorCode:
@@ -46,7 +45,9 @@ class TestEvershadeError:
         assert "NOT_FOUND" in str(err)
 
     def test_error_with_details(self):
-        err = EvershadeError(ErrorCode.VALIDATION_ERROR, "Bad input", details={"field": "name"})
+        err = EvershadeError(
+            ErrorCode.VALIDATION_ERROR, "Bad input", details={"field": "name"}
+        )
         assert err.details == {"field": "name"}
 
 

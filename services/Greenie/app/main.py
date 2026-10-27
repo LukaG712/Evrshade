@@ -110,7 +110,9 @@ app.include_router(missions.router, prefix="/api/missions", tags=["missions"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
 app.include_router(plugins.router, prefix="/api/plugins", tags=["plugins"])
 app.include_router(mcp.router, prefix="/api/mcp", tags=["mcp"])
-app.include_router(workstations.router, prefix="/api/workstations", tags=["workstations"])
+app.include_router(
+    workstations.router, prefix="/api/workstations", tags=["workstations"]
+)
 
 
 @app.get("/api/capabilities")

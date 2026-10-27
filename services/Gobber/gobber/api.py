@@ -120,8 +120,12 @@ if HAS_PROMETHEUS:
             status = "500"
         finally:
             duration = time.time() - start
-            gobber_http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
-            gobber_http_request_duration.labels(method=method, endpoint=endpoint).observe(duration)
+            gobber_http_requests_total.labels(
+                method=method, endpoint=endpoint, status=status
+            ).inc()
+            gobber_http_request_duration.labels(
+                method=method, endpoint=endpoint
+            ).observe(duration)
         return response
 
     @app.get("/metrics")
@@ -159,7 +163,9 @@ async def capabilities() -> dict[str, Any]:
 
 
 @app.post("/api/webhooks")
-async def create_webhook(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def create_webhook(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     webhook = Webhook(
         name=data["name"],
@@ -173,14 +179,18 @@ async def create_webhook(data: dict[str, Any], authorization: str | None = Heade
 
 
 @app.get("/api/webhooks")
-async def list_webhooks(active_only: bool = False, authorization: str | None = Header(None)) -> list[dict[str, Any]]:
+async def list_webhooks(
+    active_only: bool = False, authorization: str | None = Header(None)
+) -> list[dict[str, Any]]:
     verify_bearer(authorization)
     webhooks = storage.list_webhooks(active_only=active_only)
     return [w.to_dict() for w in webhooks]
 
 
 @app.get("/api/webhooks/{webhook_id}")
-async def get_webhook(webhook_id: str, authorization: str | None = Header(None)) -> dict[str, Any]:
+async def get_webhook(
+    webhook_id: str, authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     webhook = storage.get_webhook(webhook_id)
     if webhook is None:
@@ -202,7 +212,9 @@ async def update_webhook(
 
 
 @app.delete("/api/webhooks/{webhook_id}")
-async def delete_webhook(webhook_id: str, authorization: str | None = Header(None)) -> dict[str, bool]:
+async def delete_webhook(
+    webhook_id: str, authorization: str | None = Header(None)
+) -> dict[str, bool]:
     verify_bearer(authorization)
     deleted = storage.delete_webhook(webhook_id)
     if not deleted:
@@ -248,7 +260,9 @@ async def list_deliveries(
 
 
 @app.post("/api/analytics/events")
-async def record_event(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def record_event(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     event = AnalyticsEvent(
         event_type=data["event_type"],
@@ -275,7 +289,9 @@ async def query_events(
 
 
 @app.post("/api/flags")
-async def create_flag(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def create_flag(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     flag = FeatureFlag(
         name=data["name"],
@@ -295,7 +311,9 @@ async def list_flags(authorization: str | None = Header(None)) -> list[dict[str,
 
 
 @app.get("/api/flags/{name}")
-async def get_flag(name: str, authorization: str | None = Header(None)) -> dict[str, Any]:
+async def get_flag(
+    name: str, authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     flag = storage.get_feature_flag(name)
     if flag is None:
@@ -317,7 +335,9 @@ async def update_flag(
 
 
 @app.delete("/api/flags/{name}")
-async def delete_flag(name: str, authorization: str | None = Header(None)) -> dict[str, bool]:
+async def delete_flag(
+    name: str, authorization: str | None = Header(None)
+) -> dict[str, bool]:
     verify_bearer(authorization)
     deleted = storage.delete_feature_flag(name)
     if not deleted:
@@ -329,7 +349,9 @@ async def delete_flag(name: str, authorization: str | None = Header(None)) -> di
 
 
 @app.post("/api/cache")
-async def set_cache(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def set_cache(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     entry = CacheEntry(
         key=data["key"],
@@ -341,7 +363,9 @@ async def set_cache(data: dict[str, Any], authorization: str | None = Header(Non
 
 
 @app.get("/api/cache/{key}")
-async def get_cache(key: str, authorization: str | None = Header(None)) -> dict[str, Any] | None:
+async def get_cache(
+    key: str, authorization: str | None = Header(None)
+) -> dict[str, Any] | None:
     verify_bearer(authorization)
     entry = storage.get_cache(key)
     if entry is None:
@@ -350,7 +374,9 @@ async def get_cache(key: str, authorization: str | None = Header(None)) -> dict[
 
 
 @app.delete("/api/cache/{key}")
-async def delete_cache(key: str, authorization: str | None = Header(None)) -> dict[str, bool]:
+async def delete_cache(
+    key: str, authorization: str | None = Header(None)
+) -> dict[str, bool]:
     verify_bearer(authorization)
     deleted = storage.delete_cache(key)
     return {"deleted": deleted}
@@ -360,7 +386,9 @@ async def delete_cache(key: str, authorization: str | None = Header(None)) -> di
 
 
 @app.post("/api/roles")
-async def create_role(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
+async def create_role(
+    data: dict[str, Any], authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     role = Role(
         name=data["name"],
@@ -379,7 +407,9 @@ async def list_roles(authorization: str | None = Header(None)) -> list[dict[str,
 
 
 @app.get("/api/roles/{role_id}")
-async def get_role(role_id: str, authorization: str | None = Header(None)) -> dict[str, Any]:
+async def get_role(
+    role_id: str, authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     role = storage.get_role(role_id)
     if role is None:
@@ -388,7 +418,9 @@ async def get_role(role_id: str, authorization: str | None = Header(None)) -> di
 
 
 @app.delete("/api/roles/{role_id}")
-async def delete_role(role_id: str, authorization: str | None = Header(None)) -> dict[str, bool]:
+async def delete_role(
+    role_id: str, authorization: str | None = Header(None)
+) -> dict[str, bool]:
     verify_bearer(authorization)
     deleted = storage.delete_role(role_id)
     if not deleted:
@@ -416,7 +448,9 @@ async def assign_role(
 
 
 @app.get("/api/users/{user_id}/roles")
-async def get_user_roles(user_id: str, authorization: str | None = Header(None)) -> list[dict[str, Any]]:
+async def get_user_roles(
+    user_id: str, authorization: str | None = Header(None)
+) -> list[dict[str, Any]]:
     verify_bearer(authorization)
     roles = storage.get_user_roles(user_id)
     return [r.to_dict() for r in roles]
@@ -459,7 +493,9 @@ async def list_vault_notes(
 
 
 @app.get("/api/vault/notes/{note_id}")
-async def get_vault_note(note_id: str, authorization: str | None = Header(None)) -> dict[str, Any]:
+async def get_vault_note(
+    note_id: str, authorization: str | None = Header(None)
+) -> dict[str, Any]:
     verify_bearer(authorization)
     note = kg.get_note(note_id)
     if note is None:
@@ -482,7 +518,9 @@ async def search_vault(
 
 
 @app.get("/api/vault/notes/{note_id}/links")
-async def get_note_links(note_id: str, authorization: str | None = Header(None)) -> list[dict[str, Any]]:
+async def get_note_links(
+    note_id: str, authorization: str | None = Header(None)
+) -> list[dict[str, Any]]:
     verify_bearer(authorization)
     note = kg.get_note(note_id)
     if note is None:
@@ -506,7 +544,9 @@ async def get_related_notes(
 
 
 @app.delete("/api/vault/notes/{note_id}")
-async def delete_vault_note(note_id: str, authorization: str | None = Header(None)) -> dict[str, bool]:
+async def delete_vault_note(
+    note_id: str, authorization: str | None = Header(None)
+) -> dict[str, bool]:
     verify_bearer(authorization)
     deleted = kg.delete_note(note_id)
     if not deleted:

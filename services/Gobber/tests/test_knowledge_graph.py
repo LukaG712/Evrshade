@@ -7,7 +7,6 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-
 from gobber.kg_models import Note
 from gobber.kg_storage import KnowledgeGraphStorage, cosine_similarity
 from gobber.knowledge_graph import KnowledgeGraph
@@ -192,7 +191,9 @@ class TestKnowledgeGraphStorage:
 
     def test_list_notes(self, kg_storage):
         for i in range(3):
-            kg_storage.upsert_note(Note(file_path=f"note{i}.md", title=f"Note {i}", content=f"Content {i}"))
+            kg_storage.upsert_note(
+                Note(file_path=f"note{i}.md", title=f"Note {i}", content=f"Content {i}")
+            )
         notes = kg_storage.list_notes()
         assert len(notes) == 3
 
@@ -218,7 +219,9 @@ class TestKnowledgeGraphStorage:
             title="AI Note",
             content="Artificial intelligence is great",
         )
-        note2 = Note(file_path="note2.md", title="Cooking Note", content="Cooking pasta is easy")
+        note2 = Note(
+            file_path="note2.md", title="Cooking Note", content="Cooking pasta is easy"
+        )
         kg_storage.upsert_note(note1)
         kg_storage.upsert_note(note2)
 

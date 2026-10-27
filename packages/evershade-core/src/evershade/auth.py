@@ -131,7 +131,9 @@ class ServiceAuthMiddleware(BaseHTTPMiddleware):
         except jwt.ExpiredSignatureError:
             return JSONResponse(status_code=401, content={"detail": "Token expired"})
         except jwt.InvalidTokenError as e:
-            return JSONResponse(status_code=401, content={"detail": f"Invalid token: {e}"})
+            return JSONResponse(
+                status_code=401, content={"detail": f"Invalid token: {e}"}
+            )
 
         return await call_next(request)
 

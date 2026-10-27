@@ -29,7 +29,9 @@ def find_compose_file() -> Path | None:
     return None
 
 
-def _run_compose(args: list[str], project_dir: Path | None = None) -> subprocess.CompletedProcess:
+def _run_compose(
+    args: list[str], project_dir: Path | None = None
+) -> subprocess.CompletedProcess:
     """Run a docker compose command.
 
     Args:
@@ -60,7 +62,9 @@ def _run_compose(args: list[str], project_dir: Path | None = None) -> subprocess
         sys.exit(1)
 
 
-def docker_compose_up(profiles: list[str] | None = None, project_dir: Path | None = None) -> bool:
+def docker_compose_up(
+    profiles: list[str] | None = None, project_dir: Path | None = None
+) -> bool:
     """Start services with docker compose up -d.
 
     Args:
@@ -125,7 +129,9 @@ def docker_compose_ps(project_dir: Path | None = None) -> list[dict] | None:
     return None
 
 
-def docker_compose_logs(service: str, tail: int = 100, project_dir: Path | None = None) -> str | None:
+def docker_compose_logs(
+    service: str, tail: int = 100, project_dir: Path | None = None
+) -> str | None:
     """Get logs for a service.
 
     Args:
