@@ -43,6 +43,7 @@
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_GREENIE_API_KEY}"
 	}
 
 	# Service routes → individual backends
@@ -50,42 +51,49 @@
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_SLINKER_API_KEY}"
 	}
 
 	reverse_proxy /trapper/* Trapper:3000 {
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_TRAPPER_API_KEY}"
 	}
 
 	reverse_proxy /gobber/* Gobber:8085 {
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_GOBBER_API_KEY}"
 	}
 
 	reverse_proxy /sneaker/* Sneaker:8086 {
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_SNEAKER_API_KEY}"
 	}
 
 	reverse_proxy /hider/* Hider:8087 {
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_HIDER_API_KEY}"
 	}
 
 	reverse_proxy /poltergeist/* Poltergeist:8088 {
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_POLTERGEIST_API_KEY}"
 	}
 
 	reverse_proxy /shrewd/* Shrewd:8089 {
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_SHREWD_API_KEY}"
 	}
 
 	# WebSocket support for terminals and real-time features
@@ -97,5 +105,6 @@
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 		header_up X-Forwarded-For {remote_host}
+		header_up Authorization "Bearer {env.EVERSHADE_GREENIE_API_KEY}"
 	}
 }

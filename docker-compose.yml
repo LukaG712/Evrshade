@@ -102,6 +102,7 @@ services:
       - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:8080:8080"
     environment:
       # API Key (new naming + legacy alias)
+      - API_KEY=${EVERSHADE_GREENIE_API_KEY}
       - EVERSHADE_GREENIE_API_KEY=${EVERSHADE_GREENIE_API_KEY}
       - HUB_API_KEY=${EVERSHADE_GREENIE_API_KEY}
       - HUB_PORT=8080
@@ -203,6 +204,7 @@ services:
       - WORKSPACE_PATH=/workspace
       - MAX_CONCURRENT_WORKERS=${EVERSHADE_MAX_CONCURRENT_WORKERS:-1}
       - ISOLATION_MODE=${EVERSHADE_ISOLATION_MODE:-container}
+      - SHREWD_URL=http://Shrewd:8089
       - OLLAMA_URL=${EVERSHADE_OLLAMA_URL:-http://host.docker.internal:11434}
       - OLLAMA_MODEL=${EVERSHADE_OLLAMA_MODEL:-gemma4:12b}
       - REFINE_PROMPT=${EVERSHADE_REFINE_PROMPT:-false}
@@ -479,6 +481,17 @@ services:
       - API_KEY=${EVERSHADE_POLTERGEIST_API_KEY}
       - DB_PATH=/app/data/poltergeist.db
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
+      # Notification delivery
+      - SLACK_WEBHOOK_URL=${EVERSHADE_SLACK_WEBHOOK_URL:-}
+      - DISCORD_WEBHOOK_URL=${EVERSHADE_DISCORD_WEBHOOK_URL:-}
+      - SMTP_HOST=${EVERSHADE_SMTP_HOST:-localhost}
+      - SMTP_PORT=${EVERSHADE_SMTP_PORT:-587}
+      - SMTP_USER=${EVERSHADE_SMTP_USER:-}
+      - SMTP_PASSWORD=${EVERSHADE_SMTP_PASSWORD:-}
+      - SMTP_FROM=${EVERSHADE_SMTP_FROM:-noreply@evershade.local}
+      - SMTP_TLS=${EVERSHADE_SMTP_TLS:-true}
+      - TELEGRAM_BOT_TOKEN=${EVERSHADE_TELEGRAM_BOT_TOKEN:-}
+      - POLTERGEIST_REQUEST_TIMEOUT=${EVERSHADE_POLTERGEIST_REQUEST_TIMEOUT:-30}
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://Sneaker:8086
       # Tempo (optional distributed tracing)
@@ -519,8 +532,11 @@ services:
     environment:
       - API_KEY=${EVERSHADE_SHREWD_API_KEY}
       - OPENAI_API_KEY=${EVERSHADE_OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${EVERSHADE_OPENAI_BASE_URL:-https://api.openai.com/v1}
       - ANTHROPIC_API_KEY=${EVERSHADE_ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_BASE_URL=${EVERSHADE_ANTHROPIC_BASE_URL:-https://api.anthropic.com/v1}
       - GOOGLE_API_KEY=${EVERSHADE_GOOGLE_API_KEY:-}
+      - GOOGLE_BASE_URL=${EVERSHADE_GOOGLE_BASE_URL:-https://generativelanguage.googleapis.com/v1beta}
       - OLLAMA_URL=${EVERSHADE_OLLAMA_URL:-http://host.docker.internal:11434}
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
@@ -572,8 +588,11 @@ services:
     profiles: ["full", "dev"]
     networks:
       - frontend
+      - internal
     ports:
       - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:5173:80"
+    environment:
+      - GREENIE_API_KEY=${EVERSHADE_GREENIE_API_KEY}
     depends_on:
       - Greenie
     restart: unless-stopped
@@ -634,6 +653,15 @@ services:
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
+    environment:
+      - EVERSHADE_GREENIE_API_KEY=${EVERSHADE_GREENIE_API_KEY}
+      - EVERSHADE_SLINKER_API_KEY=${EVERSHADE_SLINKER_API_KEY}
+      - EVERSHADE_TRAPPER_API_KEY=${EVERSHADE_TRAPPER_API_KEY}
+      - EVERSHADE_GOBBER_API_KEY=${EVERSHADE_GOBBER_API_KEY}
+      - EVERSHADE_SNEAKER_API_KEY=${EVERSHADE_SNEAKER_API_KEY}
+      - EVERSHADE_HIDER_API_KEY=${EVERSHADE_HIDER_API_KEY}
+      - EVERSHADE_POLTERGEIST_API_KEY=${EVERSHADE_POLTERGEIST_API_KEY}
+      - EVERSHADE_SHREWD_API_KEY=${EVERSHADE_SHREWD_API_KEY}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
