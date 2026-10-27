@@ -55,59 +55,102 @@ The API will be available at **http://localhost:8080**.
 
 ---
 
-## GUI Installers
+## Installation
 
-Evershade provides visual, step-by-step GUI installers for both **Linux** and **Windows**. The wizard handles everything: dependency checks, Docker setup, service installation, configuration, and auto-start.
+Evershade provides interactive CLI installers for all platforms. The installers guide you through profile selection, service configuration, and environment setup.
 
-### Linux GUI Installer
+### Linux/macOS Quick Install
 
-For a visual installation experience on Ubuntu Desktop, use the GUI installer:
+The `install.sh` script provides an interactive wizard that checks prerequisites, selects your profile, configures `.env` with secure keys, and pulls Docker images:
 
 ```bash
-# Run the launcher script (checks prerequisites and installs missing ones)
-bash run-install-gui.sh
-
-# Or run directly with sudo
-sudo python3 install-gui.py
+# Run the interactive installer
+./install.sh
 ```
 
-The Linux GUI wizard guides you through 9 steps:
-1. **Welcome** — Overview of Evershade and requirements
-2. **System Check** — Verifies OS version, architecture, and installed tools
-3. **Installation Options** — Choose profile (minimal/standard/full/custom) and install directory. Custom mode lets you pick individual services via checkboxes.
-4. **Install Docker** — Installs Docker Engine and Compose if missing
-5. **Clone & Install** — Clones the repository with all services included
-6. **Configure** — Creates `.env` with auto-generated secure API keys
-7. **System Integration** — Optional systemd service and desktop launcher
-8. **Start Services** — Launches all services with your chosen profile
-9. **Complete** — Summary with quick commands and next steps
+The wizard will:
+1. Check Docker and Docker Compose are installed (with install instructions if missing)
+2. Prompt you to select an installation profile (minimal/standard/full)
+3. Create `.env` with auto-generated secure API keys
+4. Pull the required Docker images
 
-**Requirements:** Python 3.6+, Tkinter (usually pre-installed on Ubuntu Desktop), and a graphical display (X11/Wayland). For SSH sessions, use `ssh -X`.
+### Ubuntu Full Install (Recommended)
 
-### Windows GUI Installer
+For Ubuntu Desktop, `install-ubuntu.sh` provides a complete all-in-one installer with Docker setup, systemd service, and desktop integration:
 
-For a visual installation experience on Windows, use the GUI installer:
-
-```batch
-:: Double-click the launcher (checks Python and Tkinter)
-run-install-gui.bat
-
-:: Or run directly with Python
-python install-gui-win.py
+```bash
+# Run the interactive installer (requires sudo)
+sudo bash install-ubuntu.sh
 ```
 
-The Windows GUI wizard guides you through 9 steps:
-1. **Welcome** — Overview of Evershade and requirements
-2. **System Check** — Verifies Windows version, architecture, and installed tools
-3. **Installation Options** — Choose profile (minimal/standard/full/custom) and install directory. Custom mode lets you pick individual services via checkboxes.
-4. **Docker Check** — Verifies Docker Desktop is installed and running (with download link if missing)
-5. **Clone & Install** — Clones the repository and installs services via PowerShell
-6. **Configure** — Creates `.env` with auto-generated secure API keys
-7. **Desktop Shortcut** — Optionally creates a desktop shortcut for easy launching
-8. **Start Services** — Launches all services with your chosen profile
-9. **Complete** — Summary with quick commands and next steps
+The wizard will:
+1. Check system requirements (Ubuntu 20.04+, architecture)
+2. Prompt for installation profile and optional custom service selection
+3. Prompt for install directory (default: ~/Evershade)
+4. Install system dependencies (Git, Python3, curl)
+5. Install Docker Engine and Compose if missing
+6. Configure Docker group permissions
+7. Clone the Evershade repository and install service repos
+8. Create `.env` with auto-generated secure API keys
+9. Optionally create a systemd service for auto-start on boot
+10. Optionally create a desktop launcher icon
+11. Start services with your chosen profile
 
-**Requirements:** Python 3.6+ with Tkinter (included by default), Docker Desktop, and Git.
+**Non-interactive mode:** Use `--auto` to accept all defaults:
+```bash
+sudo bash install-ubuntu.sh --auto
+```
+
+**Custom options:**
+```bash
+sudo bash install-ubuntu.sh --profile full --dir /opt/evershade
+sudo bash install-ubuntu.sh --profile custom --custom "Greenie,Slinker,Trapper,Gobber,Shrewd"
+```
+
+### Windows Install
+
+The `install.ps1` script provides an interactive PowerShell installer:
+
+```powershell
+# Run the interactive installer
+.\install.ps1
+```
+
+The wizard will:
+1. Check Git and Docker Desktop are installed (with download links if missing)
+2. Prompt you to select an installation profile (minimal/standard/full/custom)
+3. For custom profiles, let you toggle individual services
+4. Clone all service repositories with pinned commits
+5. Create `.env` from `.env.example` if it doesn't exist
+
+**Non-interactive mode:**
+```powershell
+.\install.ps1 -Profile full
+```
+
+### Installation Profiles
+
+| Profile | Services | Description |
+|---------|----------|-------------|
+| **minimal** | 4 services | Core only: Greenie, Slinker, Trapper, Gobber |
+| **standard** | 8 services | All except dashboard: + Sneaker, Hider, Poltergeist, Shrewd |
+| **full** | 10 services | Everything: + Slammer (dashboard), Speedy (CLI) |
+| **custom** | User-defined | Pick individual services interactively |
+
+### Services Overview
+
+| Service | Required | Description |
+|---------|----------|-------------|
+| **Greenie** | Yes | Central API backend |
+| **Slinker** | Yes | Code execution |
+| **Trapper** | Yes | Web scraping |
+| **Gobber** | Yes | Storage & search |
+| **Sneaker** | No | Observability & alerting |
+| **Hider** | No | Encrypted secrets management |
+| **Poltergeist** | No | Notifications (Slack, Discord, Email, Telegram) |
+| **Shrewd** | No | LLM providers (OpenAI, Anthropic, Google, Ollama) |
+| **Slammer** | No | Web dashboard |
+| **Speedy** | No | CLI tool |
 
 ---
 

@@ -5,8 +5,7 @@
 [CmdletBinding()]
 param(
     [switch]$Force,
-    [ValidateSet("minimal", "standard", "full", "custom")]
-    [string]$Profile = "standard",
+    [string]$Profile = "",
     [string]$CustomServices = ""
 )
 
@@ -14,14 +13,83 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $ScriptDir
 
-# Interactive custom service selection
+# ─── Banner ──────────────────────────────────────────────────────────
+Write-Host ""
+Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
+Write-Host "║                                                              ║" -ForegroundColor Blue
+Write-Host "║       Evershade — Windows Installer                          ║" -ForegroundColor Blue
+Write-Host "║                                                              ║" -ForegroundColor Blue
+Write-Host "║  Self-hosted AI agent platform (Docker-based microservices)  ║" -ForegroundColor Blue
+Write-Host "║                                                              ║" -ForegroundColor Blue
+Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Blue
+Write-Host ""
+
+# ─── Prerequisite Checks ─────────────────────────────────────────────
+
+# Check Git
+try {
+    $gitVersion = git --version 2>$null
+    Write-Host "[OK] Git is available: $gitVersion" -ForegroundColor Green
+} catch {
+    Write-Host "[XX] ERROR: Git is not installed. Please install Git first." -ForegroundColor Red
+    Write-Host "      Download from: https://git-scm.com/download/win" -ForegroundColor Yellow
+    exit 1
+}
+
+# Check Docker Desktop
+try {
+    $dockerVersion = docker --version 2>$null
+    $composeVersion = docker compose version 2>$null
+    if ($dockerVersion -and $composeVersion) {
+        Write-Host "[OK] Docker Desktop is available: $dockerVersion" -ForegroundColor Green
+        Write-Host "[OK] Docker Compose is available" -ForegroundColor Green
+    } else {
+        Write-Host "[XX] ERROR: Docker Desktop is not installed or not running." -ForegroundColor Red
+        Write-Host "      Download from: https://www.docker.com/products/docker-desktop/" -ForegroundColor Yellow
+        Write-Host "      After installing, restart your terminal and try again." -ForegroundColor Yellow
+        exit 1
+    }
+} catch {
+    Write-Host "[XX] ERROR: Docker Desktop is not installed or not running." -ForegroundColor Red
+    Write-Host "      Download from: https://www.docker.com/products/docker-desktop/" -ForegroundColor Yellow
+    Write-Host "      After installing, restart your terminal and try again." -ForegroundColor Yellow
+    exit 1
+}
+
+# ─── Interactive Profile Selection ───────────────────────────────────
+if (-not $Profile) {
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
+    Write-Host "║  Installation Profile Selection                             ║" -ForegroundColor Blue
+    Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Blue
+    Write-Host ""
+    Write-Host "  [1] Minimal  - Core services only (Greenie, Slinker, Trapper, Gobber)"
+    Write-Host "  [2] Standard - All services except dashboard (default)"
+    Write-Host "  [3] Full     - Everything including Slammer dashboard and Speedy CLI"
+    Write-Host "  [4] Custom   - Choose individual services"
+    Write-Host ""
+    $profileChoice = Read-Host "  Select profile (1-4) [2]"
+    $profileChoice = if ($profileChoice -eq "") { "2" } else { $profileChoice }
+    switch ($profileChoice) {
+        "1" { $Profile = "minimal" }
+        "2" { $Profile = "standard" }
+        "3" { $Profile = "full" }
+        "4" { $Profile = "custom" }
+        default {
+            Write-Host "[XX] Invalid choice, using default: standard" -ForegroundColor Yellow
+            $Profile = "standard"
+        }
+    }
+    Write-Host ""
+    Write-Host "[OK] Selected profile: $Profile" -ForegroundColor Green
+}
+
+# ─── Interactive Custom Service Selection ────────────────────────────
 $services = @()
 if ($Profile -eq "custom") {
     if ($CustomServices) {
-        # Services provided via -CustomServices parameter
         $services = $CustomServices -split ',' | ForEach-Object { $_.Trim() }
     } else {
-        # Interactive menu
         Write-Host ""
         Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
         Write-Host "║  Custom Service Selection                                    ║" -ForegroundColor Blue
@@ -85,21 +153,6 @@ if ($Profile -eq "custom") {
     Write-Host ""
     Write-Host "[OK] Selected services: $($services -join ', ')" -ForegroundColor Green
     Write-Host ""
-}
-
-Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
-Write-Host "║  Evershade Bootstrap Installer                               ║" -ForegroundColor Blue
-Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Blue
-Write-Host ""
-
-# Check Git
-try {
-    $gitVersion = git --version 2>$null
-    Write-Host "[OK] Git is available: $gitVersion" -ForegroundColor Green
-} catch {
-    Write-Host "[XX] ERROR: Git is not installed. Please install Git first." -ForegroundColor Red
-    exit 1
 }
 
 # Read version manifest

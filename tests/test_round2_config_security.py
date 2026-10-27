@@ -6,8 +6,6 @@ Verifies:
 - No unpinned :latest tags in version-manifest.json (CWE-1104)
 - No plaintext default keys in start.sh (CWE-798)
 - .gitignore covers all .env backup variants (CWE-200)
-- install-gui.py shell=False fixes — no broken shell syntax (CWE-676)
-
 Run with: pytest tests/test_round2_config_security.py -v
 """
 
@@ -25,9 +23,6 @@ _DOCKER_COMPOSE_PATH = os.path.join(_PROJECT_ROOT, "docker-compose.yml")
 _VERSION_MANIFEST_PATH = os.path.join(_PROJECT_ROOT, "version-manifest.json")
 _START_SH_PATH = os.path.join(_PROJECT_ROOT, "start.sh")
 _GITIGNORE_PATH = os.path.join(_PROJECT_ROOT, ".gitignore")
-_INSTALL_GUI_PATH = os.path.join(_PROJECT_ROOT, "install-gui.py")
-
-
 # ─── Redis password consistency tests ───────────────────────────────────────
 
 
@@ -414,133 +409,6 @@ class TestGitignoreEnvPatterns(unittest.TestCase):
             ".env",
             [line.strip() for line in self.lines if line.strip()],
             ".env should be in .gitignore",
-        )
-
-
-# ─── install-gui.py shell=False fixes (CWE-676) ────────────────────────────
-
-
-class TestInstallGuiNoShellSyntax(unittest.TestCase):
-    """
-    Verify install-gui.py doesn't use shell-specific syntax with shell=False (CWE-676).
-
-    NOTE: These tests define the desired security standard. install-gui.py needs
-    refactoring to use list-based args instead of shell syntax.
-    Marked as expected failures until the script is updated.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        with open(_INSTALL_GUI_PATH, "r", encoding="utf-8") as f:
-            cls.source = f.read()
-
-    @unittest.expectedFailure
-    def test_no_dot_source_in_run_command(self):
-        """
-        No run_command() call should use dot-source (. /etc/os-release).
-        This requires a shell and breaks with shell=False.
-        """
-        # The fix reads /etc/os-release directly in Python
-        pattern = re.compile(r"run_command\s*\([^)]*\.\s*/etc/os-release")
-        matches = pattern.findall(self.source)
-        self.assertEqual(
-            len(matches),
-            0,
-            "Found dot-source in run_command() — breaks with shell=False",
-        )
-
-    @unittest.expectedFailure
-    def test_no_pipe_in_run_command(self):
-        """
-        No run_command() call should use shell pipes (|).
-        Pipes require a shell and break with shell=False.
-        """
-        # Check each line for run_command with pipe character
-        for lineno, line in enumerate(self.source.split("\n"), 1):
-            stripped = line.strip()
-            if stripped.startswith("#"):
-                continue
-            if "run_command" in stripped and "|" in stripped:
-                # Exclude lines where | is in a comment after the call
-                code_part = stripped.split("#")[0]
-                if "run_command" in code_part and "|" in code_part:
-                    self.fail(f"Line {lineno}: Found pipe in run_command(): {stripped}")
-
-    @unittest.expectedFailure
-    def test_no_tee_in_run_command(self):
-        """
-        No run_command() call should use tee with pipe.
-        """
-        pattern = re.compile(r"run_command\s*\(\s*[fF]?\s*\"[^\"]*tee[^\"]*\"")
-        matches = pattern.findall(self.source)
-        self.assertEqual(
-            len(matches),
-            0,
-            "Found tee in run_command() — breaks with shell=False",
-        )
-
-    def test_reads_os_release_in_python(self):
-        """
-        The fix reads /etc/os-release directly in Python instead of using shell.
-        """
-        self.assertIn(
-            "/etc/os-release",
-            self.source,
-            "Expected /etc/os-release reference",
-        )
-        # Should use open() to read the file
-        pattern = re.compile(r"open\s*\(\s*[\"']/etc/os-release")
-        matches = pattern.findall(self.source)
-        self.assertGreater(
-            len(matches),
-            0,
-            "Expected Python open() to read /etc/os-release",
-        )
-
-    @unittest.expectedFailure
-    def test_docker_version_parsed_in_python(self):
-        """
-        Docker version should be parsed in Python, not via pipe/awk.
-        """
-        # The fix uses: parts = _ver_raw.split() and iterates
-        self.assertIn(
-            "docker --version",
-            self.source,
-            "Expected docker --version command",
-        )
-        # Should NOT use pipe with awk
-        pattern = re.compile(r"docker\s+--version\s*\|")
-        matches = pattern.findall(self.source)
-        self.assertEqual(
-            len(matches),
-            0,
-            "Found 'docker --version |' pipe — should parse in Python",
-        )
-
-    def test_docker_group_check_uses_list_args(self):
-        """
-        Docker group membership check should use list-based arguments.
-        """
-        # The fix uses: ["id", "-nG", self.installer.user]
-        # and checks "docker" in group_out.split()
-        pattern = re.compile(r'\["id"\s*,\s*"-nG"')
-        matches = pattern.findall(self.source)
-        self.assertGreater(
-            len(matches),
-            0,
-            "Expected list-based args for id -nG command",
-        )
-
-    def test_no_cd_and_in_run_command(self):
-        """
-        No run_command() should use 'cd ... &&' shell chains.
-        """
-        pattern = re.compile(r"run_command\s*\(\s*[fF]?\s*\"[^\"]*cd\s+.*&&")
-        matches = pattern.findall(self.source)
-        self.assertEqual(
-            len(matches),
-            0,
-            "Found 'cd ... &&' in run_command() — use cwd= parameter",
         )
 
 

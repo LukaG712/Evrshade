@@ -104,10 +104,132 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# ─── Interactive Configuration (when not --auto) ────────────────────
+
+# Service definitions for interactive selection
+REQUIRED_SERVICES=("Greenie" "Slinker" "Trapper" "Gobber")
+OPTIONAL_SERVICES=(
+    "Sneaker|Observability & alerting"
+    "Hider|Encrypted secrets management"
+    "Poltergeist|Notifications (Slack, Discord, Email, Telegram)"
+    "Shrewd|LLM providers (OpenAI, Anthropic, Google, Ollama)"
+    "Slammer|Web dashboard"
+    "Speedy|CLI tool"
+)
+
+select_profile_interactive() {
+    echo -e "${BLUE}"
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║  Installation Profile Selection                             ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+    echo ""
+    echo "  [1] Minimal  — Core services only (Greenie, Slinker, Trapper, Gobber)"
+    echo "  [2] Standard — All services except dashboard (default)"
+    echo "  [3] Full     — Everything including Slammer dashboard and Speedy CLI"
+    echo "  [4] Custom   — Choose individual services"
+    echo ""
+    read -rp "  Select profile (1-4) [2]: " PROFILE_CHOICE
+    PROFILE_CHOICE="${PROFILE_CHOICE:-2}"
+    case "$PROFILE_CHOICE" in
+        1) PROFILE="minimal" ;;
+        2) PROFILE="standard" ;;
+        3) PROFILE="full" ;;
+        4) PROFILE="custom" ;;
+        *) warn "Invalid choice, using default: standard"; PROFILE="standard" ;;
+    esac
+    echo ""
+    success "Selected profile: $PROFILE"
+}
+
+select_services_interactive() {
+    echo -e "${BLUE}"
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║  Custom Service Selection                                   ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+    echo ""
+    echo -e "  ${YELLOW}Required services (always included):${NC}"
+    echo "    [x] Greenie    — Central API backend"
+    echo "    [x] Slinker    — Code execution"
+    echo "    [x] Trapper    — Web scraping"
+    echo "    [x] Gobber     — Storage & search"
+    echo ""
+    echo -e "  ${YELLOW}Optional services (press number to toggle):${NC}"
+    local idx=1
+    for svc in "${OPTIONAL_SERVICES[@]}"; do
+        local name="${svc%%|*}"
+        local desc="${svc##*|}"
+        echo "    [$idx] $name — $desc"
+        ((idx++))
+    done
+    echo ""
+    echo -e "  ${BLUE}Enter numbers to toggle, or 'done' to continue:${NC}"
+
+    # Start with required services
+    local selected=("${REQUIRED_SERVICES[@]}")
+
+    while true; do
+        read -rp "  > " CHOICE
+        if [[ "$CHOICE" == "done" || -z "$CHOICE" ]]; then
+            break
+        fi
+        # Check if choice is a valid number
+        if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [[ "$CHOICE" -ge 1 ]] && [[ "$CHOICE" -le ${#OPTIONAL_SERVICES[@]} ]]; then
+            local svc_name="${OPTIONAL_SERVICES[$((CHOICE-1))]%%|*}"
+            local found=false
+            for s in "${selected[@]}"; do
+                if [[ "$s" == "$svc_name" ]]; then
+                    found=true
+                    break
+                fi
+            done
+            if $found; then
+                # Remove from selected
+                local new_selected=()
+                for s in "${selected[@]}"; do
+                    if [[ "$s" != "$svc_name" ]]; then
+                        new_selected+=("$s")
+                    fi
+                done
+                selected=("${new_selected[@]}")
+                echo -e "  ${RED}[XX] Removed $svc_name${NC}"
+            else
+                selected+=("$svc_name")
+                echo -e "  ${GREEN}[OK] Added $svc_name${NC}"
+            fi
+        else
+            echo -e "  ${RED}[XX] Invalid choice. Enter 1-${#OPTIONAL_SERVICES[@]}, or 'done'.${NC}"
+        fi
+    done
+
+    # Build comma-separated list
+    CUSTOM_SERVICES=$(IFS=,; echo "${selected[*]}")
+    echo ""
+    success "Selected services: ${selected[*]}"
+}
+
+select_install_dir_interactive() {
+    echo -e "${BLUE}"
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║  Installation Directory                                     ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+    echo ""
+    echo -e "  ${YELLOW}Default: $INSTALL_DIR${NC}"
+    echo ""
+    read -rp "  Enter install directory [Enter for default]: " DIR_CHOICE
+    if [[ -n "$DIR_CHOICE" ]]; then
+        INSTALL_DIR="$DIR_CHOICE"
+    fi
+    echo ""
+    success "Install directory: $INSTALL_DIR"
+}
+
 # ─── Pre-flight Checks ──────────────────────────────────────────────
 banner
 
-# Check Ubuntu
+# Check Ubuntu first (needed for everything else)
 if ! command -v lsb_release &>/dev/null && [ ! -f /etc/os-release ]; then
     error "This script is designed for Ubuntu Desktop."
     error "Detected non-Ubuntu system. Proceeding is not recommended."
@@ -139,6 +261,24 @@ if [[ $EUID -ne 0 ]]; then
     error "This installer requires root privileges for Docker installation."
     error "Please run: sudo bash $0"
     exit 1
+fi
+
+# ─── Interactive Prompts (skip in --auto mode) ──────────────────────
+if [ "$AUTO" = false ]; then
+    # Profile selection (only if not set via --profile)
+    if [[ "${INSTALL_PROFILE:-}" == "" ]]; then
+        select_profile_interactive
+    fi
+
+    # Custom service selection (only for custom profile)
+    if [[ "$PROFILE" == "custom" && -z "$CUSTOM_SERVICES" ]]; then
+        select_services_interactive
+    fi
+
+    # Install directory selection (only if not set via --dir)
+    if [[ "${INSTALL_PATH:-}" == "" ]]; then
+        select_install_dir_interactive
+    fi
 fi
 
 info "Install directory: $INSTALL_DIR"

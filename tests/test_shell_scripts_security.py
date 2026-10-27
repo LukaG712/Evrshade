@@ -7,9 +7,8 @@ Verifies:
 - No Python code injection via shell variable interpolation (CWE-94)
 - SUDO_USER validation against /etc/passwd (CWE-128)
 - Proper quoting in desktop entries (CWE-78)
-- Quoted `exec` in run-install-gui.sh (CWE-78)
 
-Covers: install-ubuntu.sh, update-ubuntu.sh, update.sh, uninstall.sh, run-install-gui.sh
+Covers: install-ubuntu.sh, update-ubuntu.sh, update.sh, uninstall.sh
 
 Run with: pytest tests/test_shell_scripts_security.py -v
 """
@@ -25,7 +24,6 @@ _INSTALL_UBUNTU_PATH = os.path.join(_PROJECT_ROOT, "install-ubuntu.sh")
 _UPDATE_UBUNTU_PATH = os.path.join(_PROJECT_ROOT, "update-ubuntu.sh")
 _UPDATE_PATH = os.path.join(_PROJECT_ROOT, "update.sh")
 _UNINSTALL_PATH = os.path.join(_PROJECT_ROOT, "uninstall.sh")
-_RUN_INSTALL_GUI_PATH = os.path.join(_PROJECT_ROOT, "run-install-gui.sh")
 
 
 def _read_script(path):
@@ -464,53 +462,6 @@ class TestUninstallSudoUserValidation(unittest.TestCase):
             0,
             "Expected fallback to root when SUDO_USER is invalid",
         )
-
-
-# ─── run-install-gui.sh tests ───────────────────────────────────────────────
-
-
-class TestRunInstallGuiQuotedExec(unittest.TestCase):
-    """Verify run-install-gui.sh uses quoted exec (CWE-78)."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.source = _read_script(_RUN_INSTALL_GUI_PATH)
-
-    def test_exec_is_quoted(self):
-        """
-        `exec` should use quoted variable: exec "$LAUNCH_CMD"
-        Unquoted exec $LAUNCH_CMD allows word splitting injection.
-        """
-        # Find the exec line
-        exec_pattern = re.compile(r"^exec\s+(.+)$", re.MULTILINE)
-        exec_matches = exec_pattern.findall(self.source)
-        self.assertGreater(
-            len(exec_matches), 0, "Expected exec line in run-install-gui.sh"
-        )
-
-        exec_arg = exec_matches[0].strip()
-        self.assertIn(
-            '"$LAUNCH_CMD"',
-            exec_arg,
-            f'exec should use quoted variable: exec "$LAUNCH_CMD", found: exec {exec_arg}',
-        )
-
-    def test_no_unquoted_exec(self):
-        """
-        There should be no unquoted `exec $LAUNCH_CMD` (without quotes).
-        """
-        # Check each line for unquoted exec $LAUNCH_CMD
-        for lineno, line in enumerate(self.source.split("\n"), 1):
-            stripped = line.strip()
-            if stripped.startswith("#"):
-                continue
-            # Match exec $LAUNCH_CMD without quotes
-            if re.search(r"^\s*exec\s+\$LAUNCH_CMD\b", line):
-                # Check if it's quoted
-                if not re.search(r'exec\s+"\$LAUNCH_CMD"', line):
-                    self.fail(
-                        f"Line {lineno}: Found unquoted 'exec $LAUNCH_CMD': {stripped}"
-                    )
 
 
 # ─── Cross-script comprehensive tests ───────────────────────────────────────
