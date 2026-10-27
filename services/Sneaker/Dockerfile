@@ -2,10 +2,10 @@ FROM python:3.11.11-slim
 
 WORKDIR /app
 
-COPY pyproject.toml .
+COPY services/Sneaker/pyproject.toml .
 RUN pip install --no-cache-dir -e ".[dev]"
 
-COPY . .
+COPY services/Sneaker/ .
 
 # Run as non-root user for security
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app

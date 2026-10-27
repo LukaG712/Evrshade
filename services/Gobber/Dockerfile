@@ -3,11 +3,11 @@ FROM python:3.11.11-slim
 WORKDIR /app
 
 # Install dependencies
-COPY pyproject.toml .
+COPY services/Gobber/pyproject.toml .
 RUN pip install --no-cache-dir -e ".[dev]"
 
 # Copy application code
-COPY . .
+COPY services/Gobber/ .
 
 # Create data directories
 RUN mkdir -p data

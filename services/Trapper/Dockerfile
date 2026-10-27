@@ -22,13 +22,13 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json tsconfig.json ./
+COPY services/Trapper/package.json services/Trapper/package-lock.json services/Trapper/tsconfig.json ./
 
 # Install dependencies
 RUN npm ci
 
 # Copy source
-COPY src/ src/
+COPY services/Trapper/src/ src/
 
 # Install Playwright browsers
 RUN npx playwright install chromium && npx playwright install-deps chromium
@@ -41,5 +41,8 @@ RUN useradd -m -u 5678 appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
 CMD ["node", "dist/index.js"]
