@@ -5,7 +5,6 @@ channel: Slack (webhooks), Discord (webhooks), Email (SMTP), and Telegram (bot A
 """
 
 import asyncio
-import logging
 import os
 import smtplib
 import ssl
@@ -15,8 +14,6 @@ from email.mime.text import MIMEText
 import httpx
 
 from poltergeist.models import Notification
-
-logger = logging.getLogger("poltergeist")
 
 
 class BaseDelivery:
@@ -77,9 +74,7 @@ class SlackDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code != 200:
-            raise ConnectionError(
-                f"Slack returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Slack returned {response.status_code}")
 
 
 class DiscordDelivery(BaseDelivery):
@@ -107,9 +102,7 @@ class DiscordDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code not in (200, 204):
-            raise ConnectionError(
-                f"Discord returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Discord returned {response.status_code}")
 
 
 class EmailDelivery(BaseDelivery):
@@ -177,9 +170,7 @@ class TelegramDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code != 200:
-            raise ConnectionError(
-                f"Telegram returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Telegram returned {response.status_code}")
 
 
 class WebhookDelivery(BaseDelivery):
@@ -199,9 +190,7 @@ class WebhookDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code >= 400:
-            raise ConnectionError(
-                f"Webhook returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Webhook returned {response.status_code}")
 
 
 # Module-level cached delivery instances
