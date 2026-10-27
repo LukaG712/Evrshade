@@ -7,6 +7,7 @@ with OpenAI SDK clients.
 from __future__ import annotations
 
 import json
+import logging
 import time
 import uuid
 from typing import AsyncIterator
@@ -22,6 +23,8 @@ from app.models import (
 )
 
 router = APIRouter(prefix="/v1", tags=["openai"])
+
+logger = logging.getLogger(__name__)
 
 # Available models (configured via environment or hardcoded)
 AVAILABLE_MODELS = [
@@ -94,6 +97,7 @@ async def chat_completions(request: ChatCompletionRequest):
             data = resp.json()
             return data
     except Exception as e:
+        logger.error("Chat completion error: %s", e)
         # Return error as a completion
         completion_id = f"chatcmpl-{uuid.uuid4().hex[:12]}"
         return ChatCompletionResponse(
@@ -103,7 +107,7 @@ async def chat_completions(request: ChatCompletionRequest):
             choices=[
                 ChatCompletionChoice(
                     index=0,
-                    message={"role": "assistant", "content": f"Error: {e!s}"},
+                    message={"role": "assistant", "content": "Provider error"},
                     finish_reason="error",
                 )
             ],
@@ -130,6 +134,7 @@ async def _stream_completion(
                     if line.startswith("data: "):
                         yield f"{line}\n\n"
     except Exception as e:
+        logger.error("Stream completion error: %s", e)
         error_data = json.dumps(
             {
                 "id": completion_id,
@@ -139,7 +144,7 @@ async def _stream_completion(
                 "choices": [
                     {
                         "index": 0,
-                        "delta": {"content": f"Error: {e!s}"},
+                        "delta": {"content": "Provider error"},
                         "finish_reason": "error",
                     }
                 ],
