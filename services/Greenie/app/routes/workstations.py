@@ -109,7 +109,6 @@ async def start_workstation(ws_id: str):
     existing = await db.fetchone("SELECT * FROM workstations WHERE id = ?", (ws_id,))
     if not existing:
         raise HTTPException(status_code=404, detail="Workstation not found")
-    dict(existing)
     # Mark as creating
     await db.execute(
         "UPDATE workstations SET status = 'creating' WHERE id = ?",

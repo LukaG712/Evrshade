@@ -130,10 +130,8 @@ class ServiceAuthMiddleware(BaseHTTPMiddleware):
             request.state.service_name = payload.get("sub", "unknown")
         except jwt.ExpiredSignatureError:
             return JSONResponse(status_code=401, content={"detail": "Token expired"})
-        except jwt.InvalidTokenError as e:
-            return JSONResponse(
-                status_code=401, content={"detail": f"Invalid token: {e}"}
-            )
+        except jwt.InvalidTokenError:
+            return JSONResponse(status_code=401, content={"detail": "Invalid token"})
 
         return await call_next(request)
 
@@ -163,5 +161,5 @@ async def require_service_auth(
     try:
         payload = verify_service_token(credentials.credentials, secret)
         return payload.get("sub")
-    except jwt.InvalidTokenError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")

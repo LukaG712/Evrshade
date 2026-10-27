@@ -71,8 +71,8 @@ class JunieAdapter(CodingAgentAdapter):
 
             # Run Junie
             output_parts = []
-            process = await asyncio.create_subprocess_shell(
-                " ".join(cmd_parts),
+            process = await asyncio.create_subprocess_exec(
+                *cmd_parts,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=request.workspace_path,

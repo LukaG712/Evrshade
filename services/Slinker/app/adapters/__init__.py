@@ -373,9 +373,9 @@ class CodingAgentAdapter(ABC):
         elif os.path.exists(os.path.join(workspace_path, "pytest.ini")):
             cmd = "python -m pytest -x --tb=short"
         elif os.path.exists(os.path.join(workspace_path, "package.json")):
-            cmd = "npm test -- --reporter=dot 2>/dev/null || true"
+            cmd = "npm test -- --reporter=dot"
         else:
-            cmd = "python -m pytest -x --tb=short 2>/dev/null || true"
+            cmd = "python -m pytest -x --tb=short"
 
         result = await self.run_command(cmd, workspace_path, timeout)
         passed = result["returncode"] == 0
@@ -396,11 +396,11 @@ class CodingAgentAdapter(ABC):
         if lint_command:
             cmd = lint_command
         elif os.path.exists(os.path.join(workspace_path, "pyproject.toml")):
-            cmd = "python -m ruff check . 2>/dev/null || true"
+            cmd = "python -m ruff check ."
         elif os.path.exists(os.path.join(workspace_path, "package.json")):
-            cmd = "npm run lint 2>/dev/null || true"
+            cmd = "npm run lint"
         else:
-            cmd = "python -m py_compile . 2>/dev/null || true"
+            cmd = "python -m py_compile ."
 
         result = await self.run_command(cmd, workspace_path, timeout)
         passed = result["returncode"] in (0, 1)  # Some linters return 1 for warnings
@@ -421,11 +421,11 @@ class CodingAgentAdapter(ABC):
         if build_command:
             cmd = build_command
         elif os.path.exists(os.path.join(workspace_path, "setup.py")):
-            cmd = "python setup.py build 2>/dev/null || true"
+            cmd = "python setup.py build"
         elif os.path.exists(os.path.join(workspace_path, "package.json")):
-            cmd = "npm run build 2>/dev/null || true"
+            cmd = "npm run build"
         elif os.path.exists(os.path.join(workspace_path, "Makefile")):
-            cmd = "make 2>/dev/null || true"
+            cmd = "make"
         else:
             return {
                 "passed": True,
