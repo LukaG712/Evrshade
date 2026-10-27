@@ -23,6 +23,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 ENV_FILE="$SCRIPT_DIR/.env"
 
+# ─── Service Definitions ────────────────────────────────────────────
+REQUIRED_SERVICES=("Greenie" "Slinker" "Trapper" "Gobber")
+OPTIONAL_SERVICES=(
+    "Sneaker|Observability & alerting"
+    "Hider|Encrypted secrets management"
+    "Poltergeist|Notifications (Slack, Discord, Email, Telegram)"
+    "Shrewd|LLM providers (OpenAI, Anthropic, Google, Ollama)"
+    "Slammer|Web dashboard"
+)
+
 # ─── Banner ─────────────────────────────────────────────────────────
 echo -e "${BLUE}"
 echo "╔══════════════════════════════════════════════════════════════╗"
@@ -81,28 +91,89 @@ if [ ! -f "$COMPOSE_FILE" ]; then
 fi
 success "docker-compose.yml found"
 
-# ─── Interactive Profile Selection ──────────────────────────────────
+# ─── Interactive Service Selection ──────────────────────────────────
 echo ""
 echo -e "${BLUE}"
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  Installation Profile Selection                             ║"
+echo "║  Select Services to Install                                 ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 echo ""
-echo "  [1] Minimal  — Core services only (Greenie, Slinker, Trapper, Gobber)"
-echo "  [2] Standard — All services except dashboard (default)"
-echo "  [3] Full     — Everything including Slammer dashboard and Speedy CLI"
+echo -e "  ${YELLOW}Required services (always included):${NC}"
+echo "    [x] Greenie    — Central API backend"
+echo "    [x] Slinker    — Code execution"
+echo "    [x] Trapper    — Web scraping"
+echo "    [x] Gobber     — Storage & search"
 echo ""
-read -rp "  Select profile (1-3) [2]: " PROFILE_CHOICE
-PROFILE_CHOICE="${PROFILE_CHOICE:-2}"
-case "$PROFILE_CHOICE" in
-    1) PROFILE="minimal" ;;
-    2) PROFILE="standard" ;;
-    3) PROFILE="full" ;;
-    *) warn "Invalid choice, using default: standard"; PROFILE="standard" ;;
-esac
+echo -e "  ${YELLOW}Optional services (press number to toggle):${NC}"
+idx=1
+for svc in "${OPTIONAL_SERVICES[@]}"; do
+    name="${svc%%|*}"
+    desc="${svc##*|}"
+    echo "    [$idx] $name — $desc"
+    ((idx++))
+done
 echo ""
-success "Selected profile: $PROFILE"
+echo -e "  ${BLUE}Enter numbers to toggle, or press Enter to continue:${NC}"
+
+# Start with required services selected
+selected=("${REQUIRED_SERVICES[@]}")
+
+while true; do
+    read -rp "  > " CHOICE
+    if [[ -z "$CHOICE" ]]; then
+        break
+    fi
+    if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [[ "$CHOICE" -ge 1 ]] && [[ "$CHOICE" -le ${#OPTIONAL_SERVICES[@]} ]]; then
+        svc_name="${OPTIONAL_SERVICES[$((CHOICE-1))]%%|*}"
+        found=false
+        for s in "${selected[@]}"; do
+            if [[ "$s" == "$svc_name" ]]; then
+                found=true
+                break
+            fi
+        done
+        if $found; then
+            new_selected=()
+            for s in "${selected[@]}"; do
+                if [[ "$s" != "$svc_name" ]]; then
+                    new_selected+=("$s")
+                fi
+            done
+            selected=("${new_selected[@]}")
+            echo -e "  ${RED}[XX] Removed $svc_name${NC}"
+        else
+            selected+=("$svc_name")
+            echo -e "  ${GREEN}[OK] Added $svc_name${NC}"
+        fi
+    else
+        echo -e "  ${RED}[XX] Invalid choice. Enter 1-${#OPTIONAL_SERVICES[@]}, or press Enter.${NC}"
+    fi
+done
+
+# Derive profile from selected services
+has_slammer=false
+has_supporting=false
+for s in "${selected[@]}"; do
+    if [[ "$s" == "Slammer" ]]; then
+        has_slammer=true
+    fi
+    if [[ "$s" == "Sneaker" || "$s" == "Hider" || "$s" == "Poltergeist" || "$s" == "Shrewd" ]]; then
+        has_supporting=true
+    fi
+done
+
+if $has_slammer; then
+    PROFILE="full"
+elif $has_supporting; then
+    PROFILE="standard"
+else
+    PROFILE="minimal"
+fi
+
+echo ""
+success "Selected services: ${selected[*]}"
+success "Installation profile: $PROFILE"
 
 # ─── .env Configuration ─────────────────────────────────────────────
 echo ""

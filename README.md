@@ -57,11 +57,11 @@ The API will be available at **http://localhost:8080**.
 
 ## Installation
 
-Evershade provides interactive CLI installers for all platforms. The installers guide you through profile selection, service configuration, and environment setup.
+Evershade provides interactive CLI installers for all platforms. The installers guide you through service selection, environment setup, and Docker configuration. Instead of choosing a profile, you pick exactly which services you need — the installer determines the profile automatically.
 
 ### Linux/macOS Quick Install
 
-The `install.sh` script provides an interactive wizard that checks prerequisites, selects your profile, configures `.env` with secure keys, and pulls Docker images:
+The `install.sh` script provides an interactive wizard that checks prerequisites, lets you select services, configures `.env` with secure keys, and pulls Docker images:
 
 ```bash
 # Run the interactive installer
@@ -70,7 +70,7 @@ The `install.sh` script provides an interactive wizard that checks prerequisites
 
 The wizard will:
 1. Check Docker and Docker Compose are installed (with install instructions if missing)
-2. Prompt you to select an installation profile (minimal/standard/full)
+2. Show a service selection menu — toggle the optional services you want
 3. Create `.env` with auto-generated secure API keys
 4. Pull the required Docker images
 
@@ -85,7 +85,7 @@ sudo bash install-ubuntu.sh
 
 The wizard will:
 1. Check system requirements (Ubuntu 20.04+, architecture)
-2. Prompt for installation profile and optional custom service selection
+2. Show a service selection menu — toggle the optional services you want
 3. Prompt for install directory (default: ~/Evershade)
 4. Install system dependencies (Git, Python3, curl)
 5. Install Docker Engine and Compose if missing
@@ -94,7 +94,7 @@ The wizard will:
 8. Create `.env` with auto-generated secure API keys
 9. Optionally create a systemd service for auto-start on boot
 10. Optionally create a desktop launcher icon
-11. Start services with your chosen profile
+11. Start services with your chosen configuration
 
 **Non-interactive mode:** Use `--auto` to accept all defaults:
 ```bash
@@ -104,7 +104,7 @@ sudo bash install-ubuntu.sh --auto
 **Custom options:**
 ```bash
 sudo bash install-ubuntu.sh --profile full --dir /opt/evershade
-sudo bash install-ubuntu.sh --profile custom --custom "Greenie,Slinker,Trapper,Gobber,Shrewd"
+sudo bash install-ubuntu.sh --custom "Greenie,Slinker,Trapper,Gobber,Shrewd"
 ```
 
 ### Windows Install
@@ -118,26 +118,18 @@ The `install.ps1` script provides an interactive PowerShell installer:
 
 The wizard will:
 1. Check Git and Docker Desktop are installed (with download links if missing)
-2. Prompt you to select an installation profile (minimal/standard/full/custom)
-3. For custom profiles, let you toggle individual services
-4. Clone all service repositories with pinned commits
-5. Create `.env` from `.env.example` if it doesn't exist
+2. Show a service selection menu — toggle the optional services you want
+3. Clone all service repositories with pinned commits
+4. Create `.env` from `.env.example` if it doesn't exist
 
 **Non-interactive mode:**
 ```powershell
 .\install.ps1 -Profile full
 ```
 
-### Installation Profiles
+### Service Selection
 
-| Profile | Services | Description |
-|---------|----------|-------------|
-| **minimal** | 4 services | Core only: Greenie, Slinker, Trapper, Gobber |
-| **standard** | 8 services | All except dashboard: + Sneaker, Hider, Poltergeist, Shrewd |
-| **full** | 10 services | Everything: + Slammer (dashboard), Speedy (CLI) |
-| **custom** | User-defined | Pick individual services interactively |
-
-### Services Overview
+The installer presents all available services and lets you toggle which ones to install. Core services are always included, while optional services can be added or removed:
 
 | Service | Required | Description |
 |---------|----------|-------------|
@@ -150,7 +142,11 @@ The wizard will:
 | **Poltergeist** | No | Notifications (Slack, Discord, Email, Telegram) |
 | **Shrewd** | No | LLM providers (OpenAI, Anthropic, Google, Ollama) |
 | **Slammer** | No | Web dashboard |
-| **Speedy** | No | CLI tool |
+
+The installer automatically derives the deployment profile from your service choices:
+- **minimal** — Core services only
+- **standard** — Core + any supporting services (Sneaker, Hider, Poltergeist, Shrewd)
+- **full** — Includes Slammer dashboard
 
 ---
 
@@ -200,50 +196,33 @@ The Ubuntu update script will:
 4. Optionally restart running services to apply changes
 5. Update the systemd service file if present
 
-### Installation Profiles
+### Docker Compose Profiles
+
+The installer derives a profile from your service choices, but you can also use Docker Compose profiles directly:
 
 | Profile | Services | Command |
 |---------|----------|---------|
-| **Minimal** | Core only (4 services) | `docker compose --profile minimal up -d` |
-| **Standard** | All services (8 services) | `docker compose --profile standard up -d` |
-| **Full** | + Slammer Dashboard | `docker compose --profile full up -d` |
-| **Custom** | Choose individual services | See below |
-| **+ Monitoring** | Grafana + Prometheus dashboards | `docker compose --profile standard --profile monitoring up -d` |
-| **+ Ollama** | Local LLM support | `docker compose --profile standard --profile ollama up -d` |
-| **+ Proxy** | Caddy reverse proxy with TLS | `docker compose --profile standard --profile proxy up -d` |
+| **minimal** | Core only (4 services) | `docker compose --profile minimal up -d` |
+| **standard** | All except dashboard (8 services) | `docker compose --profile standard up -d` |
+| **full** | Everything including dashboard | `docker compose --profile full up -d` |
+| **+ monitoring** | Grafana + Prometheus dashboards | `docker compose --profile standard --profile monitoring up -d` |
+| **+ ollama** | Local LLM support | `docker compose --profile standard --profile ollama up -d` |
+| **+ proxy** | Caddy reverse proxy with TLS | `docker compose --profile standard --profile proxy up -d` |
 
 ### Custom Service Selection
 
-Instead of using predefined profiles, you can choose exactly which services to install. The 4 required services (Greenie, Slinker, Trapper, Gobber) are always included, and you can toggle the optional ones:
+You can skip the interactive menu and specify services directly via command-line:
 
-| Service | Description |
-|---------|-------------|
-| **Sneaker** | Observability & alerting |
-| **Hider** | Encrypted secrets management |
-| **Poltergeist** | Notifications (Slack, Discord, Email, Telegram) |
-| **Shrewd** | LLM providers (OpenAI, Anthropic, Google, Ollama) |
-| **Slammer** | Web dashboard |
-| **Speedy** | CLI tool |
-
-**Shell (interactive menu):**
+**Shell:**
 ```bash
-./install.sh --profile custom
-.\install.ps1 -Profile custom
-```
-
-**Shell (command-line):**
-```bash
-./install.sh --profile custom --custom "Greenie,Slinker,Trapper,Gobber,Sneaker,Shrewd"
-.\install.ps1 -Profile custom -CustomServices "Greenie,Slinker,Trapper,Gobber,Sneaker,Shrewd"
+./install.sh --custom "Greenie,Slinker,Trapper,Gobber,Sneaker,Shrewd"
+.\install.ps1 -CustomServices "Greenie,Slinker,Trapper,Gobber,Sneaker,Shrewd"
 ```
 
 **Ubuntu Desktop:**
 ```bash
-sudo bash install-ubuntu.sh --profile custom
-sudo bash install-ubuntu.sh --profile custom --custom "Greenie,Slinker,Trapper,Gobber,Sneaker,Shrewd"
+sudo bash install-ubuntu.sh --custom "Greenie,Slinker,Trapper,Gobber,Sneaker,Shrewd"
 ```
-
-**GUI Installer:** Select "Custom" in the Installation Options step, then check/uncheck the services you want.
 
 ---
 

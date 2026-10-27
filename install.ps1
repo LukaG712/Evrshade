@@ -56,102 +56,83 @@ try {
     exit 1
 }
 
-# ─── Interactive Profile Selection ───────────────────────────────────
-if (-not $Profile) {
+# ─── Interactive Service Selection ─────────────────────────────────
+if (-not $Profile -and -not $CustomServices) {
     Write-Host ""
     Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
-    Write-Host "║  Installation Profile Selection                             ║" -ForegroundColor Blue
+    Write-Host "║  Select Services to Install                                 ║" -ForegroundColor Blue
     Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Blue
     Write-Host ""
-    Write-Host "  [1] Minimal  - Core services only (Greenie, Slinker, Trapper, Gobber)"
-    Write-Host "  [2] Standard - All services except dashboard (default)"
-    Write-Host "  [3] Full     - Everything including Slammer dashboard and Speedy CLI"
-    Write-Host "  [4] Custom   - Choose individual services"
+    Write-Host "Required services (always included):" -ForegroundColor Yellow
+    Write-Host "  [x] Greenie    - Central API backend"
+    Write-Host "  [x] Slinker    - Code execution"
+    Write-Host "  [x] Trapper    - Web scraping"
+    Write-Host "  [x] Gobber     - Storage & search"
     Write-Host ""
-    $profileChoice = Read-Host "  Select profile (1-4) [2]"
-    $profileChoice = if ($profileChoice -eq "") { "2" } else { $profileChoice }
-    switch ($profileChoice) {
-        "1" { $Profile = "minimal" }
-        "2" { $Profile = "standard" }
-        "3" { $Profile = "full" }
-        "4" { $Profile = "custom" }
-        default {
-            Write-Host "[XX] Invalid choice, using default: standard" -ForegroundColor Yellow
-            $Profile = "standard"
-        }
+    Write-Host "Optional services (press number to toggle):" -ForegroundColor Yellow
+    Write-Host "  [1] Sneaker      - Observability & alerting"
+    Write-Host "  [2] Hider        - Encrypted secrets management"
+    Write-Host "  [3] Poltergeist  - Notifications (Slack, Discord, Email, Telegram)"
+    Write-Host "  [4] Shrewd       - LLM providers (OpenAI, Anthropic, Google, Ollama)"
+    Write-Host "  [5] Slammer      - Web dashboard"
+    Write-Host ""
+    Write-Host "Enter numbers to toggle, or press Enter to continue:" -ForegroundColor Blue
+
+    $services = @("Greenie", "Slinker", "Trapper", "Gobber")
+    $optionalMap = @{
+        1 = "Sneaker"
+        2 = "Hider"
+        3 = "Poltergeist"
+        4 = "Shrewd"
+        5 = "Slammer"
     }
-    Write-Host ""
-    Write-Host "[OK] Selected profile: $Profile" -ForegroundColor Green
-}
 
-# ─── Interactive Custom Service Selection ────────────────────────────
-$services = @()
-if ($Profile -eq "custom") {
-    if ($CustomServices) {
-        $services = $CustomServices -split ',' | ForEach-Object { $_.Trim() }
-    } else {
-        Write-Host ""
-        Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
-        Write-Host "║  Custom Service Selection                                    ║" -ForegroundColor Blue
-        Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Blue
-        Write-Host ""
-        Write-Host "Required services (cannot be removed):" -ForegroundColor Yellow
-        Write-Host "  [x] Greenie    - Central API backend"
-        Write-Host "  [x] Slinker    - Code execution"
-        Write-Host "  [x] Trapper    - Web scraping"
-        Write-Host "  [x] Gobber     - Storage & search"
-        Write-Host ""
-        Write-Host "Optional services (press number to toggle):" -ForegroundColor Yellow
-        Write-Host "  [1] Sneaker      - Observability & alerting"
-        Write-Host "  [2] Hider        - Encrypted secrets management"
-        Write-Host "  [3] Poltergeist  - Notifications (Slack, Discord, Email, Telegram)"
-        Write-Host "  [4] Shrewd       - LLM providers (OpenAI, Anthropic, Google, Ollama)"
-        Write-Host "  [5] Slammer      - Web dashboard"
-        Write-Host "  [6] Speedy       - CLI tool"
-        Write-Host ""
-        Write-Host "Enter numbers to toggle, or 'done' to continue:" -ForegroundColor Blue
-
-        $services = @("Greenie", "Slinker", "Trapper", "Gobber")
-        $optionalMap = @{
-            1 = "Sneaker"
-            2 = "Hider"
-            3 = "Poltergeist"
-            4 = "Shrewd"
-            5 = "Slammer"
-            6 = "Speedy"
+    while ($true) {
+        $choice = Read-Host "  >"
+        if ($choice -eq "") {
+            break
         }
-
-        while ($true) {
-            $choice = Read-Host "  >"
-            if ($choice -eq "done" -or $choice -eq "") {
-                break
-            }
-            $num = $null
-            if ([int32]::TryParse($choice, [ref]$num) -and $optionalMap.ContainsKey($num)) {
-                $svc = $optionalMap[$num]
-                if ($services -contains $svc) {
-                    $services = $services | Where-Object { $_ -ne $svc }
-                    Write-Host "  [XX] Removed $svc" -ForegroundColor Red
-                } else {
-                    $services += $svc
-                    Write-Host "  [OK] Added $svc" -ForegroundColor Green
-                }
+        $num = $null
+        if ([int32]::TryParse($choice, [ref]$num) -and $optionalMap.ContainsKey($num)) {
+            $svc = $optionalMap[$num]
+            if ($services -contains $svc) {
+                $services = $services | Where-Object { $_ -ne $svc }
+                Write-Host "  [XX] Removed $svc" -ForegroundColor Red
             } else {
-                Write-Host "  [XX] Invalid choice. Enter 1-6, or 'done'." -ForegroundColor Red
+                $services += $svc
+                Write-Host "  [OK] Added $svc" -ForegroundColor Green
             }
+        } else {
+            Write-Host "  [XX] Invalid choice. Enter 1-5, or press Enter." -ForegroundColor Red
         }
     }
 
-    # Validate required services
-    foreach ($req in @("Greenie", "Slinker", "Trapper", "Gobber")) {
-        if ($services -notcontains $req) {
-            Write-Host "[XX] ERROR: Required service '$req' is missing. Cannot proceed." -ForegroundColor Red
-            exit 1
-        }
+    # Derive profile from selected services
+    $hasSlammer = $services -contains "Slammer"
+    $hasSupporting = ($services -contains "Sneaker") -or ($services -contains "Hider") -or ($services -contains "Poltergeist") -or ($services -contains "Shrewd")
+
+    if ($hasSlammer) {
+        $Profile = "full"
+    } elseif ($hasSupporting) {
+        $Profile = "standard"
+    } else {
+        $Profile = "minimal"
     }
 
     Write-Host ""
     Write-Host "[OK] Selected services: $($services -join ', ')" -ForegroundColor Green
+    Write-Host "[OK] Installation profile: $Profile" -ForegroundColor Green
+    Write-Host ""
+} elseif ($CustomServices) {
+    # Custom services provided via -CustomServices parameter
+    $services = $CustomServices -split ',' | ForEach-Object { $_.Trim() }
+    $Profile = "custom"
+    Write-Host ""
+    Write-Host "[OK] Using custom services: $($services -join ', ')" -ForegroundColor Green
+    Write-Host ""
+} else {
+    # Profile forced via -Profile parameter — derive services from manifest later
+    Write-Host "[OK] Using forced profile: $Profile" -ForegroundColor Green
     Write-Host ""
 }
 

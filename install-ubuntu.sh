@@ -78,21 +78,15 @@ while [[ $# -gt 0 ]]; do
             echo "Options:"
             echo "  --force          Remove existing installation directory"
             echo "  --auto           Non-interactive: accept defaults, skip prompts"
-            echo "  --profile NAME   Install profile: minimal, standard, full, custom (default: standard)"
-            echo "  --custom LIST    Comma-separated services (requires --profile custom)"
+            echo "  --profile NAME   Force install profile: minimal, standard, full (default: auto-derived)"
+            echo "  --custom LIST    Comma-separated services to install"
             echo "  --dir PATH       Install directory (default: ~/Evershade)"
             echo "  --skip-start     Don't start services after install"
             echo "  --help, -h       Show this help message"
             echo ""
-            echo "Profiles:"
-            echo "  minimal   Core services only (Greenie, Slinker, Trapper, Gobber)"
-            echo "  standard  All services except dashboard (default)"
-            echo "  full      Everything including Slammer dashboard"
-            echo "  custom    Choose individual services interactively or via --custom"
-            echo ""
             echo "Services:"
             echo "  Required:  Greenie, Slinker, Trapper, Gobber"
-            echo "  Optional:  Sneaker, Hider, Poltergeist, Shrewd, Slammer, Speedy"
+            echo "  Optional:  Sneaker, Hider, Poltergeist, Shrewd, Slammer"
             echo ""
             echo "Note: Run with sudo for Docker installation, or as root."
             exit 0
@@ -114,38 +108,12 @@ OPTIONAL_SERVICES=(
     "Poltergeist|Notifications (Slack, Discord, Email, Telegram)"
     "Shrewd|LLM providers (OpenAI, Anthropic, Google, Ollama)"
     "Slammer|Web dashboard"
-    "Speedy|CLI tool"
 )
-
-select_profile_interactive() {
-    echo -e "${BLUE}"
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║  Installation Profile Selection                             ║"
-    echo "╚══════════════════════════════════════════════════════════════╝"
-    echo -e "${NC}"
-    echo ""
-    echo "  [1] Minimal  — Core services only (Greenie, Slinker, Trapper, Gobber)"
-    echo "  [2] Standard — All services except dashboard (default)"
-    echo "  [3] Full     — Everything including Slammer dashboard and Speedy CLI"
-    echo "  [4] Custom   — Choose individual services"
-    echo ""
-    read -rp "  Select profile (1-4) [2]: " PROFILE_CHOICE
-    PROFILE_CHOICE="${PROFILE_CHOICE:-2}"
-    case "$PROFILE_CHOICE" in
-        1) PROFILE="minimal" ;;
-        2) PROFILE="standard" ;;
-        3) PROFILE="full" ;;
-        4) PROFILE="custom" ;;
-        *) warn "Invalid choice, using default: standard"; PROFILE="standard" ;;
-    esac
-    echo ""
-    success "Selected profile: $PROFILE"
-}
 
 select_services_interactive() {
     echo -e "${BLUE}"
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║  Custom Service Selection                                   ║"
+    echo "║  Select Services to Install                                 ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
     echo ""
@@ -164,14 +132,14 @@ select_services_interactive() {
         ((idx++))
     done
     echo ""
-    echo -e "  ${BLUE}Enter numbers to toggle, or 'done' to continue:${NC}"
+    echo -e "  ${BLUE}Enter numbers to toggle, or press Enter to continue:${NC}"
 
     # Start with required services
     local selected=("${REQUIRED_SERVICES[@]}")
 
     while true; do
         read -rp "  > " CHOICE
-        if [[ "$CHOICE" == "done" || -z "$CHOICE" ]]; then
+        if [[ -z "$CHOICE" ]]; then
             break
         fi
         # Check if choice is a valid number
@@ -199,14 +167,35 @@ select_services_interactive() {
                 echo -e "  ${GREEN}[OK] Added $svc_name${NC}"
             fi
         else
-            echo -e "  ${RED}[XX] Invalid choice. Enter 1-${#OPTIONAL_SERVICES[@]}, or 'done'.${NC}"
+            echo -e "  ${RED}[XX] Invalid choice. Enter 1-${#OPTIONAL_SERVICES[@]}, or press Enter.${NC}"
         fi
     done
+
+    # Derive profile from selected services
+    local has_slammer=false
+    local has_supporting=false
+    for s in "${selected[@]}"; do
+        if [[ "$s" == "Slammer" ]]; then
+            has_slammer=true
+        fi
+        if [[ "$s" == "Sneaker" || "$s" == "Hider" || "$s" == "Poltergeist" || "$s" == "Shrewd" ]]; then
+            has_supporting=true
+        fi
+    done
+
+    if $has_slammer; then
+        PROFILE="full"
+    elif $has_supporting; then
+        PROFILE="standard"
+    else
+        PROFILE="minimal"
+    fi
 
     # Build comma-separated list
     CUSTOM_SERVICES=$(IFS=,; echo "${selected[*]}")
     echo ""
     success "Selected services: ${selected[*]}"
+    success "Installation profile: $PROFILE"
 }
 
 select_install_dir_interactive() {
@@ -265,14 +254,13 @@ fi
 
 # ─── Interactive Prompts (skip in --auto mode) ──────────────────────
 if [ "$AUTO" = false ]; then
-    # Profile selection (only if not set via --profile)
-    if [[ "${INSTALL_PROFILE:-}" == "" ]]; then
-        select_profile_interactive
-    fi
-
-    # Custom service selection (only for custom profile)
-    if [[ "$PROFILE" == "custom" && -z "$CUSTOM_SERVICES" ]]; then
+    # Service selection (always shown unless profile is forced via --profile)
+    if [[ "${INSTALL_PROFILE:-}" == "" && -z "$CUSTOM_SERVICES" ]]; then
         select_services_interactive
+    elif [[ -n "$CUSTOM_SERVICES" ]]; then
+        # Custom services provided via --custom flag
+        PROFILE="custom"
+        success "Using custom services: $CUSTOM_SERVICES"
     fi
 
     # Install directory selection (only if not set via --dir)
