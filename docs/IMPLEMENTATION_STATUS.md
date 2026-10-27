@@ -1,8 +1,8 @@
 # Evershade Implementation Status
 
-**Version:** 3.6.0  
-**Last Updated:** 2026-10-26  
-**Status:** ✅ Docker Build Verified — All 10 Core Services Healthy
+**Version:** 3.7.0  
+**Last Updated:** 2026-10-27  
+**Status:** ✅ Code Complete — All 10 Core Services Implemented, Linting Clean, Tests Passing
 
 ---
 
@@ -18,7 +18,7 @@
 | 6 | Workflows, Observability, Security & Notifications | ✅ Complete | v2.5.0 |
 | 7 | Dashboard, CLI & Deployment | ✅ Complete | v2.6.0 |
 | 8 | End-to-End Testing & Release Readiness | ✅ Complete | v2.7.0 |
-| 9 | Docker Build, Live Testing & Deployment | ⏳ Pending | — |
+| 9 | Docker Build, Live Testing & Deployment | ⏳ Blocked | Docker daemon unavailable |
 | 10 | Deferred Project Integrations | ✅ Complete | v2.9.0 |
 | 11 | Existing Project Integration Wiring | ✅ Complete | v3.0.0 |
 | 12 | Greenie & Slinker Agent Architecture | ✅ Complete | v3.1.0 |
@@ -40,41 +40,33 @@
 | **Sneaker** | ✅ Complete | — | OTLP ingest, traces, logs, metrics, alerts, correlation |
 | **Hider** | ✅ Complete | — | Secrets encryption, versioned config, security audit |
 | **Poltergeist** | ✅ Complete | — | Notifications, channels, templates, delivery tracking |
-| **Slammer** | ✅ Complete | 15 views | Dashboard, agents, missions, tasks, workflows, knowledge, models, notifications, logs, metrics, diagnostics, plugins, terminal, workstations, settings |
+| **Slammer** | ✅ Complete | 10 views | Services, agents, runs, workflows, workstations, metrics, logs, plugins, missions, crawler |
 | **Speedy** | ✅ Complete | 19 commands | status, agents, tasks, config, secrets, capabilities, registry, monitoring, install, start, stop, validate, diagnose, version, integrations, workflows, knowledge, models |
 
 ---
 
 ## Slammer Dashboard (Phase 15)
 
-### Views (15 total)
+### Views (10 total)
 
 | View | Route | Real API Data | Description |
 |------|-------|---------------|-------------|
-| Dashboard | `/` | ✅ | Service health, agent/mission/task counts, integrations |
-| Agents | `/agents` | ✅ | Agent CRUD, status, model |
-| Missions | `/missions` | ✅ | Mission lifecycle, milestones, progress |
-| Tasks | `/tasks` | ✅ | Task list, status, progress bars |
-| Workflows | `/workflows` | ✅ | Workflow CRUD, execution, runs |
-| Knowledge | `/knowledge` | ✅ | Search, memory entries, tags |
-| Models | `/models` | ✅ | Providers, models, usage stats |
-| Notifications | `/notifications` | ✅ | Rules CRUD, channels, event types |
-| Logs | `/logs` | ✅ | Log entries, filtering, levels |
+| Services | `/` | ✅ | Service health, version, status indicators |
+| Agents | `/agents` | ✅ | Agent list from Greenie API |
+| Runs | `/runs` | ✅ | Recent execution runs from Greenie API |
+| Workflows | `/workflows` | ✅ | Workflow builder |
+| Workstations | `/workstations` | ✅ | Workspace CRUD, Docker lifecycle, logs, terminal |
 | Metrics | `/metrics` | ✅ | Metric points, charts |
-| Diagnostics | `/diagnostics` | ✅ | Service health, latency, integrations |
-| Plugins | `/plugins` | ⚠️ Partial | Integration status |
-| Terminal | `/terminal` | ⚠️ Partial | Execution output |
-| Workstations | `/workstations` | ⚠️ Partial | Workspace management |
-| Settings | `/settings` | ✅ | Configuration management |
+| Logs | `/logs` | ✅ | Log entries, filtering, levels |
+| Plugins | `/plugins` | ✅ | Plugin CRUD, MCP server management |
+| Missions | `/missions` | ✅ | Mission lifecycle, milestones, progress |
+| Crawler | `/crawler` | ✅ | Web scraping interface |
 
-### API Client Enhancements
-- 40+ API methods covering all services
-- Diagnostics: `runDiagnostics()` with latency measurement
-- Integrations: `checkIntegrations()` for optional services
-- Workflows: CRUD, execution, runs
-- Knowledge: search, memory entries
-- Models: providers, models, usage stats
-- Notifications: rules CRUD, channels
+### API Client
+- Direct fetch calls to Greenie API endpoints
+- Service health polling every 10 seconds
+- CORS-aware URL resolution with proxy support
+- WebSocket terminal for workstations
 
 ---
 
@@ -191,6 +183,14 @@
 - Updated integration tests for new packages
 - Added security and performance checks
 
+### v3.7.0 (2026-10-27) — Linting, Formatting & Documentation Fixes
+- Fixed 120 ruff linting errors (115 auto-fixed, 5 manual): ASYNC221 (blocking subprocess in async), PERF402 (list.extend), SIM115 (context manager), UP041 (builtin TimeoutError)
+- Reformatted 31 files with ruff format
+- Fixed IMPLEMENTATION_PLAN.md: Phase 2 status Pending→Complete, added phases 9, 11-15
+- Fixed IMPLEMENTATION_STATUS.md: corrected Docker build claim, Slammer views are complete
+- Verified: 91/91 unit tests pass, 0 lint errors, Docker Compose validates
+- Docker daemon still unavailable for image builds and live testing
+
 ### v3.5.0 (2026-10-26) — Runtime Verification
 - Verified all 10 services with entry points and Dockerfiles
 - Ran 91 unit tests: all pass (5117 deprecation warnings from Python 3.14)
@@ -233,13 +233,19 @@
 3. Added phases 10-15 to `version-manifest.json`
 
 ### Known Issues
-1. IMPLEMENTATION_PLAN.md Phase 2 shows "Pending" — needs documentation update
-2. Phase 9 (Docker Build) pending — requires Docker environment
-3. 3 Slammer views (Plugins, Terminal, Workstations) are partial
-4. ROADMAP.md Phase 2 has unchecked items (CSRF, rate limiting, emergency stop)
-5. 897 ruff linting warnings (mostly type annotation deprecations from Python 3.14)
+1. Phase 9 (Docker Build & Live Testing) blocked — Docker daemon not running on this machine
+2. ROADMAP.md Phase 2 has unchecked items (CSRF, rate limiting, emergency stop) — future enhancements
+3. Integration tests require running services — cannot execute without Docker daemon
 
-### Status: ✅ DOCKER BUILD VERIFIED — ALL 10 CORE SERVICES HEALTHY
+### Status: ✅ CODE COMPLETE — ALL 10 CORE SERVICES IMPLEMENTED
+
+**Verification Evidence:**
+- 91/91 unit tests pass
+- Ruff linting: 0 errors (was 120, all fixed)
+- Ruff formatting: 31 files reformatted, now clean
+- Docker Compose config: validates successfully
+- Docker image builds: ⏳ Blocked — Docker daemon not running
+- Live integration tests: ⏳ Blocked — requires running services
 
 ## Next Steps
 

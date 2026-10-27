@@ -17,9 +17,8 @@ def tmp_db():
     """Create a temporary database for testing."""
     import tempfile
 
-    db_file = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
-    db_file.close()
-    db_path = db_file.name
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as db_file:
+        db_path = db_file.name
     yield db_path
     # Force close any WAL files on Windows
     import glob as glob_mod

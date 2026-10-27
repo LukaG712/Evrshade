@@ -514,8 +514,7 @@ def register_otlp_routes(app: FastAPI) -> None:
 
         if "json" in content_type:
             spans = parse_otlp_traces(data)
-            for span in spans:
-                _traces_store.append(span)
+            _traces_store.extend(spans)
             logger.info(f"Received {len(spans)} spans via OTLP")
         else:
             # Protobuf — try to parse, log warning if not possible
@@ -545,8 +544,7 @@ def register_otlp_routes(app: FastAPI) -> None:
 
         if "json" in content_type:
             metrics = parse_otlp_metrics(data)
-            for metric in metrics:
-                _metrics_store.append(metric)
+            _metrics_store.extend(metrics)
             logger.info(f"Received {len(metrics)} metrics via OTLP")
         else:
             logger.info(f"Received {len(data)} bytes of OTLP protobuf metrics")
@@ -578,8 +576,7 @@ def register_otlp_routes(app: FastAPI) -> None:
 
         if "json" in content_type:
             logs = parse_otlp_logs(data)
-            for log in logs:
-                _logs_store.append(log)
+            _logs_store.extend(logs)
             logger.info(f"Received {len(logs)} logs via OTLP")
         else:
             logger.info(f"Received {len(data)} bytes of OTLP protobuf logs")
