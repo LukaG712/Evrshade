@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-hub"
+version = "1.0.3"
+description = "Self-hosted dashboard for managing AI coding agents (JetBrains Junie CLI)"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [
+    {name = "LukaG712"},
+]
+keywords = ["ai", "agent", "junie", "dashboard", "coding-assistant"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "fastapi==0.115.0",
+    "uvicorn==0.32.0",
+    "pyyaml==6.0.2",
+    "httpx==0.27.0",
+    "requests==2.31.0",
+    "python-multipart==0.0.18",
+]
+
+[project.urls]
+Homepage = "https://github.com/LukaG712/Greenie"
+Repository = "https://github.com/LukaG712/Greenie"
+Changelog = "https://github.com/LukaG712/Greenie/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.0",
+    "pytest-asyncio==0.24.0",
+    "pytest-timeout==2.3.1",
+    "pytest-xdist==3.6.1",
+    "ruff==0.9.0",
+]
+
+[project.scripts]
+agent-hub = "hub.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["hub*"]
+
+[tool.setuptools.package-data]
+"hub" = ["static/**/*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "F",     # Pyflakes
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "I",     # isort
+    "UP",    # pyupgrade
+]
+ignore = [
+    "UP006", # Use X | None for type annotations (keep typing.Optional for clarity)
+    "UP007", # Use X | Y for type annotations (keep Optional for clarity)
+    "UP035", # typing.Dict deprecated (keep Dict for now, migrate later)
+    "UP039", # typing.List deprecated (keep List for now, migrate later)
+    "UP045", # Use X | None for type annotations (keep Optional for clarity)
+    "UP017", # Use datetime.UTC (keep datetime.timezone.utc for compatibility)
+    "UP042", # Classes inheriting from object (minor style issue)
+    "E501",  # Line too long (handled by line-length)
+    "E741",  # Ambiguous variable name (legacy code)
+    "F401",  # Unused imports (many are for re-export or future use)
+    "F841",  # Unused variables (common in tests)
+    "F811",  # Redefinition (common in test classes)
+    "W293",  # Blank line contains whitespace
+    "W291",  # Trailing whitespace
+    "E402",  # Module level import not at top of file (lazy imports in api.py)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F401", "F841", "F811", "E402"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+timeout = 60
+timeout_func_only = true
+addopts = "-n auto --dist loadfile"
