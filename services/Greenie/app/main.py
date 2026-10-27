@@ -14,8 +14,6 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-
 from evershade.config import ServiceConfig
 from evershade.errors import (
     CorrelationIdMiddleware,
@@ -24,7 +22,8 @@ from evershade.errors import (
 )
 from evershade.health import register_health_routes
 from evershade.registry import ServiceRegistry
-from evershade.telemetry import setup_telemetry, create_traced_httpx_client
+from evershade.telemetry import create_traced_httpx_client, setup_telemetry
+from fastapi import FastAPI
 
 from app.database import init_db
 from app.routes import agents, missions, tasks
@@ -94,7 +93,10 @@ async def capabilities():
         ],
         "integrations": {
             "opentelemetry": {"enabled": config.telemetry.is_configured},
-            "sqlite": {"enabled": True, "path": os.getenv("GREENIE_DB_PATH", "/data/greenie.db")},
+            "sqlite": {
+                "enabled": True,
+                "path": os.getenv("GREENIE_DB_PATH", "/data/greenie.db"),
+            },
             "slinker": {"enabled": bool(slinker_url), "url": slinker_url},
             "trapper": {"enabled": bool(trapper_url), "url": trapper_url},
             "gobber": {"enabled": bool(gobber_url), "url": gobber_url},
@@ -105,6 +107,7 @@ async def capabilities():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host=config.host,

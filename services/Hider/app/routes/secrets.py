@@ -6,9 +6,9 @@ import base64
 import hashlib
 import hmac
 import os
-from fastapi import APIRouter, HTTPException
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from fastapi import APIRouter, HTTPException
 
 from app.database import db
 from app.models import SecretCreate, SecretResponse, SecretUpdate, gen_id

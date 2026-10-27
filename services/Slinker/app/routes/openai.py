@@ -36,10 +36,12 @@ async def list_models():
     """List available models (OpenAI-compatible)."""
     models = []
     for m in AVAILABLE_MODELS:
-        models.append(ModelInfo(
-            id=m["id"],
-            created=int(time.time()),
-        ))
+        models.append(
+            ModelInfo(
+                id=m["id"],
+                created=int(time.time()),
+            )
+        )
     return {"object": "list", "data": models}
 
 
@@ -51,6 +53,7 @@ async def chat_completions(request: ChatCompletionRequest):
     If Shrewd is not available, it returns a placeholder response.
     """
     import os
+
     shrewd_url = os.getenv("SHREWD_URL", "")
 
     if not shrewd_url:
@@ -63,7 +66,10 @@ async def chat_completions(request: ChatCompletionRequest):
             choices=[
                 ChatCompletionChoice(
                     index=0,
-                    message={"role": "assistant", "content": "Shrewd service is not configured. Set SHREWD_URL to enable LLM routing."},
+                    message={
+                        "role": "assistant",
+                        "content": "Shrewd service is not configured. Set SHREWD_URL to enable LLM routing.",
+                    },
                     finish_reason="stop",
                 )
             ],
@@ -81,7 +87,9 @@ async def chat_completions(request: ChatCompletionRequest):
         import httpx
         from evershade_telemetry import create_traced_httpx_client
 
-        async with create_traced_httpx_client(base_url=shrewd_url, timeout=120.0) as client:
+        async with create_traced_httpx_client(
+            base_url=shrewd_url, timeout=120.0
+        ) as client:
             resp = await client.post("/v1/chat/completions", json=request.model_dump())
             resp.raise_for_status()
             data = resp.json()
@@ -96,14 +104,16 @@ async def chat_completions(request: ChatCompletionRequest):
             choices=[
                 ChatCompletionChoice(
                     index=0,
-                    message={"role": "assistant", "content": f"Error: {str(e)}"},
+                    message={"role": "assistant", "content": f"Error: {e!s}"},
                     finish_reason="error",
                 )
             ],
         )
 
 
-async def _stream_completion(request: ChatCompletionRequest, shrewd_url: str) -> AsyncIterator[str]:
+async def _stream_completion(
+    request: ChatCompletionRequest, shrewd_url: str
+) -> AsyncIterator[str]:
     """Stream chat completion response."""
     completion_id = f"chatcmpl-{uuid.uuid4().hex[:12]}"
     created = int(time.time())
@@ -112,18 +122,30 @@ async def _stream_completion(request: ChatCompletionRequest, shrewd_url: str) ->
         import httpx
         from evershade_telemetry import create_traced_httpx_client
 
-        async with create_traced_httpx_client(base_url=shrewd_url, timeout=120.0) as client:
-            async with client.stream("POST", "/v1/chat/completions", json=request.model_dump()) as resp:
+        async with create_traced_httpx_client(
+            base_url=shrewd_url, timeout=120.0
+        ) as client:
+            async with client.stream(
+                "POST", "/v1/chat/completions", json=request.model_dump()
+            ) as resp:
                 async for line in resp.aiter_lines():
                     if line.startswith("data: "):
                         yield f"{line}\n\n"
     except Exception as e:
-        error_data = json.dumps({
-            "id": completion_id,
-            "object": "chat.completion.chunk",
-            "created": created,
-            "model": request.model,
-            "choices": [{"index": 0, "delta": {"content": f"Error: {str(e)}"}, "finish_reason": "error"}],
-        })
+        error_data = json.dumps(
+            {
+                "id": completion_id,
+                "object": "chat.completion.chunk",
+                "created": created,
+                "model": request.model,
+                "choices": [
+                    {
+                        "index": 0,
+                        "delta": {"content": f"Error: {e!s}"},
+                        "finish_reason": "error",
+                    }
+                ],
+            }
+        )
         yield f"data: {error_data}\n\n"
         yield "data: [DONE]\n\n"

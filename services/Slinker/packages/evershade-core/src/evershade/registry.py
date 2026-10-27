@@ -34,6 +34,7 @@ logger = logging.getLogger("evershade.registry")
 
 class ServiceStatus(str, Enum):
     """Service health status."""
+
     HEALTHY = "healthy"
     UNHEALTHY = "unhealthy"
     STARTING = "starting"
@@ -43,6 +44,7 @@ class ServiceStatus(str, Enum):
 @dataclass
 class ServiceInfo:
     """Information about a registered service."""
+
     name: str
     url: str
     version: str
@@ -73,7 +75,9 @@ class ServiceRegistry:
     def __init__(self):
         self._services: dict[str, ServiceInfo] = {}
 
-    def register(self, name: str, url: str, version: str, capabilities: Optional[list[str]] = None) -> ServiceInfo:
+    def register(
+        self, name: str, url: str, version: str, capabilities: list[str] | None = None
+    ) -> ServiceInfo:
         """Register or update a service."""
         info = ServiceInfo(
             name=name,
@@ -93,11 +97,11 @@ class ServiceRegistry:
             return True
         return False
 
-    def get(self, name: str) -> Optional[ServiceInfo]:
+    def get(self, name: str) -> ServiceInfo | None:
         """Get service info by name."""
         return self._services.get(name)
 
-    def list_services(self, status: Optional[ServiceStatus] = None) -> list[ServiceInfo]:
+    def list_services(self, status: ServiceStatus | None = None) -> list[ServiceInfo]:
         """List all registered services, optionally filtered by status."""
         services = list(self._services.values())
         if status:
@@ -125,7 +129,9 @@ class ServiceRegistry:
     def summary(self) -> dict[str, Any]:
         """Return a summary of the registry."""
         total = len(self._services)
-        healthy = sum(1 for s in self._services.values() if s.status == ServiceStatus.HEALTHY)
+        healthy = sum(
+            1 for s in self._services.values() if s.status == ServiceStatus.HEALTHY
+        )
         return {
             "total": total,
             "healthy": healthy,
@@ -207,7 +213,7 @@ class ServiceDiscoveryClient:
         name: str,
         url: str,
         version: str,
-        capabilities: Optional[list[str]] = None,
+        capabilities: list[str] | None = None,
     ) -> dict[str, Any]:
         """Register this service with the registry."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -232,11 +238,13 @@ class ServiceDiscoveryClient:
     async def heartbeat(self, name: str) -> dict[str, Any]:
         """Send a heartbeat to the registry."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.post(f"{self.registry_url}/api/registry/{name}/heartbeat")
+            resp = await client.post(
+                f"{self.registry_url}/api/registry/{name}/heartbeat"
+            )
             resp.raise_for_status()
             return resp.json()
 
-    async def get_service(self, name: str) -> Optional[dict[str, Any]]:
+    async def get_service(self, name: str) -> dict[str, Any] | None:
         """Get service info by name."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:

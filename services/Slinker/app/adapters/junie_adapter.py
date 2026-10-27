@@ -10,7 +10,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from . import (
@@ -32,7 +32,7 @@ class JunieAdapter(CodingAgentAdapter):
     file access control, and structured result reporting.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
         self.junie_path = self.config.get("junie_path", "junie")
         self.junie_args = self.config.get("junie_args", [])
@@ -59,11 +59,16 @@ class JunieAdapter(CodingAgentAdapter):
 
             # Build Junie command
             prompt = self._build_prompt(request)
-            cmd_parts = [self.junie_path] + self.junie_args + [
-                "--non-interactive",
-                f"--workspace={request.workspace_path}",
-                "--prompt", prompt,
-            ]
+            cmd_parts = (
+                [self.junie_path]
+                + self.junie_args
+                + [
+                    "--non-interactive",
+                    f"--workspace={request.workspace_path}",
+                    "--prompt",
+                    prompt,
+                ]
+            )
 
             # Run Junie
             output_parts = []
@@ -114,7 +119,7 @@ class JunieAdapter(CodingAgentAdapter):
                 },
             )
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             duration = int((time.time() - start) * 1000)
             return ExecutionResult(
                 task_id=task_id,
@@ -145,11 +150,13 @@ class JunieAdapter(CodingAgentAdapter):
         # Progress is streamed via the execute method's output
         # This endpoint polls for status updates
         while not self.is_cancelled(task_id):
-            yield json.dumps({
-                "task_id": task_id,
-                "status": "running",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            })
+            yield json.dumps(
+                {
+                    "task_id": task_id,
+                    "status": "running",
+                    "timestamp": datetime.now(UTC).isoformat(),
+                }
+            )
             await asyncio.sleep(2)
 
     def _build_prompt(self, request: ExecutionRequest) -> str:
@@ -157,7 +164,7 @@ class JunieAdapter(CodingAgentAdapter):
         parts = [request.title, request.description]
 
         if request.files:
-            parts.append(f"\nFocus on these files:\n" + "\n".join(request.files))
+            parts.append("\nFocus on these files:\n" + "\n".join(request.files))
 
         if request.permissions:
             perms = request.permissions

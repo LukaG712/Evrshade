@@ -13,8 +13,6 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-
 from evershade.config import ServiceConfig
 from evershade.errors import (
     CorrelationIdMiddleware,
@@ -22,10 +20,11 @@ from evershade.errors import (
     register_error_handlers,
 )
 from evershade.health import register_health_routes
-from evershade.telemetry import setup_telemetry, create_traced_httpx_client
+from evershade.telemetry import create_traced_httpx_client, setup_telemetry
+from fastapi import FastAPI
 
 from app.database import init_db
-from app.routes import secrets, config
+from app.routes import config, secrets
 
 VERSION = "2.0.0"
 
@@ -82,14 +81,21 @@ async def capabilities():
         ],
         "integrations": {
             "opentelemetry": {"enabled": config_settings.telemetry.is_configured},
-            "sqlite": {"enabled": True, "path": os.getenv("DB_PATH", "/app/data/hider.db")},
-            "encryption": {"enabled": bool(os.getenv("ENCRYPTION_KEY")), "algorithm": "AES-256-GCM"},
+            "sqlite": {
+                "enabled": True,
+                "path": os.getenv("DB_PATH", "/app/data/hider.db"),
+            },
+            "encryption": {
+                "enabled": bool(os.getenv("ENCRYPTION_KEY")),
+                "algorithm": "AES-256-GCM",
+            },
         },
     }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host=config_settings.host,

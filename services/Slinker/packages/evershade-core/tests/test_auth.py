@@ -1,17 +1,15 @@
 """Tests for evershade.auth — JWT authentication."""
 
-import pytest
 import jwt
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
+import pytest
 from evershade.auth import (
+    PUBLIC_PATHS,
+    ServiceAuthMiddleware,
     create_service_token,
     verify_service_token,
-    ServiceAuthMiddleware,
-    PUBLIC_PATHS,
 )
-
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 SECRET = "test-secret-key-12345"
 

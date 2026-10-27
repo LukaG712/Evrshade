@@ -34,6 +34,7 @@ import httpx
 
 class EventType(str, Enum):
     """Standard event types for Evershade."""
+
     # Agent events
     AGENT_CREATED = "agent.created"
     AGENT_UPDATED = "agent.updated"
@@ -69,6 +70,7 @@ class Event:
 
     Every event contains a standard envelope with metadata and a typed payload.
     """
+
     type: str
     payload: dict[str, Any]
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
@@ -111,6 +113,7 @@ class Event:
 @dataclass
 class AgentCreatedEvent:
     """Event fired when a new agent is created."""
+
     agent_id: str
     name: str
     description: str = ""
@@ -126,6 +129,7 @@ class AgentCreatedEvent:
 @dataclass
 class MissionStartedEvent:
     """Event fired when a mission starts."""
+
     mission_id: str
     agent_id: str
     name: str = ""
@@ -141,6 +145,7 @@ class MissionStartedEvent:
 @dataclass
 class TaskCompletedEvent:
     """Event fired when a task completes."""
+
     task_id: str
     worker_id: str = ""
     exit_code: int = 0
@@ -156,6 +161,7 @@ class TaskCompletedEvent:
 @dataclass
 class NotificationSentEvent:
     """Event fired when a notification is sent."""
+
     notification_id: str
     channel: str
     recipient: str = ""
@@ -184,7 +190,7 @@ class EventBus:
         bus = EventBus(redis_url="redis://localhost:6379")  # Redis
     """
 
-    def __init__(self, redis_url: Optional[str] = None):
+    def __init__(self, redis_url: str | None = None):
         self.redis_url = redis_url
         self._handlers: dict[str, list[EventHandler]] = {}
         self._redis = None

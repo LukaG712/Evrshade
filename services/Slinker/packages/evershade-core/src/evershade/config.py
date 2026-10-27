@@ -25,6 +25,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Environment(str, Enum):
     """Deployment environment."""
+
     DEV = "dev"
     STAGING = "staging"
     PROD = "prod"
@@ -32,8 +33,9 @@ class Environment(str, Enum):
 
 class DatabaseConfig(BaseSettings):
     """Database connection settings."""
+
     model_config = SettingsConfigDict(env_prefix="DB_", env_nested_delimiter="__")
-    
+
     url: str = Field(default="sqlite:///./app.db", description="Database URL")
     pool_size: int = Field(default=5, ge=1, le=20)
     max_overflow: int = Field(default=10, ge=0)
@@ -50,8 +52,9 @@ class DatabaseConfig(BaseSettings):
 
 class TelemetryConfig(BaseSettings):
     """OpenTelemetry and metrics configuration."""
+
     model_config = SettingsConfigDict(env_prefix="OTEL_", env_nested_delimiter="__")
-    
+
     otlp_endpoint: str = Field(default="", description="OTLP collector endpoint")
     enabled: bool = Field(default=False)
     sample_rate: float = Field(default=1.0, ge=0.0, le=1.0)
@@ -63,14 +66,15 @@ class TelemetryConfig(BaseSettings):
 
 class AuthConfig(BaseSettings):
     """Service-to-service authentication settings."""
+
     model_config = SettingsConfigDict(env_prefix="AUTH_", env_nested_delimiter="__")
-    
+
     jwt_secret: str = Field(default="", description="JWT signing secret")
     token_expiry_seconds: int = Field(default=3600, ge=60, le=86400)
     enabled: bool = Field(default=False)
 
     @model_validator(mode="after")
-    def validate_secret_required(self) -> "AuthConfig":
+    def validate_secret_required(self) -> AuthConfig:
         if self.enabled and not self.jwt_secret:
             raise ValueError("JWT secret is required when auth is enabled")
         return self
@@ -78,7 +82,7 @@ class AuthConfig(BaseSettings):
 
 class ServiceConfig(BaseSettings):
     """Main configuration for an Evershade service.
-    
+
     Reads from environment variables with the EVERSHADE_ prefix and
     falls back to sensible defaults. Validates all required fields
     at startup.
@@ -87,11 +91,12 @@ class ServiceConfig(BaseSettings):
         service_name: Human-readable service name (e.g. "Greenie").
         port: Default HTTP port for this service.
         version: Semantic version string.
-    
+
     Examples:
         >>> config = ServiceConfig(service_name="Greenie", port=8080)
         >>> config.validate()  # Raises on invalid config
     """
+
     model_config = SettingsConfigDict(
         env_prefix="EVERSHADE_",
         env_nested_delimiter="__",
@@ -104,12 +109,14 @@ class ServiceConfig(BaseSettings):
     port: int = Field(..., ge=1, le=65535)
     version: str = Field(default="2.0.0", min_length=1)
     environment: Environment = Field(default=Environment.DEV)
-    log_level: str = Field(default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
+    log_level: str = Field(
+        default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$"
+    )
     host: str = Field(default="0.0.0.0")
-    
+
     # API key for external authentication
     api_key: str = Field(default="", description="Service API key")
-    
+
     # Service-to-service URLs (resolved from Docker network)
     slinker_url: str = Field(default="http://Slinker:8000")
     trapper_url: str = Field(default="http://Trapper-api:3000")
@@ -119,7 +126,7 @@ class ServiceConfig(BaseSettings):
     poltergeist_url: str = Field(default="http://Poltergeist:8088")
     shrewd_url: str = Field(default="http://Shrewd:8089")
     greenie_url: str = Field(default="http://Greenie:8080")
-    
+
     # Sub-configs
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     telemetry: TelemetryConfig = Field(default_factory=TelemetryConfig)
@@ -130,29 +137,39 @@ class ServiceConfig(BaseSettings):
     def validate_service_name(cls, v: str) -> str:
         if not v.strip():
             raise ValueError("Service name must not be empty")
-        allowed = {"Greenie", "Slinker", "Trapper", "Gobber", "Sneaker",
-                    "Hider", "Poltergeist", "Shrewd", "Slammer", "Speedy"}
+        allowed = {
+            "Greenie",
+            "Slinker",
+            "Trapper",
+            "Gobber",
+            "Sneaker",
+            "Hider",
+            "Poltergeist",
+            "Shrewd",
+            "Slammer",
+            "Speedy",
+        }
         if v not in allowed:
             print(f"Warning: Unknown service name '{v}', expected one of {allowed}")
         return v
 
     def validate(self) -> dict[str, str]:
         """Validate configuration and return any warnings.
-        
+
         Returns:
             Dictionary of warning messages (empty if config is valid).
         """
         warnings = {}
-        
+
         if self.environment == Environment.PROD and not self.api_key:
             warnings["api_key"] = "API key is recommended in production"
-        
+
         if self.environment == Environment.PROD and self.log_level == "DEBUG":
             warnings["log_level"] = "DEBUG logging is not recommended in production"
-        
+
         if self.telemetry.is_configured and not self.telemetry.otlp_endpoint:
             warnings["telemetry"] = "Telemetry enabled but no OTLP endpoint configured"
-        
+
         return warnings
 
     def dict_without_secrets(self) -> dict[str, Any]:

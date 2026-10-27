@@ -7,8 +7,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-
 # ─── Tasks ───────────────────────────────────────────────────────────────────
+
 
 class TaskStatus(str, Enum):
     PENDING = "pending"
@@ -35,15 +35,16 @@ class TaskResponse(BaseModel):
     command: str
     output: str
     error: str
-    exit_code: Optional[int]
+    exit_code: int | None
     worker_id: str
-    started_at: Optional[str]
-    completed_at: Optional[str]
+    started_at: str | None
+    completed_at: str | None
     created_at: str
     updated_at: str
 
 
 # ─── Workers ─────────────────────────────────────────────────────────────────
+
 
 class WorkerStatus(str, Enum):
     IDLE = "idle"
@@ -56,11 +57,12 @@ class WorkerResponse(BaseModel):
     name: str
     status: str
     current_task_id: str
-    last_heartbeat: Optional[str]
+    last_heartbeat: str | None
     created_at: str
 
 
 # ─── Projects ────────────────────────────────────────────────────────────────
+
 
 class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
@@ -80,6 +82,7 @@ class ProjectResponse(BaseModel):
 
 # ─── Sessions ────────────────────────────────────────────────────────────────
 
+
 class SessionCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
 
@@ -90,10 +93,11 @@ class SessionResponse(BaseModel):
     status: str
     task_count: int
     started_at: str
-    completed_at: Optional[str]
+    completed_at: str | None
 
 
 # ─── Session Logs ────────────────────────────────────────────────────────────
+
 
 class LogLevel(str, Enum):
     DEBUG = "debug"
@@ -122,6 +126,7 @@ class SessionLogResponse(BaseModel):
 
 # ─── OpenAI-compatible ───────────────────────────────────────────────────────
 
+
 class ChatCompletionMessage(BaseModel):
     role: str
     content: str
@@ -131,7 +136,7 @@ class ChatCompletionRequest(BaseModel):
     model: str = "gpt-4"
     messages: list[ChatCompletionMessage]
     temperature: float = 0.7
-    max_tokens: Optional[int] = None
+    max_tokens: int | None = None
     stream: bool = False
 
 

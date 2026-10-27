@@ -11,7 +11,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from . import (
@@ -33,7 +33,7 @@ class SubprocessAdapter(CodingAgentAdapter):
     Useful for simple tasks like running tests, linters, or build scripts.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
 
     async def execute(
@@ -79,9 +79,7 @@ class SubprocessAdapter(CodingAgentAdapter):
                 last_returncode = result["returncode"]
 
                 if last_returncode != 0:
-                    logger.warning(
-                        f"Command failed with code {last_returncode}: {cmd}"
-                    )
+                    logger.warning(f"Command failed with code {last_returncode}: {cmd}")
 
             # Capture file changes
             file_changes = await self.capture_file_changes(
@@ -128,9 +126,11 @@ class SubprocessAdapter(CodingAgentAdapter):
     ) -> AsyncGenerator[str, None]:
         """Stream progress updates."""
         while not self.is_cancelled(task_id):
-            yield json.dumps({
-                "task_id": task_id,
-                "status": "running",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            })
+            yield json.dumps(
+                {
+                    "task_id": task_id,
+                    "status": "running",
+                    "timestamp": datetime.now(UTC).isoformat(),
+                }
+            )
             await asyncio.sleep(2)

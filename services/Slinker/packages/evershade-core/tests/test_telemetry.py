@@ -9,14 +9,14 @@ Tests cover:
 """
 
 import os
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import pytest
 from evershade.telemetry import (
-    setup_telemetry,
-    create_traced_httpx_client,
-    _setup_prometheus_metrics,
     _server_request_hook,
+    _setup_prometheus_metrics,
+    create_traced_httpx_client,
+    setup_telemetry,
 )
 
 
@@ -33,10 +33,13 @@ class TestSetupTelemetry:
     def test_setup_with_missing_opentelemetry(self):
         """When OpenTelemetry packages are missing, degrade gracefully."""
         with patch.dict(os.environ, {"SNEAKER_OTLP_ENDPOINT": "http://sneaker:8086"}):
-            with patch("sys.modules", {
-                "opentelemetry": None,
-                "opentelemetry.exporter.otlp.proto.grpc.trace_exporter": None,
-            }):
+            with patch(
+                "sys.modules",
+                {
+                    "opentelemetry": None,
+                    "opentelemetry.exporter.otlp.proto.grpc.trace_exporter": None,
+                },
+            ):
                 app = MagicMock()
                 # Should not raise even with missing packages
                 setup_telemetry(app, service_name="TestService")
@@ -48,7 +51,7 @@ class TestSetupTelemetry:
             mock_trace = MagicMock()
             mock_trace_module = MagicMock()
             mock_trace_module.trace = mock_trace
-            
+
             mock_exporter_class = MagicMock()
             mock_processor_class = MagicMock()
             mock_provider_class = MagicMock()
@@ -56,7 +59,7 @@ class TestSetupTelemetry:
             mock_instrumentor_httpx = MagicMock()
             mock_set_global_textmap = MagicMock()
             mock_b3 = MagicMock()
-            
+
             mocked_modules = {
                 "opentelemetry": mock_trace_module,
                 "opentelemetry.exporter.otlp.proto.grpc.trace_exporter": MagicMock(
@@ -71,9 +74,7 @@ class TestSetupTelemetry:
                 "opentelemetry.propagate": MagicMock(
                     set_global_textmap=mock_set_global_textmap
                 ),
-                "opentelemetry.propagators.b3": MagicMock(
-                    B3MultiFormat=mock_b3
-                ),
+                "opentelemetry.propagators.b3": MagicMock(B3MultiFormat=mock_b3),
                 "opentelemetry.sdk.trace": MagicMock(
                     TracerProvider=mock_provider_class
                 ),
@@ -81,7 +82,7 @@ class TestSetupTelemetry:
                     BatchSpanProcessor=mock_processor_class
                 ),
             }
-            
+
             with patch.dict("sys.modules", mocked_modules):
                 app = MagicMock()
                 setup_telemetry(app, service_name="TestService")
@@ -95,15 +96,15 @@ class TestSetupTelemetry:
         # Remove the flag if it exists
         if hasattr(_setup_prometheus_metrics, "_initialized"):
             delattr(_setup_prometheus_metrics, "_initialized")
-        
+
         with patch("prometheus_client.REGISTRY.register") as mock_register:
             _setup_prometheus_metrics("TestSvc")
             call_count_first = mock_register.call_count
-            
+
             # Second call should be a no-op
             _setup_prometheus_metrics("TestSvc")
             call_count_second = mock_register.call_count
-            
+
             assert call_count_first == call_count_second
 
 

@@ -2,8 +2,8 @@
 
 import os
 import tempfile
-import pytest
 
+import pytest
 from evershade_db import Database, ensure_db_path, init_wal_mode
 
 
@@ -92,7 +92,9 @@ class TestDatabase:
                     name TEXT NOT NULL
                 );
             """)
-            result = await db.fetchone("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+            result = await db.fetchone(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+            )
             assert result is not None
             await db.close()
 
@@ -102,6 +104,7 @@ class TestWalMode:
 
     def test_sync_wal_mode(self):
         import sqlite3
+
         with tempfile.TemporaryDirectory() as tmp:
             db_path = os.path.join(tmp, "test.db")
             conn = sqlite3.connect(db_path)

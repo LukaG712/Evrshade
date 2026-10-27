@@ -6,21 +6,21 @@ import asyncio
 import json
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from evershade.errors import EvershadeError
 from fastapi import APIRouter, Query
 
-from evershade.errors import EvershadeError
-from app.database import get_db_instance
 from app.adapters import ExecutionRequest, ExecutionResult
 from app.adapters.factory import create_adapter, list_adapters
+from app.database import get_db_instance
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["execution"])
 
 
 @router.post("", status_code=201)
-async def create_task(data: Dict[str, Any]):
+async def create_task(data: dict[str, Any]):
     """Create and execute a task using a coding agent adapter."""
     task_id = str(uuid.uuid4())
     title = data.get("title", "Untitled task")
@@ -46,14 +46,14 @@ async def create_task(data: Dict[str, Any]):
                 workspace_id,
                 os.path.basename(workspace_path),
                 workspace_path,
-                datetime.now(timezone.utc).isoformat(),
-                datetime.now(timezone.utc).isoformat(),
+                datetime.now(UTC).isoformat(),
+                datetime.now(UTC).isoformat(),
             ),
         )
 
     # Create execution session
     session_id = str(uuid.uuid4())
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     await db.execute(
         """INSERT INTO execution_sessions (id, task_id, adapter, workspace_id, status,
                                           metadata, created_at, updated_at)
@@ -124,7 +124,7 @@ async def _execute_task_async(
         result = await adapter.execute(request)
 
         # Update execution session
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         await db.execute(
             """UPDATE execution_sessions SET status = ?, output = ?, error = ?,
                exit_code = ?, duration_ms = ?, completed_at = ?, updated_at = ?
@@ -173,7 +173,7 @@ async def _execute_task_async(
         )
 
     except Exception as e:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         error_msg = str(e)
         await db.execute(
             """UPDATE execution_sessions SET status = 'failed', error = ?,
@@ -221,7 +221,7 @@ async def get_task(task_id: str):
 
 @router.get("")
 async def list_tasks(
-    status: Optional[str] = Query(None),
+    status: str | None = Query(None),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
@@ -250,9 +250,11 @@ async def cancel_task(task_id: str):
         raise EvershadeError.not_found("Task not found")
 
     if task["status"] not in ("running", "pending"):
-        raise EvershadeError.bad_request(f"Cannot cancel task in status: {task['status']}")
+        raise EvershadeError.bad_request(
+            f"Cannot cancel task in status: {task['status']}"
+        )
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     await db.execute(
         """UPDATE tasks SET status = 'cancelled', completed_at = ?, updated_at = ?
            WHERE id = ?""",
@@ -270,7 +272,7 @@ async def list_available_adapters():
 
 
 @router.post("/{task_id}/run-tests")
-async def run_tests(task_id: str, test_command: Optional[str] = None):
+async def run_tests(task_id: str, test_command: str | None = None):
     """Run tests for a task's workspace."""
     db = await get_db_instance()
     session = await db.fetchone(
@@ -306,7 +308,7 @@ async def run_tests(task_id: str, test_command: Optional[str] = None):
 
 
 @router.post("/{task_id}/run-lint")
-async def run_lint(task_id: str, lint_command: Optional[str] = None):
+async def run_lint(task_id: str, lint_command: str | None = None):
     """Run linter for a task's workspace."""
     db = await get_db_instance()
     session = await db.fetchone(
@@ -341,7 +343,7 @@ async def run_lint(task_id: str, lint_command: Optional[str] = None):
 
 
 @router.post("/{task_id}/run-build")
-async def run_build(task_id: str, build_command: Optional[str] = None):
+async def run_build(task_id: str, build_command: str | None = None):
     """Run build for a task's workspace."""
     db = await get_db_instance()
     session = await db.fetchone(

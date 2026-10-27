@@ -33,25 +33,27 @@ class ExecutionStatus(str, Enum):
 @dataclass
 class FileChange:
     """Represents a file modification made by a coding agent."""
+
     path: str
     action: str  # "created", "modified", "deleted"
-    diff: Optional[str] = None
-    content: Optional[str] = None
+    diff: str | None = None
+    content: str | None = None
 
 
 @dataclass
 class ExecutionResult:
     """Structured result from a coding agent execution."""
+
     task_id: str
     status: str
     output: str = ""
-    error: Optional[str] = None
+    error: str | None = None
     exit_code: int = 0
-    file_changes: List[FileChange] = field(default_factory=list)
+    file_changes: list[FileChange] = field(default_factory=list)
     duration_ms: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "status": self.status,
@@ -74,15 +76,16 @@ class ExecutionResult:
 @dataclass
 class ExecutionRequest:
     """Request to execute a coding task."""
+
     task_id: str
     title: str
     description: str
     workspace_path: str
-    files: Optional[List[str]] = None  # Files to focus on
-    commands: Optional[List[str]] = None  # Commands to run after
+    files: list[str] | None = None  # Files to focus on
+    commands: list[str] | None = None  # Commands to run after
     timeout: int = 300
-    permissions: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    permissions: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class CodingAgentAdapter(ABC):
@@ -104,10 +107,10 @@ class CodingAgentAdapter(ABC):
     - Structured result reporting
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
-        self._active_tasks: Dict[str, asyncio.Task] = {}
-        self._cancel_events: Dict[str, asyncio.Event] = {}
+        self._active_tasks: dict[str, asyncio.Task] = {}
+        self._cancel_events: dict[str, asyncio.Event] = {}
 
     @abstractmethod
     async def execute(
@@ -115,7 +118,6 @@ class CodingAgentAdapter(ABC):
         request: ExecutionRequest,
     ) -> ExecutionResult:
         """Execute a coding task and return structured results."""
-        pass
 
     @abstractmethod
     async def stream_progress(
@@ -123,7 +125,6 @@ class CodingAgentAdapter(ABC):
         task_id: str,
     ) -> AsyncGenerator[str, None]:
         """Stream progress updates as SSE events."""
-        pass
 
     async def cancel(self, task_id: str) -> bool:
         """Cancel a running task."""
@@ -157,7 +158,7 @@ class CodingAgentAdapter(ABC):
         """Run a coroutine with timeout and cancellation support."""
         try:
             return await asyncio.wait_for(coro, timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise TimeoutError(f"Task {task_id} timed out after {timeout}s")
         except asyncio.CancelledError:
             raise asyncio.CancelledError(f"Task {task_id} was cancelled")
@@ -165,8 +166,8 @@ class CodingAgentAdapter(ABC):
     async def capture_file_changes(
         self,
         workspace_path: str,
-        before_files: Optional[set] = None,
-    ) -> List[FileChange]:
+        before_files: set | None = None,
+    ) -> list[FileChange]:
         """Capture file changes in a workspace."""
         changes = []
         if not os.path.isdir(workspace_path):
@@ -186,22 +187,28 @@ class CodingAgentAdapter(ABC):
                 full_path = os.path.join(workspace_path, path)
                 try:
                     loop = asyncio.get_event_loop()
-                    content = await loop.run_in_executor(None, self._read_file, full_path)
-                    changes.append(FileChange(
-                        path=path,
-                        action="created",
-                        content=content,
-                    ))
+                    content = await loop.run_in_executor(
+                        None, self._read_file, full_path
+                    )
+                    changes.append(
+                        FileChange(
+                            path=path,
+                            action="created",
+                            content=content,
+                        )
+                    )
                 except Exception:
                     pass
 
             # Deleted files
             deleted_files = before_files - current_files
             for path in deleted_files:
-                changes.append(FileChange(
-                    path=path,
-                    action="deleted",
-                ))
+                changes.append(
+                    FileChange(
+                        path=path,
+                        action="deleted",
+                    )
+                )
 
         return changes
 
@@ -210,8 +217,8 @@ class CodingAgentAdapter(ABC):
         command: str,
         workspace_path: str,
         timeout: int = 60,
-        task_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        task_id: str | None = None,
+    ) -> dict[str, Any]:
         """Run a shell command in the workspace."""
         start = time.time()
         try:
@@ -231,7 +238,7 @@ class CodingAgentAdapter(ABC):
                 "returncode": process.returncode,
                 "duration_ms": duration,
             }
-        except asyncio.TimeoutError:
+        except TimeoutError:
             if process:
                 process.kill()
             return {
@@ -244,9 +251,9 @@ class CodingAgentAdapter(ABC):
     async def run_tests(
         self,
         workspace_path: str,
-        test_command: Optional[str] = None,
+        test_command: str | None = None,
         timeout: int = 120,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Run tests in the workspace."""
         if test_command:
             cmd = test_command
@@ -269,9 +276,9 @@ class CodingAgentAdapter(ABC):
     async def run_lint(
         self,
         workspace_path: str,
-        lint_command: Optional[str] = None,
+        lint_command: str | None = None,
         timeout: int = 60,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Run linter in the workspace."""
         if lint_command:
             cmd = lint_command
@@ -294,9 +301,9 @@ class CodingAgentAdapter(ABC):
     async def run_build(
         self,
         workspace_path: str,
-        build_command: Optional[str] = None,
+        build_command: str | None = None,
         timeout: int = 120,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Run build in the workspace."""
         if build_command:
             cmd = build_command
@@ -307,7 +314,11 @@ class CodingAgentAdapter(ABC):
         elif os.path.exists(os.path.join(workspace_path, "Makefile")):
             cmd = "make 2>/dev/null || true"
         else:
-            return {"passed": True, "output": "No build system detected", "returncode": 0}
+            return {
+                "passed": True,
+                "output": "No build system detected",
+                "returncode": 0,
+            }
 
         result = await self.run_command(cmd, workspace_path, timeout)
         passed = result["returncode"] == 0

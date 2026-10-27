@@ -1,15 +1,15 @@
 """Tests for evershade_events — Event contracts and bus."""
 
 import asyncio
-import pytest
 
+import pytest
 from evershade_events import (
-    Event,
-    EventType,
     AgentCreatedEvent,
+    Event,
+    EventBus,
+    EventType,
     MissionStartedEvent,
     TaskCompletedEvent,
-    EventBus,
 )
 
 

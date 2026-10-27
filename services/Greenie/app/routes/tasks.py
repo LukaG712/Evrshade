@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+
 from fastapi import APIRouter, HTTPException
 
 from app.database import db
@@ -17,7 +18,14 @@ async def create_task(task: TaskCreate) -> TaskResponse:
     tid = gen_id()
     await db.execute(
         "INSERT INTO tasks (id, mission_id, name, description, type, payload) VALUES (?, ?, ?, ?, ?, ?)",
-        (tid, task.mission_id, task.name, task.description, task.task_type, json.dumps(task.payload)),
+        (
+            tid,
+            task.mission_id,
+            task.name,
+            task.description,
+            task.task_type,
+            json.dumps(task.payload),
+        ),
     )
     row = await db.fetchone("SELECT * FROM tasks WHERE id = ?", (tid,))
     return TaskResponse(**row)

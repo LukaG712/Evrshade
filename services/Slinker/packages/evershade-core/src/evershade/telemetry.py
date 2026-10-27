@@ -87,7 +87,7 @@ def setup_telemetry(app, service_name: str = "evershade-service") -> None:
 
 
 def create_traced_httpx_client(
-    base_url: Optional[str] = None,
+    base_url: str | None = None,
     timeout: float = 30.0,
 ) -> httpx.AsyncClient:
     """Create an HTTPX async client that propagates OpenTelemetry trace context.
@@ -122,8 +122,8 @@ def _setup_prometheus_metrics(service_name: str) -> None:
         service_name: Name of the service for metric labels.
     """
     try:
-        from prometheus_client import Counter, Histogram, REGISTRY
         import prometheus_client
+        from prometheus_client import REGISTRY, Counter, Histogram
 
         # Check if we've already set up metrics (avoid duplicates)
         if hasattr(_setup_prometheus_metrics, "_initialized"):

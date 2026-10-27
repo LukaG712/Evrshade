@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 # Registry of available adapters
-ADAPTER_REGISTRY: Dict[str, Any] = {}
+ADAPTER_REGISTRY: dict[str, Any] = {}
 
 
 def register_adapter(name: str, adapter_class: type) -> None:
@@ -30,6 +30,7 @@ register_adapter("subprocess", SubprocessAdapter)
 # Try to register Junie adapter (may not be available)
 try:
     from .junie_adapter import JunieAdapter
+
     register_adapter("junie", JunieAdapter)
     logger.info("Junie adapter registered")
 except ImportError:
@@ -38,7 +39,7 @@ except ImportError:
 
 def create_adapter(
     adapter_name: str = "subprocess",
-    config: Optional[Dict[str, Any]] = None,
+    config: dict[str, Any] | None = None,
 ) -> CodingAgentAdapter:
     """
     Create a coding agent adapter by name.
@@ -73,7 +74,7 @@ def create_adapter(
     return adapter
 
 
-def list_adapters() -> Dict[str, Dict[str, Any]]:
+def list_adapters() -> dict[str, dict[str, Any]]:
     """List all registered adapters with their status."""
     result = {}
     for name, cls in ADAPTER_REGISTRY.items():
