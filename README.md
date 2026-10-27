@@ -76,7 +76,7 @@ The Linux GUI wizard guides you through 9 steps:
 2. **System Check** — Verifies OS version, architecture, and installed tools
 3. **Installation Options** — Choose profile (minimal/standard/full/custom) and install directory. Custom mode lets you pick individual services via checkboxes.
 4. **Install Docker** — Installs Docker Engine and Compose if missing
-5. **Clone & Install** — Clones the repository and installs service submodules
+5. **Clone & Install** — Clones the repository with all services included
 6. **Configure** — Creates `.env` with auto-generated secure API keys
 7. **System Integration** — Optional systemd service and desktop launcher
 8. **Start Services** — Launches all services with your chosen profile

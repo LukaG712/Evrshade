@@ -246,16 +246,6 @@ class Installer:
             return False, f"Service install failed: {_err[:200]}"
         return True, "Services installed"
 
-    def init_submodules(self):
-        """Initialize and update git submodules."""
-        rc, _out, _err = run_command(
-            ["git", "submodule", "update", "--init", "--recursive"],
-            cwd=self.install_dir,
-        )
-        if rc != 0:
-            pass  # Submodules might not be set up
-        return True, "Submodules initialized"
-
     def create_env(self):
         """Create .env file with auto-generated keys."""
         env_path = os.path.join(self.install_dir, ".env")
@@ -1307,11 +1297,6 @@ class EvershadeInstallerGUI:
         if not ok:
             self._enable_install_btn()
             return
-
-        # Init submodules
-        self._log_to_text(self.clone_log, "Initializing git submodules...")
-        ok, msg = self.installer.init_submodules()
-        self._log_to_text(self.clone_log, f"{'✓' if ok else '✗'} {msg}")
 
         # Install services
         self._log_to_text(

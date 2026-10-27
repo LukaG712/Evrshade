@@ -68,7 +68,7 @@ class TestNoShellTrue(unittest.TestCase):
         in run_command() calls. This covers the critical CWE-78 attack surface.
 
         Checks: clone_repo, install_services, setup_docker_group, create_env,
-        init_submodules, start_services, create_desktop_launcher.
+        start_services, create_desktop_launcher.
         """
         # Methods that handle user-controlled values (install dir, username, profile)
         user_input_methods = {
@@ -76,7 +76,6 @@ class TestNoShellTrue(unittest.TestCase):
             "install_services",
             "setup_docker_group",
             "create_env",
-            "init_submodules",
             "start_services",
             "create_desktop_launcher",
         }
@@ -418,21 +417,6 @@ class TestInstallerMethodsNoShellInjection(unittest.TestCase):
                             self._assert_no_fstring_arg(child, "create_env")
                 break
 
-    def test_init_submodules_no_fstring(self):
-        """init_submodules() must not use f-string arguments."""
-        tree = ast.parse(self.source)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) and node.name == "init_submodules":
-                for child in ast.walk(node):
-                    if isinstance(child, ast.Call):
-                        func_name = ""
-                        if isinstance(child.func, ast.Name):
-                            func_name = child.func.id
-                        elif isinstance(child.func, ast.Attribute):
-                            func_name = child.func.attr
-                        if func_name == "run_command":
-                            self._assert_no_fstring_arg(child, "init_submodules")
-                break
 
     def test_start_services_no_fstring(self):
         """start_services() must not use f-string arguments."""
