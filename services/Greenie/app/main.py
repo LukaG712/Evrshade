@@ -11,6 +11,7 @@ Greenie is the central agent orchestration service for the Evershade platform. I
 
 from __future__ import annotations
 
+import hmac
 import os
 from contextlib import asynccontextmanager
 
@@ -22,8 +23,10 @@ from evershade.errors import (
 )
 from evershade.health import register_health_routes
 from evershade.registry import ServiceRegistry
+from evershade.security import add_security_middleware
 from evershade.telemetry import create_traced_httpx_client, setup_telemetry
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.database import init_db
 from app.routes import agents, mcp, missions, plugins, tasks, workstations
@@ -32,6 +35,36 @@ VERSION = "2.0.0"
 
 config = ServiceConfig(service_name="Greenie", port=8080)
 registry = ServiceRegistry(service_name="Greenie")
+
+# API key authentication
+API_KEY = os.getenv("API_KEY", "")
+
+PUBLIC_PATHS = {
+    "/health",
+    "/ready",
+    "/metrics",
+    "/api/status",
+    "/docs",
+    "/openapi.json",
+}
+
+
+async def auth_middleware(request: Request, call_next):
+    """Authenticate requests using API key."""
+    if request.url.path in PUBLIC_PATHS or not API_KEY:
+        return await call_next(request)
+
+    authorization = request.headers.get("Authorization", "")
+    if not authorization.startswith("Bearer "):
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Missing or invalid Authorization header"},
+        )
+    token = authorization[7:]
+    if not hmac.compare_digest(token, API_KEY):
+        return JSONResponse(status_code=401, content={"detail": "Invalid API key"})
+
+    return await call_next(request)
 
 
 @asynccontextmanager
@@ -52,7 +85,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Middleware
+# Security middleware
+add_security_middleware(app, requests_per_minute=60)
+
+# Authentication middleware
+app.add_middleware(auth_middleware)
+
+# Other middleware
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 

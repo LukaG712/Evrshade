@@ -64,6 +64,4 @@ def backup(backup_dir):
             # Container might not be running
             print_error(f"Could not backup {service}: container may not be running")
 
-    print_info(
-        f"Backup complete: {backed_up}/{len(services_dbs)} services backed up to {dest}"
-    )
+    print_info(f"Backup complete: {backed_up}/{len(services_dbs)} services backed up to {dest}")

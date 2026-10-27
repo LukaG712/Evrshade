@@ -1,13 +1,14 @@
 """Tests for evershade.registry — Service registry."""
 
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
 from evershade.registry import (
     ServiceInfo,
     ServiceRegistry,
     ServiceStatus,
     register_service_routes,
 )
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
 
 class TestServiceRegistry:
@@ -89,9 +90,7 @@ class TestServiceRegistry:
 
     def test_capabilities(self):
         registry = ServiceRegistry()
-        registry.register(
-            "Greenie", "http://localhost:8080", "2.0.0", capabilities=["agents", "chat"]
-        )
+        registry.register("Greenie", "http://localhost:8080", "2.0.0", capabilities=["agents", "chat"])
         info = registry.get("Greenie")
         assert "agents" in info.capabilities
 
@@ -195,7 +194,5 @@ class TestRegistryRoutes:
                     "version": "2.0.0",
                 },
             )
-            resp = client.post(
-                "/api/registry/Greenie/status", json={"status": "unhealthy"}
-            )
+            resp = client.post("/api/registry/Greenie/status", json={"status": "unhealthy"})
             assert resp.status_code == 200

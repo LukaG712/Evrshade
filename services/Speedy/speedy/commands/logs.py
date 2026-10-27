@@ -37,9 +37,7 @@ def logs(service, tail):
             "Shrewd",
         ]
         for svc in services:
-            output = docker_compose_logs(
-                svc, tail=min(tail, 20), project_dir=compose.parent
-            )
+            output = docker_compose_logs(svc, tail=min(tail, 20), project_dir=compose.parent)
             if output:
                 console.print(f"\n[bold cyan]=== {svc} ===[/]")
                 console.print(output[:500])  # Limit output per service

@@ -7,6 +7,12 @@ const GREENIE_URL = (() => {
   return baseUrl ? `${baseUrl}/greenie` : 'http://localhost:8080'
 })()
 
+// Strip ANSI escape codes from terminal output
+const ansiRegex = /\x1b\[[0-9;]*[a-zA-Z]|\x1b\][^\x07]*\x07|[\x1b\x9c]/g
+function stripAnsi(text: string): string {
+  return text.replace(ansiRegex, '')
+}
+
 function Terminal({ workstationId, onClose }: { workstationId: string; onClose: () => void }) {
   const [connected, setConnected] = useState(false)
   const [output, setOutput] = useState<string[]>([])
@@ -108,7 +114,9 @@ function Terminal({ workstationId, onClose }: { workstationId: string; onClose: 
           <p className="text-gray-500">Connecting to terminal...</p>
         ) : (
           output.map((line, i) => (
-            <div key={`${i}-${line.slice(0, 50)}`} className="whitespace-pre-wrap">{line}</div>
+            <div key={`${i}-${line.slice(0, 50)}`} className="whitespace-pre-wrap">
+              {stripAnsi(line)}
+            </div>
           ))
         )}
       </div>

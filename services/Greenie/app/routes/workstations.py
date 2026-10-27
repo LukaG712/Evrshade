@@ -8,11 +8,14 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException
 
 from app.database import db
+
+logger = logging.getLogger(__name__)
 
 
 async def _run_docker(*args: str, timeout: int = 30) -> tuple[int, str, str]:
@@ -52,21 +55,9 @@ async def list_workstations():
 async def get_workstation_stats():
     """Get workstation statistics."""
     total = (await db.fetchone("SELECT COUNT(*) as c FROM workstations"))["c"]
-    running = (
-        await db.fetchone(
-            "SELECT COUNT(*) as c FROM workstations WHERE status = 'running'"
-        )
-    )["c"]
-    stopped = (
-        await db.fetchone(
-            "SELECT COUNT(*) as c FROM workstations WHERE status = 'stopped'"
-        )
-    )["c"]
-    error = (
-        await db.fetchone(
-            "SELECT COUNT(*) as c FROM workstations WHERE status = 'error'"
-        )
-    )["c"]
+    running = (await db.fetchone("SELECT COUNT(*) as c FROM workstations WHERE status = 'running'"))["c"]
+    stopped = (await db.fetchone("SELECT COUNT(*) as c FROM workstations WHERE status = 'stopped'"))["c"]
+    error = (await db.fetchone("SELECT COUNT(*) as c FROM workstations WHERE status = 'error'"))["c"]
     # Docker availability is checked at runtime
     docker_available = False
     try:
@@ -137,11 +128,12 @@ async def start_workstation(ws_id: str):
         else:
             raise RuntimeError(stderr)
     except RuntimeError as e:
+        logger.error("Failed to start workstation %s: %s", ws_id, e)
         await db.execute(
             "UPDATE workstations SET status = 'error', error = ? WHERE id = ?",
-            (str(e), ws_id),
+            ("Failed to start container", ws_id),
         )
-        raise HTTPException(status_code=500, detail=f"Failed to start workstation: {e}")
+        raise HTTPException(status_code=500, detail="Failed to start workstation")
 
 
 @router.post("/{ws_id}/stop")
@@ -157,9 +149,7 @@ async def stop_workstation(ws_id: str):
             await _run_docker("docker", "stop", container_name, timeout=30)
         except Exception:
             pass
-    await db.execute(
-        "UPDATE workstations SET status = 'stopped' WHERE id = ?", (ws_id,)
-    )
+    await db.execute("UPDATE workstations SET status = 'stopped' WHERE id = ?", (ws_id,))
     return {"id": ws_id, "status": "stopped"}
 
 
@@ -176,9 +166,7 @@ async def destroy_workstation(ws_id: str):
             await _run_docker("docker", "rm", "-f", container_name, timeout=30)
         except Exception:
             pass
-    await db.execute(
-        "UPDATE workstations SET status = 'destroyed' WHERE id = ?", (ws_id,)
-    )
+    await db.execute("UPDATE workstations SET status = 'destroyed' WHERE id = ?", (ws_id,))
     return {"id": ws_id, "status": "destroyed"}
 
 
@@ -193,9 +181,7 @@ async def get_workstation_logs(ws_id: str, tail: int = 100):
     if not container_name:
         return {"logs": "No container attached"}
     try:
-        _, stdout, stderr = await _run_docker(
-            "docker", "logs", "--tail", str(tail), container_name, timeout=10
-        )
+        _, stdout, stderr = await _run_docker("docker", "logs", "--tail", str(tail), container_name, timeout=10)
         return {"logs": stdout + stderr}
     except Exception:
         return {"logs": "Docker not available"}

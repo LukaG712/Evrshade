@@ -14,6 +14,7 @@ from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import Response
+from starlette.middleware.cors import CORSMiddleware
 
 try:
     from prometheus_client import (
@@ -37,6 +38,14 @@ app = FastAPI(
     title="Poltergeist",
     description="Notification and messaging hub for the Evershade ecosystem",
     version="1.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 _api_key_raw = os.getenv("API_KEY")
@@ -82,9 +91,7 @@ async def _deliver(notification: Notification) -> None:
             logger.info(f"Notification {notification.id} delivered via {channel_str}")
             return
         except Exception as e:
-            logger.warning(
-                f"Delivery attempt {attempt} failed for {notification.id}: {e}"
-            )
+            logger.warning(f"Delivery attempt {attempt} failed for {notification.id}: {e}")
             if attempt < MAX_RETRIES:
                 await asyncio.sleep(2**attempt)  # Exponential backoff
             notification.error = str(e)
@@ -96,9 +103,7 @@ async def _deliver(notification: Notification) -> None:
         NotificationStatus.FAILED,
         error=notification.error,
     )
-    logger.error(
-        f"Notification {notification.id} failed after {MAX_RETRIES} attempts: {notification.error}"
-    )
+    logger.error(f"Notification {notification.id} failed after {MAX_RETRIES} attempts: {notification.error}")
 
 
 @app.get("/health")
@@ -136,12 +141,8 @@ if HAS_PROMETHEUS:
             status = "500"
         finally:
             duration = time.time() - start
-            poltergeist_http_requests_total.labels(
-                method=method, endpoint=endpoint, status=status
-            ).inc()
-            poltergeist_http_request_duration.labels(
-                method=method, endpoint=endpoint
-            ).observe(duration)
+            poltergeist_http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
+            poltergeist_http_request_duration.labels(method=method, endpoint=endpoint).observe(duration)
         return response
 
     @app.get("/metrics")
@@ -176,9 +177,7 @@ async def capabilities() -> dict:
 
 
 @app.post("/api/notifications")
-async def send_notification(
-    data: dict[str, Any], authorization: str | None = Header(None)
-) -> dict[str, Any]:
+async def send_notification(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
     """Send a notification via the specified channel.
 
     Supports real delivery to Slack, Discord, Email, Telegram, and webhooks.
@@ -264,9 +263,7 @@ async def get_notification(
 
 
 @app.post("/api/templates")
-async def create_template(
-    data: dict[str, Any], authorization: str | None = Header(None)
-) -> dict[str, Any]:
+async def create_template(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
     """Create a notification template."""
     verify_bearer(authorization)
     template = Template(
@@ -301,9 +298,7 @@ async def list_templates(
 
 
 @app.get("/api/templates/{name}")
-async def get_template(
-    name: str, authorization: str | None = Header(None)
-) -> dict[str, Any]:
+async def get_template(name: str, authorization: str | None = Header(None)) -> dict[str, Any]:
     """Get a template by name."""
     verify_bearer(authorization)
     row = storage.get_template(name)
@@ -363,9 +358,7 @@ async def send_from_template(
 
 
 @app.delete("/api/templates/{name}")
-async def delete_template(
-    name: str, authorization: str | None = Header(None)
-) -> dict[str, bool]:
+async def delete_template(name: str, authorization: str | None = Header(None)) -> dict[str, bool]:
     """Delete a template by name."""
     verify_bearer(authorization)
     deleted = storage.delete_template(name)

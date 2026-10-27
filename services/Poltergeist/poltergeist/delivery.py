@@ -77,9 +77,7 @@ class SlackDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code != 200:
-            raise ConnectionError(
-                f"Slack returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Slack returned {response.status_code}: {response.text}")
 
 
 class DiscordDelivery(BaseDelivery):
@@ -107,9 +105,7 @@ class DiscordDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code not in (200, 204):
-            raise ConnectionError(
-                f"Discord returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Discord returned {response.status_code}: {response.text}")
 
 
 class EmailDelivery(BaseDelivery):
@@ -177,9 +173,7 @@ class TelegramDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code != 200:
-            raise ConnectionError(
-                f"Telegram returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Telegram returned {response.status_code}: {response.text}")
 
 
 class WebhookDelivery(BaseDelivery):
@@ -199,9 +193,7 @@ class WebhookDelivery(BaseDelivery):
         client = await self._get_client()
         response = await client.post(url, json=payload)
         if response.status_code >= 400:
-            raise ConnectionError(
-                f"Webhook returned {response.status_code}: {response.text}"
-            )
+            raise ConnectionError(f"Webhook returned {response.status_code}: {response.text}")
 
 
 # Module-level cached delivery instances

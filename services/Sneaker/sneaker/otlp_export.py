@@ -125,16 +125,12 @@ def redact_secrets_in_traces(data: bytes) -> bytes:
         for resource_span in content.get("resourceSpans", []):
             resource = resource_span.get("resource", {})
             if resource.get("attributes"):
-                resource["attributes"] = redact_secrets_in_attributes(
-                    resource["attributes"]
-                )
+                resource["attributes"] = redact_secrets_in_attributes(resource["attributes"])
                 modified = True
             for scope_span in resource_span.get("scopeSpans", []):
                 for span in scope_span.get("spans", []):
                     if span.get("attributes"):
-                        span["attributes"] = redact_secrets_in_attributes(
-                            span["attributes"]
-                        )
+                        span["attributes"] = redact_secrets_in_attributes(span["attributes"])
                         modified = True
         if modified:
             return json.dumps(content).encode()
@@ -158,16 +154,12 @@ def redact_secrets_in_logs(data: bytes) -> bytes:
         for resource_log in content.get("resourceLogs", []):
             resource = resource_log.get("resource", {})
             if resource.get("attributes"):
-                resource["attributes"] = redact_secrets_in_attributes(
-                    resource["attributes"]
-                )
+                resource["attributes"] = redact_secrets_in_attributes(resource["attributes"])
                 modified = True
             for scope_log in resource_log.get("scopeLogs", []):
                 for log_record in scope_log.get("logRecords", []):
                     if log_record.get("attributes"):
-                        log_record["attributes"] = redact_secrets_in_attributes(
-                            log_record["attributes"]
-                        )
+                        log_record["attributes"] = redact_secrets_in_attributes(log_record["attributes"])
                         modified = True
                     # Redact secrets in log body
                     body = log_record.get("body", {})
@@ -246,20 +238,12 @@ def parse_otlp_traces(data: bytes) -> list[TraceSpan]:
 
                     # Convert hex IDs to readable format
                     trace_id_str = trace_id.rstrip("0") if trace_id else ""
-                    parent_id_str = (
-                        parent_id.rstrip("0")
-                        if parent_id and parent_id != "0"
-                        else None
-                    )
+                    parent_id_str = parent_id.rstrip("0") if parent_id and parent_id != "0" else None
 
                     # Extract duration from start/end time (nanoseconds)
                     start_time = span.get("startTimeUnixNano", 0)
                     end_time = span.get("endTimeUnixNano", 0)
-                    duration_ms = (
-                        (end_time - start_time) / 1_000_000
-                        if end_time > start_time
-                        else 0
-                    )
+                    duration_ms = (end_time - start_time) / 1_000_000 if end_time > start_time else 0
 
                     # Extract operation name
                     operation = span.get("name", "unknown")
@@ -308,21 +292,13 @@ def parse_otlp_metrics(data: bytes) -> list[MetricPoint]:
                     # Handle different metric types
                     if "gauge" in metric:
                         for data_point in metric["gauge"].get("dataPoints", []):
-                            value = data_point.get(
-                                "asDouble", data_point.get("asInt", 0)
-                            )
-                            mp = MetricPoint(
-                                name=name, value=float(value), labels=labels
-                            )
+                            value = data_point.get("asDouble", data_point.get("asInt", 0))
+                            mp = MetricPoint(name=name, value=float(value), labels=labels)
                             metrics.append(mp)
                     elif "sum" in metric:
                         for data_point in metric["sum"].get("dataPoints", []):
-                            value = data_point.get(
-                                "asDouble", data_point.get("asInt", 0)
-                            )
-                            mp = MetricPoint(
-                                name=name, value=float(value), labels=labels
-                            )
+                            value = data_point.get("asDouble", data_point.get("asInt", 0))
+                            mp = MetricPoint(name=name, value=float(value), labels=labels)
                             metrics.append(mp)
     except (json.JSONDecodeError, KeyError) as e:
         logger.warning(f"Failed to parse OTLP metrics JSON: {e}")
@@ -390,9 +366,7 @@ def parse_otlp_logs(data: bytes) -> list[LogEntry]:
                         key = attr.get("key", "")
                         value = attr.get("value", {})
                         if key:
-                            metadata[key] = value.get(
-                                "stringValue", value.get("intValue", str(value))
-                            )
+                            metadata[key] = value.get("stringValue", value.get("intValue", str(value)))
 
                     log_entry = LogEntry(
                         level=level,
@@ -444,9 +418,7 @@ async def export_to_otlp_endpoint(
                 response = await client.post(url, content=data, headers=headers)
                 if response.status_code in (200, 202):
                     if attempt > 0:
-                        logger.info(
-                            f"Forwarded {signal_type} to OTLP endpoint after {attempt + 1} attempts"
-                        )
+                        logger.info(f"Forwarded {signal_type} to OTLP endpoint after {attempt + 1} attempts")
                     else:
                         logger.info(f"Forwarded {signal_type} to OTLP endpoint")
                     return True
@@ -471,9 +443,7 @@ async def export_to_otlp_endpoint(
                 await asyncio.sleep(delay)
                 continue
             else:
-                logger.warning(
-                    f"Failed to forward to OTLP endpoint after {max_retries} attempts: {e}"
-                )
+                logger.warning(f"Failed to forward to OTLP endpoint after {max_retries} attempts: {e}")
                 return False
         except Exception as e:
             logger.warning(f"Failed to forward to OTLP endpoint: {e}")
@@ -626,22 +596,16 @@ def register_otlp_routes(app: FastAPI) -> None:
                         "scope": {"name": "Sneaker", "version": "1.0.0"},
                         "spans": [
                             {
-                                "traceId": t.trace_id.zfill(32)
-                                if len(t.trace_id) < 32
-                                else t.trace_id,
+                                "traceId": t.trace_id.zfill(32) if len(t.trace_id) < 32 else t.trace_id,
                                 "spanId": f"{id(t):016x}",
-                                "parentSpanId": t.parent_id.zfill(16)
-                                if t.parent_id
-                                else "0" * 16,
+                                "parentSpanId": t.parent_id.zfill(16) if t.parent_id else "0" * 16,
                                 "name": t.operation,
                                 "startTimeUnixNano": 0,
                                 "endTimeUnixNano": int(t.duration_ms * 1_000_000),
                                 "attributes": [
                                     {
                                         "key": "service.name",
-                                        "value": {
-                                            "stringValue": t.service or "unknown"
-                                        },
+                                        "value": {"stringValue": t.service or "unknown"},
                                     }
                                 ]
                                 if t.service

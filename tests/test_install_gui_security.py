@@ -417,7 +417,6 @@ class TestInstallerMethodsNoShellInjection(unittest.TestCase):
                             self._assert_no_fstring_arg(child, "create_env")
                 break
 
-
     def test_start_services_no_fstring(self):
         """start_services() must not use f-string arguments."""
         tree = ast.parse(self.source)

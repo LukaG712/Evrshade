@@ -109,9 +109,7 @@ class TestTemplates:
 
 class TestAuth:
     def test_invalid_key(self):
-        response = client.get(
-            "/api/notifications", headers={"Authorization": "Bearer wrong"}
-        )
+        response = client.get("/api/notifications", headers={"Authorization": "Bearer wrong"})
         assert response.status_code == 401
 
     def test_missing_auth(self):

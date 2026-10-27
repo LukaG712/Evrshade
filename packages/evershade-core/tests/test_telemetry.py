@@ -24,7 +24,13 @@ class TestSetupTelemetry:
 
     def test_setup_without_otlp_endpoint(self):
         """Without SNEAKER_OTLP_ENDPOINT, only Prometheus metrics are set up."""
-        with patch.dict(os.environ, {}, clear=True):
+        # Reset the Prometheus init flag and mock REGISTRY to avoid duplicates
+        if hasattr(_setup_prometheus_metrics, "_initialized"):
+            delattr(_setup_prometheus_metrics, "_initialized")
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("prometheus_client.REGISTRY.register"),
+        ):
             app = MagicMock()
             setup_telemetry(app, service_name="TestService")
             # Should not raise, should set up Prometheus metrics only
@@ -66,31 +72,19 @@ class TestSetupTelemetry:
                 "opentelemetry.exporter.otlp.proto.grpc.trace_exporter": MagicMock(
                     OTLPSpanExporter=mock_exporter_class
                 ),
-                "opentelemetry.instrumentation.fastapi": MagicMock(
-                    FastAPIInstrumentor=mock_instrumentor_fastapi
-                ),
-                "opentelemetry.instrumentation.httpx": MagicMock(
-                    HTTPXClientInstrumentor=mock_instrumentor_httpx
-                ),
-                "opentelemetry.propagate": MagicMock(
-                    set_global_textmap=mock_set_global_textmap
-                ),
+                "opentelemetry.instrumentation.fastapi": MagicMock(FastAPIInstrumentor=mock_instrumentor_fastapi),
+                "opentelemetry.instrumentation.httpx": MagicMock(HTTPXClientInstrumentor=mock_instrumentor_httpx),
+                "opentelemetry.propagate": MagicMock(set_global_textmap=mock_set_global_textmap),
                 "opentelemetry.propagators.b3": MagicMock(B3MultiFormat=mock_b3),
-                "opentelemetry.sdk.trace": MagicMock(
-                    TracerProvider=mock_provider_class
-                ),
-                "opentelemetry.sdk.trace.export": MagicMock(
-                    BatchSpanProcessor=mock_processor_class
-                ),
+                "opentelemetry.sdk.trace": MagicMock(TracerProvider=mock_provider_class),
+                "opentelemetry.sdk.trace.export": MagicMock(BatchSpanProcessor=mock_processor_class),
             }
 
             with patch.dict("sys.modules", mocked_modules):
                 app = MagicMock()
                 setup_telemetry(app, service_name="TestService")
                 # Verify OTLP exporter was created with correct endpoint
-                mock_exporter_class.assert_called_once_with(
-                    endpoint="http://sneaker:8086", insecure=True
-                )
+                mock_exporter_class.assert_called_once_with(endpoint="http://sneaker:8086", insecure=True)
 
     def test_setup_resets_prometheus_flag(self):
         """Prometheus metrics initialization flag prevents duplicates."""

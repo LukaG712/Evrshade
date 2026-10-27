@@ -35,6 +35,11 @@ from evershade.registry import (
     ServiceStatus,
     register_service_routes,
 )
+from evershade.security import (
+    RateLimitMiddleware,
+    add_cors_middleware,
+    add_security_middleware,
+)
 from evershade.telemetry import create_traced_httpx_client, setup_telemetry
 
 __all__ = [
@@ -45,6 +50,7 @@ __all__ = [
     "ErrorCode",
     # Errors
     "EvershadeError",
+    "RateLimitMiddleware",
     "RequestLoggingMiddleware",
     "ServiceAuthMiddleware",
     # Config
@@ -55,6 +61,8 @@ __all__ = [
     "ServiceStatus",
     "TelemetryConfig",
     # Auth
+    "add_cors_middleware",
+    "add_security_middleware",
     "create_service_token",
     "create_traced_httpx_client",
     "error_response",

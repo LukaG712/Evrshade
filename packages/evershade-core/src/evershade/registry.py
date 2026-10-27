@@ -75,9 +75,7 @@ class ServiceRegistry:
     def __init__(self):
         self._services: dict[str, ServiceInfo] = {}
 
-    def register(
-        self, name: str, url: str, version: str, capabilities: list[str] | None = None
-    ) -> ServiceInfo:
+    def register(self, name: str, url: str, version: str, capabilities: list[str] | None = None) -> ServiceInfo:
         """Register or update a service."""
         info = ServiceInfo(
             name=name,
@@ -129,9 +127,7 @@ class ServiceRegistry:
     def summary(self) -> dict[str, Any]:
         """Return a summary of the registry."""
         total = len(self._services)
-        healthy = sum(
-            1 for s in self._services.values() if s.status == ServiceStatus.HEALTHY
-        )
+        healthy = sum(1 for s in self._services.values() if s.status == ServiceStatus.HEALTHY)
         return {
             "total": total,
             "healthy": healthy,
@@ -238,9 +234,7 @@ class ServiceDiscoveryClient:
     async def heartbeat(self, name: str) -> dict[str, Any]:
         """Send a heartbeat to the registry."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.post(
-                f"{self.registry_url}/api/registry/{name}/heartbeat"
-            )
+            resp = await client.post(f"{self.registry_url}/api/registry/{name}/heartbeat")
             resp.raise_for_status()
             return resp.json()
 

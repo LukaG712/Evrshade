@@ -123,9 +123,7 @@ def resolve_provider(model: str) -> tuple[Provider, dict[str, Any]]:
         return meta["provider"], meta
     # Unknown model — raise an error instead of silently defaulting to Ollama
     logger.warning(f"Unknown model requested: {model}")
-    raise ValueError(
-        f"Model '{model}' not found in registry. Available models: {list(MODEL_REGISTRY.keys())}"
-    )
+    raise ValueError(f"Model '{model}' not found in registry. Available models: {list(MODEL_REGISTRY.keys())}")
 
 
 def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
@@ -137,9 +135,7 @@ def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> flo
     if rates is None:
         return 0.0
     input_rate, output_rate = rates
-    cost = (prompt_tokens / 1_000_000) * input_rate + (
-        completion_tokens / 1_000_000
-    ) * output_rate
+    cost = (prompt_tokens / 1_000_000) * input_rate + (completion_tokens / 1_000_000) * output_rate
     return round(cost, 6)
 
 

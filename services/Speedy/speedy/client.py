@@ -15,9 +15,7 @@ logger = logging.getLogger(__name__)
 class ServiceClient:
     """HTTP client for an Evershade service."""
 
-    def __init__(
-        self, base_url: str, api_key: str | None = None, timeout: float = 10.0
-    ):
+    def __init__(self, base_url: str, api_key: str | None = None, timeout: float = 10.0):
         """Initialize the service client.
 
         Args:

@@ -12,6 +12,7 @@ from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import Response
+from starlette.middleware.cors import CORSMiddleware
 
 try:
     from prometheus_client import (
@@ -41,6 +42,14 @@ app = FastAPI(
     title="Shrewd",
     description="LLM provider abstraction for the Evershade ecosystem",
     version="1.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Set up OpenTelemetry instrumentation (no-op if SNEAKER_OTLP_ENDPOINT is not set)
@@ -102,12 +111,8 @@ if HAS_PROMETHEUS:
             status = "500"
         finally:
             duration = time.time() - start
-            shrewd_http_requests_total.labels(
-                method=method, endpoint=endpoint, status=status
-            ).inc()
-            shrewd_http_request_duration.labels(
-                method=method, endpoint=endpoint
-            ).observe(duration)
+            shrewd_http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
+            shrewd_http_request_duration.labels(method=method, endpoint=endpoint).observe(duration)
         return response
 
     @app.get("/metrics")
@@ -140,9 +145,7 @@ async def capabilities() -> dict:
 
 
 @app.post("/api/chat")
-async def chat(
-    data: dict[str, Any], authorization: str | None = Header(None)
-) -> dict[str, Any]:
+async def chat(data: dict[str, Any], authorization: str | None = Header(None)) -> dict[str, Any]:
     """Route a chat request to the appropriate LLM provider.
 
     Supports real providers: OpenAI, Anthropic, Google Gemini, and Ollama.
@@ -155,9 +158,7 @@ async def chat(
     require_private = data.get("require_private", False)
     messages_data = data.get("messages", [])
 
-    messages = [
-        ChatMessage(role=m["role"], content=m["content"]) for m in messages_data
-    ]
+    messages = [ChatMessage(role=m["role"], content=m["content"]) for m in messages_data]
 
     try:
         response = await route_chat(
@@ -182,14 +183,12 @@ async def chat(
         )
         return response.to_dict()
     except Exception as e:
-        logger.error(f"Chat error: {e}")
-        raise HTTPException(status_code=502, detail=f"Provider error: {e!s}")
+        logger.error("Chat error: %s", e)
+        raise HTTPException(status_code=502, detail="Provider error")
 
 
 @app.get("/api/models")
-async def list_models(
-    provider: str | None = None, authorization: str | None = Header(None)
-) -> list[dict[str, Any]]:
+async def list_models(provider: str | None = None, authorization: str | None = Header(None)) -> list[dict[str, Any]]:
     """List available models with provider and privacy info."""
     verify_bearer(authorization)
     results = []

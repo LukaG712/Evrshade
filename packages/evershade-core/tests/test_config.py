@@ -1,6 +1,8 @@
 """Tests for evershade.config — Configuration validation."""
 
 import pytest
+from pydantic import ValidationError
+
 from evershade.config import (
     AuthConfig,
     DatabaseConfig,
@@ -8,7 +10,6 @@ from evershade.config import (
     ServiceConfig,
     TelemetryConfig,
 )
-from pydantic import ValidationError
 
 
 class TestServiceConfig:

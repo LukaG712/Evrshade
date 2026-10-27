@@ -15,9 +15,7 @@ def stop():
 
     compose = find_compose_file()
     if compose is None:
-        print_error(
-            "docker-compose.yml not found. Run from the Evershade project root."
-        )
+        print_error("docker-compose.yml not found. Run from the Evershade project root.")
         return
 
     print_info("Stopping services...")

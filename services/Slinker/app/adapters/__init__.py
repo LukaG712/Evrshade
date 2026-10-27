@@ -10,6 +10,8 @@ import asyncio
 import json
 import logging
 import os
+import re
+import shlex
 import time
 import uuid
 from abc import ABC, abstractmethod
@@ -19,6 +21,105 @@ from enum import Enum
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
+# Dangerous shell metacharacters that enable command injection
+_DANGEROUS_CHARS = re.compile(r"[;&|`$(){}!\\\n\r]")
+
+# Allowed commands for safe execution
+ALLOWED_COMMANDS = {
+    "python",
+    "python3",
+    "pip",
+    "pip3",
+    "node",
+    "npm",
+    "npx",
+    "git",
+    "make",
+    "cmake",
+    "pytest",
+    "ruff",
+    "black",
+    "mypy",
+    "cargo",
+    "go",
+    "rustc",
+    "java",
+    "javac",
+    "mvn",
+    "gradle",
+    "docker",
+    "docker-compose",
+    "ls",
+    "cat",
+    "head",
+    "tail",
+    "grep",
+    "find",
+    "echo",
+    "date",
+    "pwd",
+    "whoami",
+    "curl",
+    "wget",
+    "tar",
+    "zip",
+    "unzip",
+    "chmod",
+    "chown",
+    "rm",
+    "cp",
+    "mv",
+    "mkdir",
+    "python -m pytest",
+    "python -m ruff",
+}
+
+
+def validate_command(command: str) -> str:
+    """Validate a shell command for safety.
+
+    Checks for dangerous shell metacharacters and validates the command
+    is in the allowlist. Raises ValueError if the command is unsafe.
+
+    Args:
+        command: The shell command to validate.
+
+    Returns:
+        The validated command string.
+
+    Raises:
+        ValueError: If the command contains dangerous patterns.
+    """
+    if not command or not command.strip():
+        raise ValueError("Empty command is not allowed")
+
+    # Extract the base command (first word)
+    try:
+        parts = shlex.split(command)
+        base_cmd = parts[0] if parts else ""
+        # Handle commands like "python -m pytest"
+        if base_cmd == "python" and len(parts) > 2 and parts[1] == "-m":
+            base_cmd = f"python -m {parts[2]}"
+    except ValueError:
+        # shlex.split can fail on malformed input - fall back to simple split
+        base_cmd = command.split()[0] if command.split() else ""
+
+    # Check for dangerous shell metacharacters
+    if _DANGEROUS_CHARS.search(command):
+        raise ValueError(
+            f"Command contains dangerous characters: {_DANGEROUS_CHARS.search(command).group()}"
+        )
+
+    # Check if the base command is allowed
+    base_name = os.path.basename(base_cmd)
+    if base_name not in ALLOWED_COMMANDS and base_cmd not in ALLOWED_COMMANDS:
+        raise ValueError(
+            f"Command '{base_name}' is not in the allowlist. "
+            f"Allowed commands: {', '.join(sorted(ALLOWED_COMMANDS))}"
+        )
+
+    return command
 
 
 class ExecutionStatus(str, Enum):
@@ -219,8 +320,24 @@ class CodingAgentAdapter(ABC):
         timeout: int = 60,
         task_id: str | None = None,
     ) -> dict[str, Any]:
-        """Run a shell command in the workspace."""
+        """Run a shell command in the workspace.
+
+        Validates the command for safety before execution to prevent
+        command injection attacks.
+        """
+        # Validate command safety
+        try:
+            validate_command(command)
+        except ValueError as e:
+            return {
+                "stdout": "",
+                "stderr": f"Command rejected for safety: {e}",
+                "returncode": -1,
+                "duration_ms": 0,
+            }
+
         start = time.time()
+        process = None
         try:
             process = await asyncio.create_subprocess_shell(
                 command,
