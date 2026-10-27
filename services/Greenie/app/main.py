@@ -26,7 +26,7 @@ from evershade.telemetry import create_traced_httpx_client, setup_telemetry
 from fastapi import FastAPI
 
 from app.database import init_db
-from app.routes import agents, missions, tasks
+from app.routes import agents, mcp, missions, plugins, tasks, workstations
 
 VERSION = "2.0.0"
 
@@ -69,6 +69,9 @@ setup_telemetry(app, service_name="Greenie")
 app.include_router(agents.router, prefix="/api/agents", tags=["agents"])
 app.include_router(missions.router, prefix="/api/missions", tags=["missions"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
+app.include_router(plugins.router, prefix="/api/plugins", tags=["plugins"])
+app.include_router(mcp.router, prefix="/api/mcp", tags=["mcp"])
+app.include_router(workstations.router, prefix="/api/workstations", tags=["workstations"])
 
 
 @app.get("/api/capabilities")

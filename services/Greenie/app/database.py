@@ -101,4 +101,43 @@ CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_agent_id ON chat_sessions(agent_id);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id ON chat_messages(session_id);
 
+CREATE TABLE IF NOT EXISTS plugins (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    type TEXT DEFAULT 'tool',
+    source TEXT DEFAULT '',
+    config TEXT DEFAULT '{}',
+    enabled INTEGER DEFAULT 1,
+    installed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS mcp_servers (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    url TEXT NOT NULL,
+    transport TEXT DEFAULT 'stdio',
+    config TEXT DEFAULT '{}',
+    tools TEXT DEFAULT '[]',
+    connected INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS workstations (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    agent_name TEXT DEFAULT '',
+    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'creating', 'running', 'stopped', 'error')),
+    container_id TEXT DEFAULT '',
+    image TEXT DEFAULT '',
+    tags TEXT DEFAULT '[]',
+    error TEXT DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugins_enabled ON plugins(enabled);
+CREATE INDEX IF NOT EXISTS idx_workstations_status ON workstations(status);
+
 """
