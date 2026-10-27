@@ -439,8 +439,8 @@ async def assign_role(
 
     try:
         role_uuid = UUID(data["role_id"])
-    except (ValueError, KeyError) as e:
-        raise HTTPException(status_code=400, detail=f"Invalid role_id format: {e}")
+    except (ValueError, KeyError):
+        raise HTTPException(status_code=400, detail="Invalid role_id format")
 
     user_role = UserRole(user_id=user_id, role_id=role_uuid)
     result = storage.assign_role(user_role)
