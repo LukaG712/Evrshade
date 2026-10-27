@@ -284,8 +284,7 @@ class CodingAgentAdapter(ABC):
             for path in new_files:
                 full_path = os.path.join(workspace_path, path)
                 try:
-                    loop = asyncio.get_event_loop()
-                    content = await loop.run_in_executor(
+                    content = await asyncio.get_running_loop().run_in_executor(
                         None, self._read_file, full_path
                     )
                     changes.append(
