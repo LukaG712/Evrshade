@@ -24,11 +24,10 @@ from __future__ import annotations
 import json
 import time
 import uuid
-from abc import ABC
 from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 

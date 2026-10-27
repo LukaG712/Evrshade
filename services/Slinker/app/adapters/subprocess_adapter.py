@@ -11,15 +11,14 @@ import json
 import logging
 import os
 import time
-from datetime import UTC, datetime, timezone
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from datetime import UTC, datetime
+from typing import Any, AsyncGenerator
 
 from . import (
     CodingAgentAdapter,
     ExecutionRequest,
     ExecutionResult,
     ExecutionStatus,
-    FileChange,
 )
 
 logger = logging.getLogger(__name__)

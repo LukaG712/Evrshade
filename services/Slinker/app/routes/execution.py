@@ -6,13 +6,13 @@ import asyncio
 import json
 import os
 import uuid
-from datetime import UTC, datetime, timezone
-from typing import Any, Dict, List, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from evershade.errors import EvershadeError
 from fastapi import APIRouter, Query
 
-from app.adapters import ExecutionRequest, ExecutionResult
+from app.adapters import ExecutionRequest
 from app.adapters.factory import create_adapter, list_adapters
 from app.database import get_db_instance
 

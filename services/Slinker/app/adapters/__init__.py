@@ -7,18 +7,15 @@ New coding agents can be added by creating a new adapter class.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import os
 import re
 import shlex
 import time
-import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from typing import Any, AsyncGenerator
 
 logger = logging.getLogger(__name__)
 

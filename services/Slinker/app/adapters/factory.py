@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from . import CodingAgentAdapter
 from .subprocess_adapter import SubprocessAdapter

@@ -12,13 +12,11 @@ Usage:
 
 from __future__ import annotations
 
-import asyncio
-import os
 import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 

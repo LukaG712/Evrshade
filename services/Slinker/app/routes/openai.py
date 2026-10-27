@@ -84,7 +84,6 @@ async def chat_completions(request: ChatCompletionRequest):
 
     # Non-streaming: delegate to Shrewd
     try:
-        import httpx
         from evershade_telemetry import create_traced_httpx_client
 
         async with create_traced_httpx_client(
@@ -119,7 +118,6 @@ async def _stream_completion(
     created = int(time.time())
 
     try:
-        import httpx
         from evershade_telemetry import create_traced_httpx_client
 
         async with create_traced_httpx_client(
