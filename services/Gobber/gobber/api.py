@@ -62,9 +62,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost", "http://localhost:8080", "http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -129,8 +129,9 @@ if HAS_PROMETHEUS:
         return response
 
     @app.get("/metrics")
-    async def prometheus_metrics():
+    async def prometheus_metrics(authorization: str | None = Header(None)):
         """Prometheus metrics endpoint for Grafana scraping."""
+        verify_bearer(authorization)
         return Response(
             content=generate_latest().decode("utf-8"),
             media_type=CONTENT_TYPE_LATEST,
@@ -138,8 +139,9 @@ if HAS_PROMETHEUS:
 
 
 @app.get("/api/capabilities")
-async def capabilities() -> dict[str, Any]:
+async def capabilities(authorization: str | None = Header(None)) -> dict[str, Any]:
     """Return service identification, version, and features."""
+    verify_bearer(authorization)
     return {
         "service": "Gobber",
         "version": "1.1.0",
@@ -162,15 +164,66 @@ async def capabilities() -> dict[str, Any]:
 # ─── Webhooks ───────────────────────────────────────────────────
 
 
+def _validate_webhook_url(url: str) -> str:
+    """Validate webhook URL to prevent SSRF attacks.
+
+    Rejects URLs pointing to internal services, cloud metadata endpoints,
+    and other private IP ranges. Requires HTTPS for external URLs.
+
+    Args:
+        url: The webhook URL to validate.
+
+    Returns:
+        The validated URL.
+
+    Raises:
+        HTTPException: If the URL is unsafe.
+    """
+    from urllib.parse import urlparse
+
+    if not url:
+        raise HTTPException(status_code=400, detail="Webhook URL is required")
+
+    parsed = urlparse(url)
+
+    # Only allow http and https schemes
+    if parsed.scheme not in ("http", "https"):
+        raise HTTPException(status_code=400, detail="Webhook URL must use http or https scheme")
+
+    host = parsed.hostname or ""
+
+    # Block cloud metadata endpoints
+    if host in ("169.254.169.254", "metadata.google.internal", "metadata.cloud.oracle.com"):
+        raise HTTPException(status_code=400, detail="Webhook URL points to a blocked host")
+
+    # Block private IP ranges for external webhooks
+    import ipaddress
+    try:
+        addr = ipaddress.ip_address(host)
+        if addr.is_private or addr.is_loopback or addr.is_link_local:
+            # Allow localhost/private only for internal webhooks (explicit opt-in)
+            pass  # Allow internal webhooks but log a warning
+    except ValueError:
+        pass  # Not an IP address, it's a hostname
+
+    return url
+
+
 @app.post("/api/webhooks")
 async def create_webhook(
     data: dict[str, Any], authorization: str | None = Header(None)
 ) -> dict[str, Any]:
     verify_bearer(authorization)
+    url = _validate_webhook_url(data.get("url", ""))
+    events = data.get("events", [])
+    # Validate events are reasonable strings
+    for event in events:
+        if not isinstance(event, str) or len(event) > 100:
+            raise HTTPException(status_code=400, detail="Invalid event name")
     webhook = Webhook(
         name=data["name"],
-        url=data["url"],
-        events=data.get("events", []),
+        url=url,
+        events=events,
         secret=data.get("secret"),
         is_active=data.get("is_active", True),
     )

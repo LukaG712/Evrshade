@@ -199,8 +199,9 @@ if HAS_PROMETHEUS:
         return response
 
     @app.get("/metrics")
-    async def prometheus_metrics():
+    async def prometheus_metrics(authorization: str | None = Header(None)):
         """Prometheus metrics endpoint for Grafana scraping."""
+        verify_bearer(authorization)
         return Response(
             content=generate_latest().decode("utf-8"),
             media_type=CONTENT_TYPE_LATEST,
@@ -208,8 +209,9 @@ if HAS_PROMETHEUS:
 
 
 @app.get("/api/capabilities")
-async def capabilities() -> dict:
+async def capabilities(authorization: str | None = Header(None)) -> dict:
     """Return service identification, version, and features."""
+    verify_bearer(authorization)
     return {
         "service": "Poltergeist",
         "version": "1.1.0",

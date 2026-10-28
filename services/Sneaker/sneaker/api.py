@@ -31,9 +31,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost", "http://localhost:8080", "http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -239,8 +239,9 @@ async def prometheus_middleware(request, call_next):
 
 
 @app.get("/metrics")
-async def prometheus_metrics():
+async def prometheus_metrics(authorization: str | None = Header(None)):
     """Prometheus metrics endpoint for Grafana scraping."""
+    verify_bearer(authorization)
     # Update gauges
     sneaker_metrics_count.set(len(_metrics))
     sneaker_traces_count.set(len(_traces))
@@ -270,8 +271,9 @@ async def health() -> dict[str, str]:
 
 
 @app.get("/api/capabilities")
-async def capabilities() -> dict:
+async def capabilities(authorization: str | None = Header(None)) -> dict:
     """Return service identification, version, and features."""
+    verify_bearer(authorization)
     return {
         "service": "Sneaker",
         "version": "1.1.0",

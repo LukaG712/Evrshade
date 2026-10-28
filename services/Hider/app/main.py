@@ -125,10 +125,7 @@ async def capabilities():
         ],
         "integrations": {
             "opentelemetry": {"enabled": config_settings.telemetry.is_configured},
-            "sqlite": {
-                "enabled": True,
-                "path": os.getenv("DB_PATH", "/app/data/hider.db"),
-            },
+            "sqlite": {"enabled": True},
             "encryption": {
                 "enabled": bool(os.getenv("ENCRYPTION_KEY")),
                 "algorithm": "AES-256-GCM",

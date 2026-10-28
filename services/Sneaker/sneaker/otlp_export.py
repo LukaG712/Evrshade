@@ -17,7 +17,9 @@ import re
 import time
 from typing import Any
 
-from fastapi import FastAPI
+import hmac
+
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import Response
 
 from sneaker.models import LogEntry, MetricPoint, TraceSpan
@@ -485,6 +487,27 @@ async def export_to_otlp_endpoint(
 # ─── FastAPI Routes ──────────────────────────────────────────────
 
 
+# OTLP API key — defaults to the same API_KEY as the main app
+# Can be overridden with OTLP_API_KEY for a separate key
+_OTLP_API_KEY = os.environ.get("OTLP_API_KEY", os.environ.get("API_KEY", ""))
+
+
+def _verify_otlp_bearer(authorization: str | None) -> None:
+    """Verify Bearer token for OTLP endpoints."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or invalid Authorization header. Use: Authorization: Bearer <key>",
+        )
+    token = authorization[7:]
+    if not hmac.compare_digest(token, _OTLP_API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+
+# Max entries per OTLP receive call to prevent memory exhaustion
+_MAX_OTLP_ENTRIES_PER_CALL = 1000
+
+
 def register_otlp_routes(app: FastAPI) -> None:
     """Register OTLP endpoints with the FastAPI app.
 
@@ -499,12 +522,14 @@ def register_otlp_routes(app: FastAPI) -> None:
     """
 
     @app.post("/v1/traces")
-    async def receive_traces(request) -> Response:
+    async def receive_traces(request, authorization: str | None = Header(None)) -> Response:
         """Receive traces via OTLP protocol.
 
         Accepts both JSON and protobuf-encoded OTLP trace data.
         Secrets in attributes are automatically redacted.
+        Requires authentication via Bearer token.
         """
+        _verify_otlp_bearer(authorization)
         content_type = request.headers.get("content-type", "")
         data = await request.body()
 
@@ -514,8 +539,12 @@ def register_otlp_routes(app: FastAPI) -> None:
 
         if "json" in content_type:
             spans = parse_otlp_traces(data)
-            _traces_store.extend(spans)
-            logger.info(f"Received {len(spans)} spans via OTLP")
+            # Enforce size limit to prevent memory exhaustion
+            limited = spans[:_MAX_OTLP_ENTRIES_PER_CALL]
+            _traces_store.extend(limited)
+            logger.info(f"Received {len(limited)} spans via OTLP" + (
+                f" (dropped {len(spans) - _MAX_OTLP_ENTRIES_PER_CALL} due to limit)" if len(spans) > _MAX_OTLP_ENTRIES_PER_CALL else ""
+            ))
         else:
             # Protobuf — try to parse, log warning if not possible
             logger.info(f"Received {len(data)} bytes of OTLP protobuf traces")
@@ -534,18 +563,24 @@ def register_otlp_routes(app: FastAPI) -> None:
         return Response(status_code=200, content=b"")
 
     @app.post("/v1/metrics")
-    async def receive_metrics(request) -> Response:
+    async def receive_metrics(request, authorization: str | None = Header(None)) -> Response:
         """Receive metrics via OTLP protocol.
 
         Accepts both JSON and protobuf-encoded OTLP metric data.
+        Requires authentication via Bearer token.
         """
+        _verify_otlp_bearer(authorization)
         content_type = request.headers.get("content-type", "")
         data = await request.body()
 
         if "json" in content_type:
             metrics = parse_otlp_metrics(data)
-            _metrics_store.extend(metrics)
-            logger.info(f"Received {len(metrics)} metrics via OTLP")
+            # Enforce size limit to prevent memory exhaustion
+            limited = metrics[:_MAX_OTLP_ENTRIES_PER_CALL]
+            _metrics_store.extend(limited)
+            logger.info(f"Received {len(limited)} metrics via OTLP" + (
+                f" (dropped {len(metrics) - _MAX_OTLP_ENTRIES_PER_CALL} due to limit)" if len(metrics) > _MAX_OTLP_ENTRIES_PER_CALL else ""
+            ))
         else:
             logger.info(f"Received {len(data)} bytes of OTLP protobuf metrics")
             mp = MetricPoint(
@@ -561,12 +596,14 @@ def register_otlp_routes(app: FastAPI) -> None:
         return Response(status_code=200, content=b"")
 
     @app.post("/v1/logs")
-    async def receive_logs(request) -> Response:
+    async def receive_logs(request, authorization: str | None = Header(None)) -> Response:
         """Receive logs via OTLP protocol.
 
         Accepts both JSON and protobuf-encoded OTLP log data.
         Secrets in attributes and log bodies are automatically redacted.
+        Requires authentication via Bearer token.
         """
+        _verify_otlp_bearer(authorization)
         content_type = request.headers.get("content-type", "")
         data = await request.body()
 
@@ -576,8 +613,12 @@ def register_otlp_routes(app: FastAPI) -> None:
 
         if "json" in content_type:
             logs = parse_otlp_logs(data)
-            _logs_store.extend(logs)
-            logger.info(f"Received {len(logs)} logs via OTLP")
+            # Enforce size limit to prevent memory exhaustion
+            limited = logs[:_MAX_OTLP_ENTRIES_PER_CALL]
+            _logs_store.extend(limited)
+            logger.info(f"Received {len(limited)} logs via OTLP" + (
+                f" (dropped {len(logs) - _MAX_OTLP_ENTRIES_PER_CALL} due to limit)" if len(logs) > _MAX_OTLP_ENTRIES_PER_CALL else ""
+            ))
         else:
             logger.info(f"Received {len(data)} bytes of OTLP protobuf logs")
             log_entry = LogEntry(
@@ -593,12 +634,15 @@ def register_otlp_routes(app: FastAPI) -> None:
         return Response(status_code=200, content=b"")
 
     @app.get("/api/otlp/stats")
-    async def get_otlp_stats() -> dict[str, Any]:
+    async def get_otlp_stats(authorization: str | None = Header(None)) -> dict[str, Any]:
         """Get OTLP export statistics.
+
+        Requires authentication via Bearer token.
 
         Returns:
             Dict with counts of received traces, metrics, and logs.
         """
+        _verify_otlp_bearer(authorization)
         return {
             "traces_received": len(_traces_store),
             "metrics_received": len(_metrics_store),
@@ -608,8 +652,12 @@ def register_otlp_routes(app: FastAPI) -> None:
         }
 
     @app.get("/api/otlp/export/traces")
-    async def export_traces_otlp(limit: int = 100) -> Response:
+    async def export_traces_otlp(
+        limit: int = 100, authorization: str | None = Header(None)
+    ) -> Response:
         """Export traces in OTLP JSON format.
+
+        Requires authentication via Bearer token.
 
         Args:
             limit: Maximum number of traces to export.
@@ -617,6 +665,7 @@ def register_otlp_routes(app: FastAPI) -> None:
         Returns:
             OTLP-formatted JSON response.
         """
+        _verify_otlp_bearer(authorization)
         traces = _traces_store[-limit:]
         resource_spans = [
             {
@@ -660,8 +709,12 @@ def register_otlp_routes(app: FastAPI) -> None:
         )
 
     @app.get("/api/otlp/export/metrics")
-    async def export_metrics_otlp(limit: int = 100) -> Response:
+    async def export_metrics_otlp(
+        limit: int = 100, authorization: str | None = Header(None)
+    ) -> Response:
         """Export metrics in OTLP JSON format.
+
+        Requires authentication via Bearer token.
 
         Args:
             limit: Maximum number of metrics to export.
@@ -669,6 +722,7 @@ def register_otlp_routes(app: FastAPI) -> None:
         Returns:
             OTLP-formatted JSON response.
         """
+        _verify_otlp_bearer(authorization)
         metrics = _metrics_store[-limit:]
         resource_metrics = [
             {

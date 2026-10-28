@@ -34,7 +34,7 @@ async function bootstrap() {
 
   // Register plugins
   await app.register(cors, {
-    origin: process.env.CORS_ORIGIN || false,
+    origin: process.env.CORS_ORIGIN || ['http://localhost', 'http://localhost:8080', 'http://localhost:3000'],
     credentials: true,
   });
 
@@ -111,10 +111,10 @@ async function bootstrap() {
   registerExtractRoutes(app);
   registerAgentRoutes(app);
 
-  // Apply auth to all API routes (skip health check and capabilities)
+  // Apply auth to all API routes (skip health check only)
   app.addHook('onRequest', async (request, reply) => {
-    // Skip auth for health check and capabilities endpoints
-    if (request.url === '/health' || request.url === '/api/capabilities') {
+    // Skip auth for health check only
+    if (request.url === '/health') {
       return;
     }
     await apiKeyAuth(request, reply, () => {});

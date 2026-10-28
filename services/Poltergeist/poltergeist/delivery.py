@@ -162,9 +162,16 @@ class EmailDelivery(BaseDelivery):
         if not self.smtp_user:
             raise RuntimeError("SMTP_USER is not configured")
 
+        # Validate email recipient to prevent header injection
+        recipient = notification.recipient
+        if not recipient or "\n" in recipient or "\r" in recipient:
+            raise ValueError("Invalid email recipient")
+        if "@" not in recipient:
+            raise ValueError("Email recipient must contain '@'")
+
         msg = MIMEMultipart()
         msg["From"] = self.smtp_from
-        msg["To"] = notification.recipient
+        msg["To"] = recipient
         msg["Subject"] = notification.title or "Evershade Notification"
         msg.attach(MIMEText(notification.message, "html"))
 

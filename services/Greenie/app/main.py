@@ -142,14 +142,11 @@ async def capabilities():
         ],
         "integrations": {
             "opentelemetry": {"enabled": config.telemetry.is_configured},
-            "sqlite": {
-                "enabled": True,
-                "path": os.getenv("GREENIE_DB_PATH", "/data/greenie.db"),
-            },
-            "slinker": {"enabled": bool(slinker_url), "url": slinker_url},
-            "trapper": {"enabled": bool(trapper_url), "url": trapper_url},
-            "gobber": {"enabled": bool(gobber_url), "url": gobber_url},
-            "shrewd": {"enabled": bool(shrewd_url), "url": shrewd_url},
+            "sqlite": {"enabled": True},
+            "slinker": {"enabled": bool(slinker_url)},
+            "trapper": {"enabled": bool(trapper_url)},
+            "gobber": {"enabled": bool(gobber_url)},
+            "shrewd": {"enabled": bool(shrewd_url)},
         },
     }
 

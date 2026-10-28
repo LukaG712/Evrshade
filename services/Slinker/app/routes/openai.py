@@ -85,14 +85,18 @@ async def chat_completions(request: ChatCompletionRequest):
             media_type="text/event-stream",
         )
 
-    # Non-streaming: delegate to Shrewd
+    # Non-streaming: delegate to Shrewd with authentication
     try:
         from evershade_telemetry import create_traced_httpx_client
 
+        shrewd_api_key = os.getenv("API_KEY", "")
         async with create_traced_httpx_client(
             base_url=shrewd_url, timeout=120.0
         ) as client:
-            resp = await client.post("/v1/chat/completions", json=request.model_dump())
+            headers = {}
+            if shrewd_api_key:
+                headers["Authorization"] = f"Bearer {shrewd_api_key}"
+            resp = await client.post("/v1/chat/completions", json=request.model_dump(), headers=headers)
             resp.raise_for_status()
             data = resp.json()
             return data
@@ -124,11 +128,16 @@ async def _stream_completion(
     try:
         from evershade_telemetry import create_traced_httpx_client
 
+        shrewd_api_key = os.getenv("API_KEY", "")
+        headers = {}
+        if shrewd_api_key:
+            headers["Authorization"] = f"Bearer {shrewd_api_key}"
+
         async with create_traced_httpx_client(
             base_url=shrewd_url, timeout=120.0
         ) as client:
             async with client.stream(
-                "POST", "/v1/chat/completions", json=request.model_dump()
+                "POST", "/v1/chat/completions", json=request.model_dump(), headers=headers
             ) as resp:
                 async for line in resp.aiter_lines():
                     if line.startswith("data: "):

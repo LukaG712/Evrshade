@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import uuid
 
 from fastapi import APIRouter, HTTPException
@@ -34,6 +35,31 @@ async def _run_docker(*args: str, timeout: int = 30) -> tuple[int, str, str]:
         proc.kill()
         await proc.wait()
         return 1, "", "Timeout"
+
+
+def _validate_container_name(container_name: str) -> str:
+    """Validate that a container name matches the expected pattern.
+
+    Only allows names matching 'evershade-ws-*' to prevent arbitrary
+    Docker container manipulation if database is compromised.
+
+    Args:
+        container_name: The container name to validate.
+
+    Returns:
+        The validated container name.
+
+    Raises:
+        HTTPException: If the container name is invalid.
+    """
+    if not container_name:
+        raise HTTPException(status_code=400, detail="Container name is empty")
+    if not re.match(r'^evershade-ws-[a-f0-9]{8}$', container_name):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Container name '{container_name}' does not match expected pattern 'evershade-ws-*'"
+        )
+    return container_name
 
 
 router = APIRouter()
@@ -157,7 +183,10 @@ async def stop_workstation(ws_id: str):
     container_name = ws.get("container_name", "")
     if container_name:
         try:
+            _validate_container_name(container_name)
             await _run_docker("docker", "stop", container_name, timeout=30)
+        except HTTPException:
+            raise
         except Exception:
             pass
     await db.execute(
@@ -176,7 +205,10 @@ async def destroy_workstation(ws_id: str):
     container_name = ws.get("container_name", "")
     if container_name:
         try:
+            _validate_container_name(container_name)
             await _run_docker("docker", "rm", "-f", container_name, timeout=30)
+        except HTTPException:
+            raise
         except Exception:
             pass
     await db.execute(
@@ -196,9 +228,12 @@ async def get_workstation_logs(ws_id: str, tail: int = 100):
     if not container_name:
         return {"logs": "No container attached"}
     try:
+        _validate_container_name(container_name)
         _, stdout, stderr = await _run_docker(
             "docker", "logs", "--tail", str(tail), container_name, timeout=10
         )
         return {"logs": stdout + stderr}
+    except HTTPException:
+        raise
     except Exception:
         return {"logs": "Docker not available"}

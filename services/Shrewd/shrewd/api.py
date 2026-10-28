@@ -46,9 +46,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost", "http://localhost:8080", "http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -120,8 +120,9 @@ if HAS_PROMETHEUS:
         return response
 
     @app.get("/metrics")
-    async def prometheus_metrics():
+    async def prometheus_metrics(authorization: str | None = Header(None)):
         """Prometheus metrics endpoint for Grafana scraping."""
+        verify_bearer(authorization)
         return Response(
             content=generate_latest().decode("utf-8"),
             media_type=CONTENT_TYPE_LATEST,
@@ -129,8 +130,9 @@ if HAS_PROMETHEUS:
 
 
 @app.get("/api/capabilities")
-async def capabilities() -> dict:
+async def capabilities(authorization: str | None = Header(None)) -> dict:
     """Return service identification, version, and features."""
+    verify_bearer(authorization)
     return {
         "service": "Shrewd",
         "version": "1.1.0",
@@ -181,12 +183,12 @@ async def chat(
         # If provider is not configured, fall back to simulation
         logger.warning(f"Provider error, falling back to simulation: {e}")
         resolved_provider, _ = resolve_provider(model or "llama3")
-        last_msg = messages[-1].content if messages else ""
+        # Do NOT echo user input in the response to prevent sensitive data leakage
         response = ChatResponse(
-            content=f"[Simulated {resolved_provider.value} response] You said: {last_msg[:100]}",
+            content=f"[Simulated {resolved_provider.value} response] Provider unavailable. Please check configuration.",
             provider=resolved_provider,
             model=model or "llama3",
-            prompt_tokens=len(last_msg),
+            prompt_tokens=0,
             completion_tokens=20,
         )
         return response.to_dict()
