@@ -123,11 +123,6 @@ app.include_router(
 @app.get("/api/capabilities")
 async def capabilities():
     """Return the list of capabilities and integration status."""
-    slinker_url = os.getenv("SLINKER_URL", "")
-    trapper_url = os.getenv("TRAPPER_URL", "")
-    gobber_url = os.getenv("GOBBER_URL", "")
-    shrewd_url = os.getenv("SHREWD_URL", "")
-
     return {
         "service": "Greenie",
         "version": VERSION,
@@ -143,10 +138,6 @@ async def capabilities():
         "integrations": {
             "opentelemetry": {"enabled": config.telemetry.is_configured},
             "sqlite": {"enabled": True},
-            "slinker": {"enabled": bool(slinker_url)},
-            "trapper": {"enabled": bool(trapper_url)},
-            "gobber": {"enabled": bool(gobber_url)},
-            "shrewd": {"enabled": bool(shrewd_url)},
         },
     }
 

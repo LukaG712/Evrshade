@@ -258,6 +258,14 @@ async def update_webhook(
     authorization: str | None = Header(None),
 ) -> dict[str, Any]:
     verify_bearer(authorization)
+    # Re-validate URL if it's being updated to prevent SSRF bypass
+    if "url" in data:
+        _validate_webhook_url(data["url"])
+    # Validate event names if provided
+    if "events" in data:
+        for event in data["events"]:
+            if not isinstance(event, str) or len(event) > 100:
+                raise HTTPException(status_code=400, detail="Invalid event name")
     webhook = storage.update_webhook(webhook_id, **data)
     if webhook is None:
         raise HTTPException(status_code=404, detail="Webhook not found")

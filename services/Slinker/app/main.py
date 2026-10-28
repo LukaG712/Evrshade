@@ -113,9 +113,6 @@ app.include_router(openai.router)
 @app.get("/api/capabilities")
 async def capabilities():
     """Return the list of capabilities and integration status."""
-    shrewd_url = os.getenv("SHREWD_URL", "")
-    ollama_url = os.getenv("OLLAMA_URL", "")
-
     return {
         "service": "Slinker",
         "version": VERSION,
@@ -129,12 +126,7 @@ async def capabilities():
         ],
         "integrations": {
             "opentelemetry": {"enabled": config.telemetry.is_configured},
-            "sqlite": {
-                "enabled": True,
-                "path": os.getenv("SLINKER_DB_PATH", "/data/slinker.db"),
-            },
-            "shrewd": {"enabled": bool(shrewd_url), "url": shrewd_url},
-            "ollama": {"enabled": bool(ollama_url), "url": ollama_url},
+            "sqlite": {"enabled": True},
         },
     }
 

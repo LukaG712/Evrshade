@@ -121,15 +121,10 @@ async def capabilities():
             "versioned_config",
             "audit_logging",
             "service_tokens",
-            "aes_256_gcm",
         ],
         "integrations": {
             "opentelemetry": {"enabled": config_settings.telemetry.is_configured},
             "sqlite": {"enabled": True},
-            "encryption": {
-                "enabled": bool(os.getenv("ENCRYPTION_KEY")),
-                "algorithm": "AES-256-GCM",
-            },
         },
     }
 
