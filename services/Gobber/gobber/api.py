@@ -703,7 +703,6 @@ async def get_embedding_stats(
         "total_notes": stats.get("total_notes", 0),
         "total_embeddings": stats.get("total_embeddings", 0),
         "embedding_model": kg.embedding_model,
-        "shrewd_url": kg.shrewd_url,
     }
 
 
