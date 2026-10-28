@@ -79,6 +79,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self._window = 60
 
     def _get_client_ip(self, request: Request) -> str:
+        # Only trust X-Forwarded-For if behind a trusted proxy
+        trusted_proxy = os.getenv("TRUSTED_PROXY", "").lower() in ("true", "1", "yes")
+        if trusted_proxy:
+            forwarded_for = request.headers.get("x-forwarded-for")
+            if forwarded_for:
+                return forwarded_for.split(",")[0].strip()
+        # Default to direct connection address (cannot be spoofed)
         if request.client:
             return request.client.host
         return "unknown"

@@ -51,8 +51,12 @@ async function bootstrap() {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
-  // Prometheus metrics endpoint (no auth required)
-  app.get('/metrics', async () => {
+  // Prometheus metrics endpoint (requires auth)
+  app.get('/metrics', {
+    preValidation: [async (request: any, reply) => {
+      await apiKeyAuth(request, reply, () => {});
+    }],
+  }, async () => {
     return register.metrics();
   });
 
@@ -80,8 +84,12 @@ async function bootstrap() {
     (request as any).startTime = Date.now();
   });
 
-  // Capabilities (no auth required)
-  app.get('/api/capabilities', async () => {
+  // Capabilities (requires auth)
+  app.get('/api/capabilities', {
+    preValidation: [async (request: any, reply) => {
+      await apiKeyAuth(request, reply, () => {});
+    }],
+  }, async () => {
     return {
       service: 'Trapper',
       version: '1.1.0',

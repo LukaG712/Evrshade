@@ -269,14 +269,16 @@ class WebhookDelivery(BaseDelivery):
         if host in ("169.254.169.254", "metadata.google.internal", "metadata.cloud.oracle.com"):
             raise ValueError("Webhook URL points to a blocked host")
 
-        # Block private IP ranges for external webhooks
+        # Block private IP ranges to prevent SSRF via internal network access
         import ipaddress
         try:
             addr = ipaddress.ip_address(host)
             if addr.is_private or addr.is_loopback or addr.is_link_local:
-                # Allow internal webhooks but log a warning
-                pass
-        except ValueError:
+                raise ValueError("Webhook URL must not point to a private IP address")
+        except ValueError as e:
+            # Re-raise if it's our SSRF error, ignore if it's "not an IP"
+            if "private IP" in str(e):
+                raise
             pass  # Not an IP address, it's a hostname
 
         payload = {

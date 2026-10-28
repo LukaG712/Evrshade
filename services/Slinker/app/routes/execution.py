@@ -138,8 +138,9 @@ async def create_task(data: dict[str, Any]):
         metadata=metadata,
     )
 
-    # Execute asynchronously
-    asyncio.create_task(_execute_task_async(task_id, session_id, adapter_name, request))
+    # Execute asynchronously — keep a reference to prevent garbage collection
+    task = asyncio.create_task(_execute_task_async(task_id, session_id, adapter_name, request))
+    task.add_done_callback(lambda t: None)  # Suppress unhandled exception warnings
 
     return {
         "id": task_id,
