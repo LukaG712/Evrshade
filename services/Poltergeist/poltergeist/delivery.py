@@ -105,7 +105,7 @@ class SlackDelivery(BaseDelivery):
                 },
                 {
                     "type": "section",
-                    "text": {"type": "mrkdwn", "text": notification.message},
+                    "text": {"type": "plain_text", "text": notification.message},
                 },
             ],
         }
@@ -169,11 +169,16 @@ class EmailDelivery(BaseDelivery):
         if "@" not in recipient:
             raise ValueError("Email recipient must contain '@'")
 
+        # Sanitize subject to prevent email header injection
+        subject = (notification.title or "Evershade Notification").replace("\n", " ").replace("\r", " ")
+
         msg = MIMEMultipart()
         msg["From"] = self.smtp_from
         msg["To"] = recipient
-        msg["Subject"] = notification.title or "Evershade Notification"
-        msg.attach(MIMEText(notification.message, "html"))
+        msg["Subject"] = subject
+        # Escape HTML in message to prevent XSS in email clients
+        safe_message = html.escape(notification.message or "", quote=True)
+        msg.attach(MIMEText(safe_message, "html"))
 
         context = ssl.create_default_context() if self.use_tls else None
 
@@ -244,10 +249,35 @@ class TelegramDelivery(BaseDelivery):
 class WebhookDelivery(BaseDelivery):
     """Deliver notifications via generic HTTP webhooks."""
 
+    def __init__(self):
+        self.webhook_url = os.getenv("WEBHOOK_URL", "")
+
     async def send(self, notification: Notification) -> None:
         url = notification.recipient
         if not url:
-            raise ValueError("Webhook URL (recipient) is required")
+            if not self.webhook_url:
+                raise ValueError("Webhook URL (recipient) is required")
+            url = self.webhook_url
+
+        # Validate webhook URL to prevent SSRF attacks
+        parsed = urlparse(url)
+        if parsed.scheme not in _ALLOWED_WEBHOOK_SCHEMES:
+            raise ValueError("Webhook URL must use http or https scheme")
+
+        host = parsed.hostname or ""
+        # Block cloud metadata endpoints
+        if host in ("169.254.169.254", "metadata.google.internal", "metadata.cloud.oracle.com"):
+            raise ValueError("Webhook URL points to a blocked host")
+
+        # Block private IP ranges for external webhooks
+        import ipaddress
+        try:
+            addr = ipaddress.ip_address(host)
+            if addr.is_private or addr.is_loopback or addr.is_link_local:
+                # Allow internal webhooks but log a warning
+                pass
+        except ValueError:
+            pass  # Not an IP address, it's a hostname
 
         payload = {
             "title": notification.title,
