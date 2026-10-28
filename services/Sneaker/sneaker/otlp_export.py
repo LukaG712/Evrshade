@@ -761,8 +761,12 @@ def register_otlp_routes(app: FastAPI) -> None:
         )
 
     @app.get("/api/otlp/export/logs")
-    async def export_logs_otlp(limit: int = 100) -> Response:
+    async def export_logs_otlp(
+        limit: int = 100, authorization: str | None = Header(None)
+    ) -> Response:
         """Export logs in OTLP JSON format.
+
+        Requires authentication via Bearer token.
 
         Args:
             limit: Maximum number of logs to export.
@@ -770,6 +774,7 @@ def register_otlp_routes(app: FastAPI) -> None:
         Returns:
             OTLP-formatted JSON response.
         """
+        _verify_otlp_bearer(authorization)
         logs = _logs_store[-limit:]
         severity_map = {
             "DEBUG": 5,
