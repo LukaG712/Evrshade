@@ -5,15 +5,30 @@ channel: Slack (webhooks), Discord (webhooks), Email (SMTP), and Telegram (bot A
 """
 
 import asyncio
+import html
 import os
+import re
 import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from urllib.parse import urlparse
 
 import httpx
 
 from poltergeist.models import Notification
+
+
+# Allowed webhook URL schemes
+_ALLOWED_WEBHOOK_SCHEMES = {"https", "http"}
+
+# Known legitimate webhook host patterns
+_KNOWN_WEBHOOK_HOSTS = {
+    "hooks.slack.com",
+    "discord.com",
+    "discordapp.com",
+    "discordapp.net",
+}
 
 
 class BaseDelivery:
@@ -41,6 +56,32 @@ class BaseDelivery:
         return float(os.getenv("POLTERGEIST_REQUEST_TIMEOUT", "30"))
 
 
+def _validate_webhook_url(url: str, configured_url: str) -> str:
+    """Validate that a webhook URL is safe to use.
+
+    Only allows the configured webhook URL to prevent SSRF and data exfiltration.
+    Rejects arbitrary URLs that could redirect notifications to attacker-controlled servers.
+
+    Args:
+        url: The URL to validate.
+        configured_url: The configured webhook URL from environment variables.
+
+    Returns:
+        The validated URL.
+
+    Raises:
+        ValueError: If the URL is not the configured webhook URL.
+    """
+    if not url:
+        return configured_url
+    # Only allow the configured webhook URL — never override with user-provided URLs
+    if url != configured_url:
+        raise ValueError(
+            f"Webhook URL override is not allowed. Use the configured webhook URL."
+        )
+    return url
+
+
 class SlackDelivery(BaseDelivery):
     """Deliver notifications via Slack Incoming Webhooks."""
 
@@ -51,7 +92,7 @@ class SlackDelivery(BaseDelivery):
         if not self.webhook_url:
             raise RuntimeError("SLACK_WEBHOOK_URL is not configured")
 
-        # Slack block kit format
+        # Slack block kit format — use plain_text to prevent injection
         payload = {
             "text": f"{notification.title}\n{notification.message}",
             "blocks": [
@@ -59,7 +100,7 @@ class SlackDelivery(BaseDelivery):
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": notification.title or "Notification",
+                        "text": (notification.title or "Notification")[:150],  # Slack limit
                     },
                 },
                 {
@@ -68,8 +109,8 @@ class SlackDelivery(BaseDelivery):
                 },
             ],
         }
-        # Override webhook if recipient is provided as a URL
-        url = notification.recipient or self.webhook_url
+        # Never allow recipient to override the configured webhook URL
+        url = _validate_webhook_url(notification.recipient, self.webhook_url)
 
         client = await self._get_client()
         response = await client.post(url, json=payload)
@@ -97,7 +138,8 @@ class DiscordDelivery(BaseDelivery):
                 }
             ],
         }
-        url = notification.recipient or self.webhook_url
+        # Never allow recipient to override the configured webhook URL
+        url = _validate_webhook_url(notification.recipient, self.webhook_url)
 
         client = await self._get_client()
         response = await client.post(url, json=payload)
@@ -144,6 +186,18 @@ class EmailDelivery(BaseDelivery):
         await asyncio.to_thread(_send_sync)
 
 
+def _escape_html(text: str) -> str:
+    """Escape HTML entities to prevent HTML injection in Telegram messages.
+
+    Args:
+        text: The text to escape.
+
+    Returns:
+        HTML-escaped text safe for use in Telegram HTML parse mode.
+    """
+    return html.escape(text, quote=True)
+
+
 class TelegramDelivery(BaseDelivery):
     """Deliver notifications via Telegram Bot API."""
 
@@ -160,10 +214,17 @@ class TelegramDelivery(BaseDelivery):
         if not chat_id:
             raise ValueError("Telegram chat_id (recipient) is required")
 
+        # Validate chat_id is numeric to prevent injection
+        if not re.match(r'^-?\d+$', chat_id):
+            raise ValueError("Telegram chat_id must be numeric")
+
         url = f"{self.base_url}{self.bot_token}/sendMessage"
+        # Escape HTML entities to prevent injection attacks
+        safe_title = _escape_html(notification.title or "")
+        safe_message = _escape_html(notification.message or "")
         payload = {
             "chat_id": chat_id,
-            "text": f"{notification.title}\n\n{notification.message}",
+            "text": f"{safe_title}\n\n{safe_message}",
             "parse_mode": "HTML",
         }
 

@@ -10,13 +10,51 @@ from datetime import UTC, datetime
 from typing import Any
 
 from evershade.errors import EvershadeError
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 
 from app.adapters import ExecutionRequest
 from app.adapters.factory import create_adapter, list_adapters
 from app.database import get_db_instance
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["execution"])
+
+# Allowed workspace base directories — execution is restricted to these paths
+_ALLOWED_WORKSPACE_BASES = [
+    "/tmp/workspace",
+    "/workspace",
+    "/data/workspace",
+    os.getenv("WORKSPACE_BASE", "/tmp/workspace"),
+]
+
+
+def _validate_workspace_path(workspace_path: str) -> str:
+    """Validate that workspace path is within allowed directories.
+
+    Args:
+        workspace_path: The workspace path to validate.
+
+    Returns:
+        The resolved absolute path.
+
+    Raises:
+        HTTPException: If the path is not within an allowed directory.
+    """
+    if not workspace_path:
+        return "/tmp/workspace"
+
+    # Resolve to absolute path
+    abs_path = os.path.abspath(workspace_path)
+
+    # Check if the path is within an allowed base directory
+    for base in _ALLOWED_WORKSPACE_BASES:
+        if abs_path.startswith(os.path.abspath(base)):
+            return abs_path
+
+    raise HTTPException(
+        status_code=400,
+        detail=f"Workspace path '{workspace_path}' is not allowed. "
+               f"Must be within one of: {_ALLOWED_WORKSPACE_BASES}"
+    )
 
 
 @router.post("", status_code=201)
@@ -32,6 +70,9 @@ async def create_task(data: dict[str, Any]):
     timeout = data.get("timeout", 300)
     permissions = data.get("permissions", {})
     metadata = data.get("metadata", {})
+
+    # Validate workspace path is within allowed directories
+    workspace_path = _validate_workspace_path(workspace_path)
 
     db = await get_db_instance()
 

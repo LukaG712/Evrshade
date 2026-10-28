@@ -5,6 +5,7 @@ Provides CORS configuration and rate limiting for all Evershade services.
 
 from __future__ import annotations
 
+import os
 import time
 from collections import defaultdict
 
@@ -24,18 +25,31 @@ def add_cors_middleware(
 
     Args:
         app: The FastAPI application.
-        allowed_origins: List of allowed origins. Defaults to all origins.
+        allowed_origins: List of allowed origins. Defaults to localhost only.
+            Wildcard "*" is rejected when credentials are enabled to prevent
+            cross-origin authenticated requests from arbitrary sites.
         allowed_methods: List of allowed HTTP methods.
         allowed_headers: List of allowed HTTP headers.
     """
     from starlette.middleware.cors import CORSMiddleware
 
     if allowed_origins is None:
-        allowed_origins = ["*"]
+        allowed_origins = ["http://localhost", "http://localhost:8080", "http://localhost:3000"]
     if allowed_methods is None:
-        allowed_methods = ["*"]
+        allowed_methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
     if allowed_headers is None:
         allowed_headers = ["*"]
+
+    # Reject wildcard origins when credentials are enabled — this is a security risk
+    if "*" in allowed_origins:
+        import logging
+        logging.getLogger("evershade.security").warning(
+            "CORS wildcard origin '*' is not allowed with credentials enabled. "
+            "Specify explicit origins instead."
+        )
+        allowed_origins = [o for o in allowed_origins if o != "*"]
+        if not allowed_origins:
+            allowed_origins = ["http://localhost"]
 
     app.add_middleware(
         CORSMiddleware,
@@ -79,11 +93,19 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self._window = 60  # 60 second window
 
     def _get_client_ip(self, request: Request) -> str:
-        """Extract client IP from request."""
-        # Check X-Forwarded-For header first (for reverse proxy setups)
-        forwarded_for = request.headers.get("x-forwarded-for")
-        if forwarded_for:
-            return forwarded_for.split(",")[0].strip()
+        """Extract client IP from request.
+
+        Only trust X-Forwarded-For when behind a trusted proxy. Otherwise,
+        use the direct connection address to prevent IP spoofing.
+        """
+        # Only trust X-Forwarded-For if behind a trusted proxy
+        # In Docker deployments, this should be set when behind nginx/traefik
+        trusted_proxy = os.getenv("TRUSTED_PROXY", "").lower() in ("true", "1", "yes")
+        if trusted_proxy:
+            forwarded_for = request.headers.get("x-forwarded-for")
+            if forwarded_for:
+                return forwarded_for.split(",")[0].strip()
+        # Default to direct connection address (cannot be spoofed)
         if request.client:
             return request.client.host
         return "unknown"

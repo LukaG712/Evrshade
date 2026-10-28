@@ -12,8 +12,10 @@ import time
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import Response
+from collections import defaultdict
+from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import JSONResponse, Response
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
 try:
@@ -42,11 +44,18 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:8080",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Rate limiting middleware
+app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
 
 _api_key_raw = os.getenv("API_KEY")
 if not _api_key_raw:
@@ -58,6 +67,42 @@ storage = Storage(db_path=os.getenv("DB_PATH", "/app/data/poltergeist.db"))
 
 # Max retry attempts for failed deliveries
 MAX_RETRIES = int(os.getenv("POLTERGEIST_MAX_RETRIES", "3"))
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Simple in-memory rate limiting middleware for Poltergeist."""
+
+    def __init__(self, app, requests_per_minute: int = 60):
+        super().__init__(app)
+        self.requests_per_minute = requests_per_minute
+        self._requests: dict[str, list[float]] = defaultdict(list)
+        self._window = 60
+
+    def _get_client_ip(self, request: Request) -> str:
+        if request.client:
+            return request.client.host
+        return "unknown"
+
+    def _is_rate_limited(self, client_ip: str) -> bool:
+        now = time.time()
+        window_start = now - self._window
+        self._requests[client_ip] = [
+            ts for ts in self._requests[client_ip] if ts > window_start
+        ]
+        return len(self._requests[client_ip]) >= self.requests_per_minute
+
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path in ("/health", "/metrics"):
+            return await call_next(request)
+        client_ip = self._get_client_ip(request)
+        if self._is_rate_limited(client_ip):
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded. Try again later."},
+                headers={"Retry-After": "60"},
+            )
+        self._requests[client_ip].append(time.time())
+        return await call_next(request)
 
 
 def verify_bearer(authorization: str | None = Header(None)) -> None:

@@ -335,8 +335,13 @@ class CodingAgentAdapter(ABC):
         start = time.time()
         process = None
         try:
-            process = await asyncio.create_subprocess_shell(
-                command,
+            # Use shlex.split to safely parse the command into arguments,
+            # then use create_subprocess_exec to avoid shell interpretation entirely.
+            # This prevents command injection even if validation is bypassed.
+            import shlex
+            args = shlex.split(command)
+            process = await asyncio.create_subprocess_exec(
+                *args,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=workspace_path,

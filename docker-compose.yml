@@ -438,6 +438,7 @@ services:
     environment:
       - API_KEY=${EVERSHADE_HIDER_API_KEY}
       - ENCRYPTION_KEY=${EVERSHADE_ENCRYPTION_KEY}
+      - ENCRYPTION_SALT=${EVERSHADE_ENCRYPTION_SALT}
       - DB_PATH=/app/data/hider.db
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
       # OpenTelemetry
@@ -964,7 +965,7 @@ services:
       - internal
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD:-langfuse_local_password}
+      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD}
       - POSTGRES_DB=langfuse
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
@@ -997,11 +998,11 @@ services:
     ports:
       - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:3101:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:${LANGFUSE_DB_PASSWORD:-langfuse_local_password}@langfuse-postgres:5432/langfuse
-      - SALT="evershade-salt"
+      - DATABASE_URL=postgresql://postgres:${LANGFUSE_DB_PASSWORD}@langfuse-postgres:5432/langfuse
+      - SALT=${LANGFUSE_SALT}
       - AUTH_DISABLE_SIGNUP_WITHOUT_AUTH=true
-      - AUTH_USERNAME=${LANGFUSE_USERNAME:-admin}
-      - AUTH_PASSWORD=${LANGFUSE_PASSWORD:-admin}
+      - AUTH_USERNAME=${LANGFUSE_USERNAME}
+      - AUTH_PASSWORD=${LANGFUSE_PASSWORD}
       - TELEMETRY_ENABLED=false
     depends_on:
       langfuse-postgres:

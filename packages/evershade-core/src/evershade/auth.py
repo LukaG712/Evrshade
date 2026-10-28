@@ -112,9 +112,12 @@ class ServiceAuthMiddleware(BaseHTTPMiddleware):
         if request.url.path in self.public_paths:
             return await call_next(request)
 
-        # Skip auth if no secret is configured
+        # Require a secret to be configured — refuse to start without it
         if not self.secret:
-            return await call_next(request)
+            raise RuntimeError(
+                "JWT secret is not configured. Service-to-service authentication is disabled. "
+                "Set AUTH_SECRET environment variable: openssl rand -hex 32"
+            )
 
         # Extract and validate token
         authorization = request.headers.get("Authorization", "")

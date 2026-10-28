@@ -36,8 +36,13 @@ VERSION = "2.0.0"
 config = ServiceConfig(service_name="Greenie", port=8080)
 registry = ServiceRegistry(service_name="Greenie")
 
-# API key authentication
+# API key authentication — required, service refuses to start without it
 API_KEY = os.getenv("API_KEY", "")
+if not API_KEY:
+    raise RuntimeError(
+        "API_KEY environment variable is not set. Refusing to start Greenie without a configured API key. "
+        "Generate one: openssl rand -hex 32"
+    )
 
 PUBLIC_PATHS = {
     "/health",
@@ -51,7 +56,7 @@ PUBLIC_PATHS = {
 
 async def auth_middleware(request: Request, call_next):
     """Authenticate requests using API key."""
-    if request.url.path in PUBLIC_PATHS or not API_KEY:
+    if request.url.path in PUBLIC_PATHS:
         return await call_next(request)
 
     authorization = request.headers.get("Authorization", "")
