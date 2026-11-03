@@ -28,7 +28,7 @@ pub async fn list_mcp_servers(
                 "name": r.try_get_by_index::<String>(1).ok()?,
                 "url": r.try_get_by_index::<String>(2).ok()?,
                 "transport": r.try_get_by_index::<String>(3).ok()?,
-                "config": serde_json::from_str(&r.try_get_by_index::<String>(4).unwrap_or_else(|_| "{}".to_string()))
+                "config": serde_json::from_str::<serde_json::Value>(&r.try_get_by_index::<String>(4).unwrap_or_else(|_| "{}".to_string()))
                     .unwrap_or_default(),
                 "tools": serde_json::from_str(&r.try_get_by_index::<String>(5).unwrap_or_else(|_| "[]".to_string()))
                     .unwrap_or_else(|_| serde_json::Value::Array(Vec::new())),

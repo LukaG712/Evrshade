@@ -29,7 +29,7 @@ pub async fn list_plugins(
                 "description": r.try_get_by_index::<String>(2).ok()?,
                 "type": r.try_get_by_index::<String>(3).ok()?,
                 "source": r.try_get_by_index::<String>(4).ok()?,
-                "config": serde_json::from_str(&r.try_get_by_index::<String>(5).unwrap_or_else(|_| "{}".to_string()))
+                "config": serde_json::from_str::<serde_json::Value>(&r.try_get_by_index::<String>(5).unwrap_or_else(|_| "{}".to_string()))
                     .unwrap_or_default(),
                 "enabled": r.try_get_by_index::<i32>(6).unwrap_or(1) == 1,
                 "installed_at": r.try_get_by_index::<String>(7).ok()?,
