@@ -7,9 +7,9 @@ import hashlib
 import os
 import re
 
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
 from fastapi import APIRouter, HTTPException
 
 from app.database import db

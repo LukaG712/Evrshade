@@ -12,12 +12,11 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 
 from poltergeist.models import Notification
-
 
 # Allowed webhook URL schemes
 _ALLOWED_WEBHOOK_SCHEMES = {"https", "http"}
@@ -77,7 +76,7 @@ def _validate_webhook_url(url: str, configured_url: str) -> str:
     # Only allow the configured webhook URL — never override with user-provided URLs
     if url != configured_url:
         raise ValueError(
-            f"Webhook URL override is not allowed. Use the configured webhook URL."
+            "Webhook URL override is not allowed. Use the configured webhook URL."
         )
     return url
 
@@ -279,7 +278,7 @@ class WebhookDelivery(BaseDelivery):
             # Re-raise if it's our SSRF error, ignore if it's "not an IP"
             if "private IP" in str(e):
                 raise
-            pass  # Not an IP address, it's a hostname
+            # Not an IP address, it's a hostname
 
         payload = {
             "title": notification.title,

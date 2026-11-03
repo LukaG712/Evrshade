@@ -9,10 +9,10 @@ import hmac
 import logging
 import os
 import time
+from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Any
 
-from collections import defaultdict
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -35,39 +35,6 @@ from poltergeist.models import Channel, Notification, NotificationStatus, Templa
 from poltergeist.storage import Storage
 
 logger = logging.getLogger("poltergeist")
-
-app = FastAPI(
-    title="Poltergeist",
-    description="Notification and messaging hub for the Evershade ecosystem",
-    version="1.1.0",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost",
-        "http://localhost:8080",
-        "http://localhost:3000",
-    ],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allow_headers=["*"],
-)
-
-# Rate limiting middleware
-app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
-
-_api_key_raw = os.getenv("API_KEY")
-if not _api_key_raw:
-    raise RuntimeError(
-        "API_KEY environment variable is not set. Refusing to start Poltergeist without a configured API key."
-    )
-API_KEY = _api_key_raw
-storage = Storage(db_path=os.getenv("DB_PATH", "/app/data/poltergeist.db"))
-
-# Max retry attempts for failed deliveries
-MAX_RETRIES = int(os.getenv("POLTERGEIST_MAX_RETRIES", "3"))
-
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Simple in-memory rate limiting middleware for Poltergeist."""
@@ -110,6 +77,39 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             )
         self._requests[client_ip].append(time.time())
         return await call_next(request)
+
+
+app = FastAPI(
+    title="Poltergeist",
+    description="Notification and messaging hub for the Evershade ecosystem",
+    version="1.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:8080",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+# Rate limiting middleware
+app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
+
+_api_key_raw = os.getenv("API_KEY")
+if not _api_key_raw:
+    raise RuntimeError(
+        "API_KEY environment variable is not set. Refusing to start Poltergeist without a configured API key."
+    )
+API_KEY = _api_key_raw
+storage = Storage(db_path=os.getenv("DB_PATH", "/app/data/poltergeist.db"))
+
+# Max retry attempts for failed deliveries
+MAX_RETRIES = int(os.getenv("POLTERGEIST_MAX_RETRIES", "3"))
 
 
 def verify_bearer(authorization: str | None = Header(None)) -> None:

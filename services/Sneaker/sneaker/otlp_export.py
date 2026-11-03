@@ -10,14 +10,13 @@ Configuration:
 """
 
 import asyncio
+import hmac
 import json
 import logging
 import os
 import re
 import time
 from typing import Any
-
-import hmac
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import Response
