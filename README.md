@@ -5,7 +5,7 @@
 [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Required-blue.svg)](https://docker.com)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-React%20Dashboard-blue.svg)](https://www.typescriptlang.org)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
 
@@ -20,6 +20,74 @@ Evershade is a **self-hosted AI agent platform** that lets you create, manage, a
 - **Agents do real work.** Write code, scrape websites, search knowledge bases, send notifications, and chain tasks together.
 - **Mission Control orchestrates complex projects.** Break large tasks into milestones, let AI plan and execute, then validate automatically.
 - **It's modular.** Use just the core services or add observability, notifications, local LLMs – you choose what you need.
+- **Built in Rust.** The backend services are written in Rust for performance, memory safety, and zero garbage collection pauses. The platform compiles to single static binaries with minimal Docker images (~15-30MB vs ~500MB for Python).
+
+---
+
+## Architecture
+
+Evershade is built as a Rust workspace with shared crates and independent service binaries:
+
+```
+rust/
+├── Cargo.toml              # Workspace root
+├── crates/
+│   ├── evershade-core/     # Config, auth, health, telemetry, security
+│   ├── evershade-db/       # SeaORM database utilities
+│   └── evershade-events/   # Redis-based event bus
+└── services/
+    ├── gobber/             # Knowledge graph & search
+    ├── greenie/            # Mission orchestration
+    ├── hider/              # Encrypted secrets management
+    ├── poltergeist/        # Notification delivery
+    ├── shrewd/             # LLM provider proxy
+    ├── slinker/            # Code execution sandbox
+    ├── sneaker/            # Observability & OTLP collector
+    └── speedy/             # CLI tool
+```
+
+**Tech stack:** Axum + Tower (HTTP), Tokio (async runtime), SeaORM (database), serde (serialization), jsonwebtoken (auth), tracing (logging), OpenTelemetry (telemetry).
+
+**Other components:**
+- **Trapper** — Web scraping (TypeScript/Node.js, unchanged)
+- **Slammer** — React web dashboard (unchanged)
+
+---
+
+## Building from Source
+
+### Prerequisites
+
+- **Rust 1.75+** and **Cargo** (install via [rustup](https://rustup.rs/))
+- **Docker** and **Docker Compose** (for running services)
+
+### Build All Services
+
+```bash
+# Build all services in debug mode
+cd rust && cargo build --workspace
+
+# Build all services in release mode (optimized)
+cd rust && cargo build --workspace --release
+
+# Run clippy lints
+cd rust && cargo clippy --workspace
+
+# Run all tests
+cd rust && cargo test --workspace
+```
+
+### Docker Build
+
+Each service has a multi-stage Dockerfile that builds a minimal runtime image:
+
+```bash
+# Build a single service
+docker build -t evershade-hider ./services/Hider/Dockerfile
+
+# Build and start all services
+docker compose up -d --build
+```
 
 ---
 
@@ -324,18 +392,20 @@ sudo docker volume prune --filter label=com.evershade
 
 ## Services at a Glance
 
-| Service | Port | Role |
-|---------|------|------|
-| **Greenie** | `8080` | Central orchestrator & API backend |
-| **Slinker** | `8000` | Code execution engine |
-| **Trapper** | `3000` | Web scraping & crawling |
-| **Gobber** | `8085` | Persistent storage & knowledge graph |
-| **Sneaker** | `8086` | Observability (metrics, traces, logs) |
-| **Hider** | `8087` | Encrypted secrets management |
-| **Poltergeist** | `8088` | Notifications (Slack, Discord, email, Telegram) |
-| **Shrewd** | `8089` | LLM provider abstraction |
-| **Slammer** | `5173` | React web dashboard |
-| **Speedy** | – | CLI tool (`evershade` command) |
+| Service | Port | Role | Language |
+|---------|------|------|----------|
+| **Greenie** | `8080` | Central orchestrator & API backend | Rust |
+| **Slinker** | `8000` | Code execution engine | Rust |
+| **Trapper** | `3000` | Web scraping & crawling | TypeScript |
+| **Gobber** | `8085` | Persistent storage & knowledge graph | Rust |
+| **Sneaker** | `8086` | Observability (metrics, traces, logs) | Rust |
+| **Hider** | `8087` | Encrypted secrets management | Rust |
+| **Poltergeist** | `8088` | Notifications (Slack, Discord, email, Telegram) | Rust |
+| **Shrewd** | `8089` | LLM provider abstraction | Rust |
+| **Slammer** | `5173` | React web dashboard | TypeScript/React |
+| **Speedy** | – | CLI tool (`evershade` command) | Rust |
+
+> **Note:** The Python source code is kept in the `services/` directories as reference during the Rust migration. The Rust implementations live in `rust/services/`.
 
 > **🌐 Website:** Visit the [Evershade website](website/index.html) for interactive documentation.
 
