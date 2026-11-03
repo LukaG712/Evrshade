@@ -18,7 +18,6 @@ mod alerting;
 mod models;
 mod otlp;
 
-
 /// Application state.
 #[derive(Clone)]
 struct AppState {
