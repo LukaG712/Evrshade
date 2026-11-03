@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Notification record.
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Notification {
     pub id: String,

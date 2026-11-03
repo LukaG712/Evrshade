@@ -68,7 +68,7 @@ async fn deliver_email(recipient: &str, title: &str, _body: &str) -> Result<(), 
     }
 
     // Sanitize subject to prevent email header injection
-    let _subject = title.replace('\n', " ").replace('\r', " ");
+    let _subject = title.replace(['\n', '\r'], " ");
 
     info!(
         "Email notification queued for {} (SMTP not configured)",

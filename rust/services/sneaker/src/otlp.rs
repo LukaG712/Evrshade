@@ -25,7 +25,6 @@ static TRACES_DROPPED: AtomicU64 = AtomicU64::new(0);
 static METRICS_DROPPED: AtomicU64 = AtomicU64::new(0);
 static LOGS_DROPPED: AtomicU64 = AtomicU64::new(0);
 
-/// Patterns that indicate a value is likely a secret.
 lazy_static::lazy_static! {
     static ref SECRET_PATTERNS: Vec<Regex> = vec![
         Regex::new(r"(?:^|[^A-Za-z0-9_])(?:api[_-]?key|apikey|token|secret|password|passwd|pwd|auth|credential|access[_-]?key|private[_-]?key)(?:[^A-Za-z0-9_]|$)").unwrap(),
