@@ -7,9 +7,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Deployment environment.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Environment {
+    #[default]
     Dev,
     Staging,
     Prod,
@@ -22,12 +23,6 @@ impl fmt::Display for Environment {
             Environment::Staging => write!(f, "staging"),
             Environment::Prod => write!(f, "prod"),
         }
-    }
-}
-
-impl Default for Environment {
-    fn default() -> Self {
-        Environment::Dev
     }
 }
 
@@ -192,10 +187,10 @@ impl ServiceConfig {
         let version = std::env::var("EVERSHADE_VERSION").unwrap_or_else(|_| "2.0.0".to_string());
         let environment: Environment = std::env::var("EVERSHADE_ENVIRONMENT")
             .ok()
-            .and_then(|v| match v.as_str() {
-                "staging" => Some(Environment::Staging),
-                "prod" => Some(Environment::Prod),
-                _ => Some(Environment::Dev),
+            .map(|v| match v.as_str() {
+                "staging" => Environment::Staging,
+                "prod" => Environment::Prod,
+                _ => Environment::Dev,
             })
             .unwrap_or_default();
         let log_level = std::env::var("EVERSHADE_LOG_LEVEL").unwrap_or_else(|_| "INFO".to_string());
@@ -264,7 +259,7 @@ impl ServiceConfig {
             _ => return Err(format!("Invalid log level: {}", self.log_level)),
         }
 
-        if self.port < 1 || self.port > 65535 {
+        if self.port < 1 {
             return Err(format!(
                 "Port must be between 1 and 65535, got {}",
                 self.port

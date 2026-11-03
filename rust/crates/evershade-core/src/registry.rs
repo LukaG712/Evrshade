@@ -16,19 +16,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::info;
 
 /// Service health status.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum ServiceStatus {
+    #[default]
     Healthy,
     Unhealthy,
     Starting,
     Stopping,
-}
-
-impl Default for ServiceStatus {
-    fn default() -> Self {
-        ServiceStatus::Healthy
-    }
 }
 
 /// Information about a registered service.
@@ -322,7 +317,7 @@ impl ServiceDiscoveryClient {
             .send()
             .await?;
         let resp = resp.error_for_status()?;
-        Ok(resp.json().await?)
+        resp.json().await
     }
 
     pub async fn deregister(&self, name: &str) -> Result<serde_json::Value, reqwest::Error> {
@@ -332,7 +327,7 @@ impl ServiceDiscoveryClient {
             .send()
             .await?;
         let resp = resp.error_for_status()?;
-        Ok(resp.json().await?)
+        resp.json().await
     }
 
     pub async fn heartbeat(&self, name: &str) -> Result<serde_json::Value, reqwest::Error> {
@@ -345,7 +340,7 @@ impl ServiceDiscoveryClient {
             .send()
             .await?;
         let resp = resp.error_for_status()?;
-        Ok(resp.json().await?)
+        resp.json().await
     }
 
     pub async fn get_service(
@@ -371,7 +366,7 @@ impl ServiceDiscoveryClient {
             .send()
             .await?;
         let resp = resp.error_for_status()?;
-        Ok(resp.json().await?)
+        resp.json().await
     }
 }
 

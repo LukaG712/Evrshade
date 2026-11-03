@@ -23,11 +23,12 @@ pub fn run(backup: PathBuf) {
         }) {
             let entry = entry.unwrap();
             let path = entry.path();
-            if path.extension().map_or(false, |ext| ext == "db") {
+            if path.extension().is_some_and(|ext| ext == "db") {
                 let filename = path.file_name().unwrap();
                 let dest = data_dir.join(filename);
-                std::fs::copy(&path, &dest).unwrap_or_else(|e| {
+                let _ = std::fs::copy(&path, &dest).unwrap_or_else(|e| {
                     eprintln!("Failed to restore {}: {}", path.display(), e);
+                    0u64
                 });
                 println!("  ✅ Restored {}", filename.to_string_lossy());
             }
@@ -35,7 +36,7 @@ pub fn run(backup: PathBuf) {
     } else {
         let filename = backup.file_name().unwrap();
         let dest = data_dir.join(filename);
-        std::fs::copy(&backup, &dest).unwrap_or_else(|e| {
+        let _ = std::fs::copy(&backup, &dest).unwrap_or_else(|e| {
             eprintln!("Failed to restore backup: {}", e);
             std::process::exit(1);
         });

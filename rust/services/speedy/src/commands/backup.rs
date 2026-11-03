@@ -11,7 +11,7 @@ pub fn run(output: PathBuf) {
     });
 
     let timestamp = chrono::Utc::now().format("%Y%m%d_%H%M%S");
-    let backup_dir = output.join(&format!("evershade_backup_{}", timestamp));
+    let backup_dir = output.join(format!("evershade_backup_{}", timestamp));
     std::fs::create_dir_all(&backup_dir).unwrap_or_else(|e| {
         eprintln!("Failed to create backup directory: {}", e);
         std::process::exit(1);
@@ -25,11 +25,12 @@ pub fn run(output: PathBuf) {
         }) {
             let entry = entry.unwrap();
             let path = entry.path();
-            if path.extension().map_or(false, |ext| ext == "db") {
+            if path.extension().is_some_and(|ext| ext == "db") {
                 let filename = path.file_name().unwrap();
                 let dest = backup_dir.join(filename);
-                std::fs::copy(&path, &dest).unwrap_or_else(|e| {
+                let _ = std::fs::copy(&path, &dest).unwrap_or_else(|e| {
                     eprintln!("Failed to copy {}: {}", path.display(), e);
+                    0u64
                 });
                 println!("  ✅ Backed up {}", filename.to_string_lossy());
             }

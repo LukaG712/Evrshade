@@ -34,7 +34,7 @@ pub fn run() {
 
     println!("\n  OTLP Collector (Sneaker):");
     let api_key = std::env::var("API_KEY").unwrap_or_default();
-    let mut headers = reqwest::blocking::header::HeaderMap::new();
+    let mut headers = reqwest::header::HeaderMap::new();
     if !api_key.is_empty() {
         headers.insert(
             "Authorization",

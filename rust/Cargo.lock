@@ -1134,11 +1134,13 @@ checksum = "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
 name = "gobber"
 version = "2.0.0"
 dependencies = [
+ "anyhow",
  "axum 0.8.9",
  "chrono",
  "evershade-core",
  "evershade-db",
  "ipnetwork",
+ "lazy_static",
  "regex",
  "reqwest",
  "sea-orm",
@@ -1160,9 +1162,7 @@ dependencies = [
  "chrono",
  "evershade-core",
  "evershade-db",
- "evershade-events",
  "regex",
- "reqwest",
  "sea-orm",
  "serde",
  "serde_json",
@@ -2665,6 +2665,7 @@ dependencies = [
  "base64 0.22.1",
  "bytes",
  "encoding_rs",
+ "futures-channel",
  "futures-core",
  "futures-util",
  "h2",
@@ -3086,6 +3087,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "shell-words"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc6fe69c597f9c37bfeeeeeb33da3530379845f10be461a66d16d03eca2ded77"
+
+[[package]]
 name = "shlex"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3095,10 +3102,13 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 name = "shrewd"
 version = "2.0.0"
 dependencies = [
+ "anyhow",
+ "async-trait",
  "axum 0.8.9",
  "chrono",
  "evershade-core",
  "evershade-db",
+ "once_cell",
  "reqwest",
  "sea-orm",
  "serde",
@@ -3158,15 +3168,17 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 name = "slinker"
 version = "2.0.0"
 dependencies = [
+ "async-trait",
  "axum 0.8.9",
  "chrono",
  "evershade-core",
  "evershade-db",
- "regex",
+ "lazy_static",
  "reqwest",
  "sea-orm",
  "serde",
  "serde_json",
+ "shell-words",
  "tokio",
  "tower-http",
  "tracing",
@@ -3231,15 +3243,11 @@ dependencies = [
 name = "speedy"
 version = "2.0.0"
 dependencies = [
+ "chrono",
  "clap",
- "config",
- "evershade-core",
  "reqwest",
  "serde",
  "serde_json",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

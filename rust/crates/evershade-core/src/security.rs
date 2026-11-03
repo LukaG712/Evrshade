@@ -52,6 +52,7 @@ pub fn add_cors_middleware_with_origins(app: Router, allowed_origins: Vec<String
 }
 
 /// Simple in-memory rate limiting middleware.
+#[allow(dead_code)]
 pub struct RateLimitState {
     requests_per_minute: u32,
     requests: Arc<Mutex<HashMap<String, Vec<Instant>>>>,
@@ -74,14 +75,13 @@ impl RateLimitState {
         }
     }
 
+    #[allow(dead_code)]
     fn is_rate_limited(&self, client_ip: &str) -> bool {
         let now = Instant::now();
         let window = std::time::Duration::from_secs(60);
 
         let mut requests = self.requests.lock().unwrap();
-        let entry = requests
-            .entry(client_ip.to_string())
-            .or_insert_with(Vec::new);
+        let entry = requests.entry(client_ip.to_string()).or_default();
 
         // Clean old entries
         entry.retain(|t| now.duration_since(*t) < window);
@@ -89,11 +89,12 @@ impl RateLimitState {
         entry.len() as u32 >= self.requests_per_minute
     }
 
+    #[allow(dead_code)]
     fn record_request(&self, client_ip: &str) {
         let mut requests = self.requests.lock().unwrap();
         requests
             .entry(client_ip.to_string())
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(Instant::now());
     }
 }

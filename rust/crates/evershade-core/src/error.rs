@@ -172,10 +172,7 @@ pub async fn correlation_id_middleware(mut req: Request<axum::body::Body>, next:
 /// Middleware that logs every request with timing and correlation ID.
 pub struct RequestLoggingMiddleware;
 
-pub async fn request_logging_middleware(
-    mut req: Request<axum::body::Body>,
-    next: Next,
-) -> Response {
+pub async fn request_logging_middleware(req: Request<axum::body::Body>, next: Next) -> Response {
     let request_id = req
         .extensions()
         .get::<String>()

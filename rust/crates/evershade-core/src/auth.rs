@@ -108,11 +108,7 @@ impl ServiceAuthMiddleware {
         let auth_header = req.headers().get("Authorization");
         let token = if let Some(auth) = auth_header {
             if let Ok(auth_str) = auth.to_str() {
-                if auth_str.starts_with("Bearer ") {
-                    Some(auth_str[7..].to_string())
-                } else {
-                    None
-                }
+                auth_str.strip_prefix("Bearer ").map(|s| s.to_string())
             } else {
                 None
             }

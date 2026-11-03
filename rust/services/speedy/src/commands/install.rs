@@ -32,9 +32,9 @@ pub fn run(dir: Option<PathBuf>) {
     }
     println!("✅ Found docker-compose.yml");
 
-    let project_dir = dir
-        .as_ref()
-        .or_else(|| compose_file.parent().and_then(|p| Some(p.to_path_buf())));
+    let project_dir: Option<PathBuf> = dir
+        .clone()
+        .or_else(|| compose_file.parent().map(|p| p.to_path_buf()));
     match run_compose(&["config", "--quiet"], project_dir.as_ref()) {
         Ok(_) => println!("✅ Docker Compose configuration is valid"),
         Err(e) => {

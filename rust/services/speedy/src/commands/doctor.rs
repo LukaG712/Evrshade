@@ -19,10 +19,7 @@ pub fn run() {
     }
 
     println!("\n  Docker Compose:");
-    match Command::new("docker")
-        .args(&["compose", "version"])
-        .output()
-    {
+    match Command::new("docker").args(["compose", "version"]).output() {
         Ok(output) if output.status.success() => {
             let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
             println!("    ✅ {}", version);

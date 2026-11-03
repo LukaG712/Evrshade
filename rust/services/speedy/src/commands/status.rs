@@ -9,8 +9,8 @@ pub fn run(dir: Option<PathBuf>) {
     println!("📊 Evershade service status:");
     println!();
 
-    let project_dir = dir
-        .as_ref()
+    let project_dir: Option<PathBuf> = dir
+        .clone()
         .or_else(|| find_compose_file().and_then(|p| p.parent().map(|p| p.to_path_buf())));
 
     match run_compose(&["ps", "--format", "json"], project_dir.as_ref()) {

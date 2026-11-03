@@ -9,7 +9,7 @@ pub fn run(service: Option<String>) {
         .unwrap_or_else(|_| reqwest::blocking::Client::new());
 
     let api_key = std::env::var("API_KEY").unwrap_or_default();
-    let mut headers = reqwest::blocking::header::HeaderMap::new();
+    let mut headers = reqwest::header::HeaderMap::new();
     if !api_key.is_empty() {
         headers.insert(
             "Authorization",
@@ -70,10 +70,11 @@ pub fn run(service: Option<String>) {
             {
                 Ok(resp) if resp.status().is_success() => {
                     let data: serde_json::Value = resp.json().unwrap_or_default();
+                    let empty_vec: Vec<serde_json::Value> = Vec::new();
                     let caps = data
                         .get("capabilities")
                         .and_then(|c| c.as_array())
-                        .unwrap_or(&vec![]);
+                        .unwrap_or(&empty_vec);
                     println!("  {} ({})", name, url);
                     for cap in caps {
                         if let Some(cap_str) = cap.as_str() {
