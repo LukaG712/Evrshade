@@ -1,8 +1,0 @@
-__pycache__/
-*.pyc
-*.egg-info/
-dist/
-build/
-.env
-data/*.db
-data/*.db-journal

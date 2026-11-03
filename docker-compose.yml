@@ -3,11 +3,10 @@
 # Profiles:
 #   docker compose --profile minimal up      # Core services only
 #   docker compose --profile standard up     # All services except dashboard
-#   docker compose --profile full up         # Everything including Slammer
+#   docker compose --profile full up         # Everything
 #   docker compose --profile monitoring up   # Grafana + Prometheus + Loki + Tempo + cAdvisor + node-exporter
 #   docker compose --profile opik up        # Opik for LLM observability
 #   docker compose --profile langfuse up    # Langfuse for AI observability
-#   docker compose --profile browser-use up # Browser Use for LLM browser automation
 #   docker compose --profile playwright-mcp up # Playwright MCP for MCP browser automation
 #   docker compose --profile ollama up       # Ollama for local models
 #   docker compose --profile proxy up        # Caddy reverse proxy with TLS
@@ -93,7 +92,7 @@ services:
     image: evershade-greenie
     build:
       context: .
-      dockerfile: services/Greenie/Dockerfile
+      dockerfile: rust/services/greenie/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -148,21 +147,17 @@ services:
       # Logging
       - LOG_LEVEL=${EVERSHADE_LOG_LEVEL:-INFO}
     volumes:
-      - ./services/Greenie/hub.yaml:/app/hub.yaml:ro
       - greenie_data:/app/data
-      - ./services/Greenie/skills:/app/skills:ro
       - ${EVERSHADE_WORKSPACE_PATH:-./workspace}:/workspace
     depends_on:
       redis:
         condition: service_healthy
       Slinker:
         condition: service_healthy
-      Trapper-api:
-        condition: service_healthy
       Gobber:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 15s
       timeout: 5s
       start_period: 60s
@@ -191,7 +186,7 @@ services:
     image: evershade-slinker
     build:
       context: .
-      dockerfile: services/Slinker/Dockerfile
+      dockerfile: rust/services/slinker/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -216,7 +211,7 @@ services:
     volumes:
       - ${EVERSHADE_WORKSPACE_PATH:-./workspace}:/workspace
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s
       timeout: 5s
       start_period: 10s
@@ -242,106 +237,11 @@ services:
       - /app/logs
       - /data
 
-  Trapper-api:
-    image: evershade-trapper-api
-    build:
-      context: .
-      dockerfile: services/Trapper/Dockerfile
-    profiles: ["minimal", "standard", "full", "dev"]
-    networks:
-      - internal
-    environment:
-      - PORT=3000
-      - HOST=0.0.0.0
-      - API_KEY=${EVERSHADE_TRAPPER_API_KEY}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - RATE_LIMIT_MAX=60
-      - RATE_LIMIT_WINDOW_MS=60000
-      - SCRAPE_TIMEOUT=${EVERSHADE_SCRAPE_TIMEOUT:-30000}
-      - SCRAPE_ONLY_MAIN_CONTENT=true
-      - SCRAPE_BLOCK_ADS=true
-      - CRAWL_MAX_DEPTH=${EVERSHADE_CRAWL_MAX_DEPTH:-10}
-      - CRAWL_MAX_PAGES=${EVERSHADE_CRAWL_MAX_PAGES:-100}
-      - CRAWL_MAX_CONCURRENCY=${EVERSHADE_CRAWL_MAX_CONCURRENCY:-5}
-      - CRAWL_DELAY=1000
-      - BROWSER_HEADLESS=${EVERSHADE_BROWSER_HEADLESS:-true}
-      - LOG_LEVEL=info
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
-      interval: 15s
-      timeout: 5s
-      start_period: 15s
-      retries: 5
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1G
-        reservations:
-          cpus: '0.50'
-          memory: 256M
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    read_only: true
-    tmpfs:
-      - /tmp
-
-  Trapper-worker:
-    image: evershade-trapper-worker
-    build:
-      context: .
-      dockerfile: services/Trapper/Dockerfile
-    profiles: ["minimal", "standard", "full", "dev"]
-    networks:
-      - internal
-    command: node dist/worker.js
-    environment:
-      - PORT=3000
-      - HOST=0.0.0.0
-      - API_KEY=${EVERSHADE_TRAPPER_API_KEY}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - SCRAPE_TIMEOUT=${EVERSHADE_SCRAPE_TIMEOUT:-30000}
-      - SCRAPE_ONLY_MAIN_CONTENT=true
-      - SCRAPE_BLOCK_ADS=true
-      - CRAWL_MAX_DEPTH=${EVERSHADE_CRAWL_MAX_DEPTH:-10}
-      - CRAWL_MAX_PAGES=${EVERSHADE_CRAWL_MAX_PAGES:-100}
-      - CRAWL_MAX_CONCURRENCY=${EVERSHADE_CRAWL_MAX_CONCURRENCY:-5}
-      - CRAWL_DELAY=1000
-      - BROWSER_HEADLESS=${EVERSHADE_BROWSER_HEADLESS:-true}
-      - LOG_LEVEL=info
-    depends_on:
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1G
-        reservations:
-          cpus: '0.50'
-          memory: 256M
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    read_only: true
-    tmpfs:
-      - /tmp
-
   Gobber:
     image: evershade-gobber
     build:
       context: .
-      dockerfile: services/Gobber/Dockerfile
+      dockerfile: rust/services/gobber/Dockerfile
     profiles: ["minimal", "standard", "full", "dev"]
     networks:
       - internal
@@ -360,7 +260,7 @@ services:
     volumes:
       - ${EVERSHADE_OBSIDIAN_VAULT_PATH:-./obsidian-vault}:/app/vault:ro
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8085/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
       interval: 30s
       timeout: 5s
       start_period: 10s
@@ -392,7 +292,7 @@ services:
     image: evershade-sneaker
     build:
       context: .
-      dockerfile: services/Sneaker/Dockerfile
+      dockerfile: rust/services/sneaker/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -403,7 +303,7 @@ services:
       # OpenTelemetry
       - SNEAKER_OTLP_ENDPOINT=http://localhost:8086
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8086/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
       interval: 30s
       timeout: 5s
       start_period: 10s
@@ -431,7 +331,7 @@ services:
     image: evershade-hider
     build:
       context: .
-      dockerfile: services/Hider/Dockerfile
+      dockerfile: rust/services/hider/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -446,7 +346,7 @@ services:
       # Tempo (optional distributed tracing)
       - TEMPO_OTLP_ENDPOINT=http://tempo:4317
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8087/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8087/health"]
       interval: 30s
       timeout: 5s
       start_period: 10s
@@ -474,7 +374,7 @@ services:
     image: evershade-poltergeist
     build:
       context: .
-      dockerfile: services/Poltergeist/Dockerfile
+      dockerfile: rust/services/poltergeist/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -498,7 +398,7 @@ services:
       # Tempo (optional distributed tracing)
       - TEMPO_OTLP_ENDPOINT=http://tempo:4317
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8088/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
       interval: 30s
       timeout: 5s
       start_period: 10s
@@ -526,7 +426,7 @@ services:
     image: evershade-shrewd
     build:
       context: .
-      dockerfile: services/Shrewd/Dockerfile
+      dockerfile: rust/services/shrewd/Dockerfile
     profiles: ["standard", "full", "dev"]
     networks:
       - internal
@@ -551,7 +451,7 @@ services:
       - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
       - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8089/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8089/health"]
       interval: 30s
       timeout: 5s
       start_period: 10s
@@ -576,45 +476,6 @@ services:
       - /tmp
       - /app/data
       - /data
-
-# ═══════════════════════════════════════════════════════════════════
-# Frontend
-# ═══════════════════════════════════════════════════════════════════
-
-  Slammer:
-    image: evershade-slammer
-    build:
-      context: .
-      dockerfile: services/Slammer/Dockerfile
-    profiles: ["full", "dev"]
-    networks:
-      - frontend
-      - internal
-    ports:
-      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:5173:80"
-    environment:
-      - GREENIE_API_KEY=${EVERSHADE_GREENIE_API_KEY}
-    depends_on:
-      - Greenie
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    cap_drop:
-      - ALL
-    tmpfs:
-      - /tmp
-      - /var/cache/nginx
-      - /var/run
-      - /etc/nginx/conf.d
 
 # ═══════════════════════════════════════════════════════════════════
 # Optional: Ollama (Local LLM)
@@ -657,7 +518,6 @@ services:
     environment:
       - EVERSHADE_GREENIE_API_KEY=${EVERSHADE_GREENIE_API_KEY}
       - EVERSHADE_SLINKER_API_KEY=${EVERSHADE_SLINKER_API_KEY}
-      - EVERSHADE_TRAPPER_API_KEY=${EVERSHADE_TRAPPER_API_KEY}
       - EVERSHADE_GOBBER_API_KEY=${EVERSHADE_GOBBER_API_KEY}
       - EVERSHADE_SNEAKER_API_KEY=${EVERSHADE_SNEAKER_API_KEY}
       - EVERSHADE_HIDER_API_KEY=${EVERSHADE_HIDER_API_KEY}
@@ -1019,46 +879,6 @@ services:
         limits:
           cpus: '1.00'
           memory: 1G
-        reservations:
-          cpus: '0.50'
-          memory: 512M
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-
-# ═══════════════════════════════════════════════════════════════════
-# Browser Use — LLM Browser Automation (Optional)
-# ═══════════════════════════════════════════════════════════════════
-
-  browser-use:
-    image: python:3.12-slim
-    profiles: ["browser-use"]
-    networks:
-      - internal
-    ports:
-      - "${EVERSHADE_BIND_ADDRESS:-127.0.0.1}:8091:8091"
-    environment:
-      - OPENAI_API_KEY=${EVERSHADE_OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${EVERSHADE_ANTHROPIC_API_KEY:-}
-      - BROWSER_USE_MODEL=${EVERSHADE_BROWSER_USE_MODEL:-gpt-4o}
-      - BROWSER_USE_HEADLESS=true
-    volumes:
-      - ./integrations/browser-use:/app:ro
-    command: >
-      sh -c "pip install -q browser-use && python -m browser_use.server --host 0.0.0.0 --port 8091"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8091/health"]
-      interval: 15s
-      timeout: 5s
-      start_period: 30s
-      retries: 5
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
         reservations:
           cpus: '0.50'
           memory: 512M

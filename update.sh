@@ -97,30 +97,22 @@ fi
 echo -e "${GREEN}✓${NC} version-manifest.json found"
 
 # Extract manifest version for display
-MANIFEST_VERSION=$(python3 -c "
-import json
-with open('version-manifest.json') as f:
-    manifest = json.load(f)
-print(manifest.get('version', 'unknown'))
-")
+MANIFEST_VERSION=$(jq -r '.version // "unknown"' version-manifest.json)
 echo -e "${GREEN}✓${NC} Manifest version: ${BLUE}$MANIFEST_VERSION${NC}"
 
 # Extract service info based on profile
 get_service_info() {
     local profile="$1"
-    # Pass profile via sys.argv to prevent Python code injection (CWE-94 fix)
-    python3 -c "
-import json, sys
-with open('version-manifest.json') as f:
-    manifest = json.load(f)
-profile_services = manifest.get('profiles', {}).get(sys.argv[1], [])
-for svc in profile_services:
-    if svc not in ('redis', 'ollama', 'caddy'):  # Skip infrastructure
-        info = manifest.get('services', {}).get(svc, {})
-        repo = info.get('repository', 'https://github.com/LukaG712/' + svc)
-        commit = info.get('commit', '')
-        print(f'{svc}|{repo}|{commit}')
-" "$profile"
+    jq -r --arg profile "$profile" '
+        (.profiles // {} | .[$profile] // []) as $svcList |
+        (.services // {}) as $services |
+        $svcList[] | select(. != "redis" and . != "ollama" and . != "caddy") |
+        . as $svc |
+        ($services[$svc] // {}) as $info |
+        ($info.repository // ("https://github.com/LukaG712/" + $svc)) as $repo |
+        ($info.commit // "") as $commit |
+        "\($svc)|\($repo)|\($commit)"
+    ' version-manifest.json
 }
 
 SERVICES_INFO=$(get_service_info "$PROFILE")

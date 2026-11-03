@@ -290,13 +290,13 @@ else
     success "Git already installed ($(git --version | awk '{print $3}'))"
 fi
 
-# Install Python3 if missing
-if ! command -v python3 &>/dev/null; then
-    info "Installing Python3..."
-    apt-get install -y python3 > /dev/null 2>&1
-    success "Python3 installed ($(python3 --version))"
+# Install jq if missing
+if ! command -v jq &>/dev/null; then
+    info "Installing jq..."
+    apt-get install -y jq > /dev/null 2>&1
+    success "jq installed ($(jq --version))"
 else
-    success "Python3 already installed ($(python3 --version))"
+    success "jq already installed ($(jq --version))"
 fi
 
 # Install curl, wget, ca-certificates (needed for Docker)

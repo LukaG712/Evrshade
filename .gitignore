@@ -7,8 +7,6 @@ node_modules/
 
 # Build artifacts
 dist/
-__pycache__/
-*.pyc
 *.egg-info/
 
 # IDE
@@ -29,9 +27,6 @@ Thumbs.db
 
 # Docker volumes
 workspace/
-
-# Test artifacts
-.pytest_cache/
 
 # Rust build artifacts
 rust/target/

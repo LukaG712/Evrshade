@@ -144,16 +144,7 @@ step "Step 2: Checking for New Services"
 
 if [ -f "version-manifest.json" ]; then
     # Check if any services from the profile are missing
-    # Pass profile via sys.argv to prevent Python code injection (CWE-94 fix)
-    MISSING_SERVICES=$(python3 -c "
-import json, sys, os
-with open('version-manifest.json') as f:
-    manifest = json.load(f)
-profile_services = manifest.get('profiles', {}).get(sys.argv[1], [])
-for svc in profile_services:
-    if svc not in ('redis', 'ollama', 'caddy') and not os.path.isdir(svc):
-        print(svc)
-" "$PROFILE" 2>/dev/null || true)
+    MISSING_SERVICES=$(jq -r --arg profile "$PROFILE" '(.services // {} | keys[]) as $s | select(.services[$s].profile // [] | index($profile)) | $s' version-manifest.json 2>/dev/null || true)
 
     if [ -n "$MISSING_SERVICES" ]; then
         warn "New services detected: $MISSING_SERVICES"

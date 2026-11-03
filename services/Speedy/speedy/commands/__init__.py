@@ -1,1 +1,0 @@
-"""Speedy CLI commands."""
