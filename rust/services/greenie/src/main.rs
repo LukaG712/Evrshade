@@ -16,7 +16,7 @@ use axum::{
     Router,
     body::Body,
     extract::State,
-    http::StatusCode,
+    http::{Request, StatusCode},
     middleware::Next,
     routing::{delete, get, patch, post},
     Json,
@@ -135,8 +135,6 @@ async fn auth_middleware(
     req: Request<Body>,
     next: Next,
 ) -> axum::response::Response {
-    use axum::http::Request as HttpRequest;
-
     let path = req.uri().path().to_string();
     let public_paths = [
         "/health",

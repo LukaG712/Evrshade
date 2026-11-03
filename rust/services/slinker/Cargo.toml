@@ -23,3 +23,4 @@ sea-orm = { workspace = true }
 reqwest = { workspace = true }
 lazy_static = { workspace = true }
 shell-words = "1.1"
+async-trait = "0.1"

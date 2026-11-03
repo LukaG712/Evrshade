@@ -79,7 +79,6 @@ fn default_timeout() -> u64 {
 // ─── Adapter Trait ─────────────────────────────────────────────────
 
 #[async_trait]
-#[async_trait::async_trait]
 pub trait AdapterTrait: Send + Sync {
     fn name(&self) -> &str;
     async fn execute(&self, request: &ExecutionRequest) -> ExecutionResult;
