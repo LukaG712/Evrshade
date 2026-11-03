@@ -172,8 +172,15 @@ pub async fn correlation_id_middleware(mut req: Request<axum::body::Body>, next:
 /// Middleware that logs every request with timing and correlation ID.
 pub struct RequestLoggingMiddleware;
 
-pub async fn request_logging_middleware(mut req: Request<axum::body::Body>, next: Next) -> Response {
-    let request_id = req.extensions().get::<String>().cloned().unwrap_or_else(|| Uuid::new_v4().to_string());
+pub async fn request_logging_middleware(
+    mut req: Request<axum::body::Body>,
+    next: Next,
+) -> Response {
+    let request_id = req
+        .extensions()
+        .get::<String>()
+        .cloned()
+        .unwrap_or_else(|| Uuid::new_v4().to_string());
     let method = req.method().clone();
     let path = req.uri().path().to_string();
 
@@ -200,13 +207,25 @@ mod tests {
 
     #[test]
     fn test_all_codes_have_status() {
-        assert_eq!(ErrorCode::ValidationError.to_status(), StatusCode::BAD_REQUEST);
-        assert_eq!(ErrorCode::Unauthorized.to_status(), StatusCode::UNAUTHORIZED);
+        assert_eq!(
+            ErrorCode::ValidationError.to_status(),
+            StatusCode::BAD_REQUEST
+        );
+        assert_eq!(
+            ErrorCode::Unauthorized.to_status(),
+            StatusCode::UNAUTHORIZED
+        );
         assert_eq!(ErrorCode::Forbidden.to_status(), StatusCode::FORBIDDEN);
         assert_eq!(ErrorCode::NotFound.to_status(), StatusCode::NOT_FOUND);
         assert_eq!(ErrorCode::Conflict.to_status(), StatusCode::CONFLICT);
-        assert_eq!(ErrorCode::ServiceUnavailable.to_status(), StatusCode::SERVICE_UNAVAILABLE);
-        assert_eq!(ErrorCode::InternalError.to_status(), StatusCode::INTERNAL_SERVER_ERROR);
+        assert_eq!(
+            ErrorCode::ServiceUnavailable.to_status(),
+            StatusCode::SERVICE_UNAVAILABLE
+        );
+        assert_eq!(
+            ErrorCode::InternalError.to_status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
     }
 
     #[test]

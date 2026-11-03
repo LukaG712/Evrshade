@@ -7,10 +7,7 @@ use super::{find_compose_file, run_compose};
 pub fn run(service: Option<String>, tail: i64, dir: Option<PathBuf>) {
     let project_dir = dir
         .as_ref()
-        .or_else(|| {
-            find_compose_file()
-                .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-        });
+        .or_else(|| find_compose_file().and_then(|p| p.parent().map(|p| p.to_path_buf())));
 
     let service_name = service.as_deref().unwrap_or("");
     let mut args = vec!["logs", "--tail", &tail.to_string()];

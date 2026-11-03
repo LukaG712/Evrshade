@@ -210,14 +210,22 @@ impl ServiceConfig {
             log_level,
             host,
             api_key,
-            slinker_url: std::env::var("EVERSHADE_SLINKER_URL").unwrap_or_else(|_| "http://Slinker:8000".to_string()),
-            trapper_url: std::env::var("EVERSHADE_TRAPPER_URL").unwrap_or_else(|_| "http://Trapper-api:3000".to_string()),
-            gobber_url: std::env::var("EVERSHADE_GOBBER_URL").unwrap_or_else(|_| "http://Gobber:8085".to_string()),
-            sneaker_url: std::env::var("EVERSHADE_SNEAKER_URL").unwrap_or_else(|_| "http://Sneaker:8086".to_string()),
-            hider_url: std::env::var("EVERSHADE_HIDER_URL").unwrap_or_else(|_| "http://Hider:8087".to_string()),
-            poltergeist_url: std::env::var("EVERSHADE_POLTERGEIST_URL").unwrap_or_else(|_| "http://Poltergeist:8088".to_string()),
-            shrewd_url: std::env::var("EVERSHADE_SHREWD_URL").unwrap_or_else(|_| "http://Shrewd:8089".to_string()),
-            greenie_url: std::env::var("EVERSHADE_GREENIE_URL").unwrap_or_else(|_| "http://Greenie:8080".to_string()),
+            slinker_url: std::env::var("EVERSHADE_SLINKER_URL")
+                .unwrap_or_else(|_| "http://Slinker:8000".to_string()),
+            trapper_url: std::env::var("EVERSHADE_TRAPPER_URL")
+                .unwrap_or_else(|_| "http://Trapper-api:3000".to_string()),
+            gobber_url: std::env::var("EVERSHADE_GOBBER_URL")
+                .unwrap_or_else(|_| "http://Gobber:8085".to_string()),
+            sneaker_url: std::env::var("EVERSHADE_SNEAKER_URL")
+                .unwrap_or_else(|_| "http://Sneaker:8086".to_string()),
+            hider_url: std::env::var("EVERSHADE_HIDER_URL")
+                .unwrap_or_else(|_| "http://Hider:8087".to_string()),
+            poltergeist_url: std::env::var("EVERSHADE_POLTERGEIST_URL")
+                .unwrap_or_else(|_| "http://Poltergeist:8088".to_string()),
+            shrewd_url: std::env::var("EVERSHADE_SHREWD_URL")
+                .unwrap_or_else(|_| "http://Shrewd:8089".to_string()),
+            greenie_url: std::env::var("EVERSHADE_GREENIE_URL")
+                .unwrap_or_else(|_| "http://Greenie:8080".to_string()),
             database: DatabaseConfig::new(),
             telemetry: TelemetryConfig::new(),
             auth: AuthConfig::new(),
@@ -233,8 +241,16 @@ impl ServiceConfig {
         }
 
         let valid_names = [
-            "Greenie", "Slinker", "Trapper", "Gobber", "Sneaker",
-            "Hider", "Poltergeist", "Shrewd", "Slammer", "Speedy",
+            "Greenie",
+            "Slinker",
+            "Trapper",
+            "Gobber",
+            "Sneaker",
+            "Hider",
+            "Poltergeist",
+            "Shrewd",
+            "Slammer",
+            "Speedy",
         ];
         if !valid_names.contains(&self.service_name.as_str()) {
             warnings.push(format!(
@@ -244,12 +260,15 @@ impl ServiceConfig {
         }
 
         match self.log_level.as_str() {
-            "DEBUG" | "INFO" | "WARNING" | "ERROR" | "CRITICAL" => {},
+            "DEBUG" | "INFO" | "WARNING" | "ERROR" | "CRITICAL" => {}
             _ => return Err(format!("Invalid log level: {}", self.log_level)),
         }
 
         if self.port < 1 || self.port > 65535 {
-            return Err(format!("Port must be between 1 and 65535, got {}", self.port));
+            return Err(format!(
+                "Port must be between 1 and 65535, got {}",
+                self.port
+            ));
         }
 
         if self.environment == Environment::Prod && self.api_key.is_empty() {

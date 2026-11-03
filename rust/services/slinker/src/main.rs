@@ -8,13 +8,12 @@ mod execution;
 mod openai;
 
 use axum::{
-    Router,
     body::Body,
     extract::State,
     http::StatusCode,
     middleware::Next,
     routing::{get, post},
-    Json,
+    Json, Router,
 };
 use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
 use tracing::info;
@@ -264,8 +263,8 @@ async fn main() {
         std::process::exit(1);
     }
 
-    let db_url = std::env::var("DB_URL")
-        .unwrap_or_else(|_| "sqlite:///./data/slinker.db".to_string());
+    let db_url =
+        std::env::var("DB_URL").unwrap_or_else(|_| "sqlite:///./data/slinker.db".to_string());
     let db = evershade_db::init_db(&db_url)
         .await
         .expect("Failed to connect to database");
@@ -313,10 +312,7 @@ async fn main() {
         )
         // OpenAI-compatible routes
         .route("/v1/models", get(openai::list_models_handler))
-        .route(
-            "/v1/chat/completions",
-            post(openai::chat_completions),
-        )
+        .route("/v1/chat/completions", post(openai::chat_completions))
         .with_state(state.clone())
         .layer(axum::middleware::from_fn(move |req, next| {
             auth_middleware(State(state.clone()), req, next)

@@ -99,9 +99,7 @@ fn main() {
         Commands::Stop { dir } => commands::stop::run(dir),
         Commands::Status { dir } => commands::status::run(dir),
         Commands::Doctor => commands::doctor::run(),
-        Commands::Logs { service, tail, dir } => {
-            commands::logs::run(service, tail, dir)
-        }
+        Commands::Logs { service, tail, dir } => commands::logs::run(service, tail, dir),
         Commands::Capabilities { service } => commands::capabilities::run(service),
         Commands::Backup { output } => commands::backup::run(output),
         Commands::Restore { backup } => commands::restore::run(backup),

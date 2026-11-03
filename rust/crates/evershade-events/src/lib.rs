@@ -3,10 +3,10 @@
 //! Defines typed event classes and an in-memory event bus for pub/sub
 //! communication between services.
 
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use chrono::Utc;
 use uuid::Uuid;
 
 /// Standard event types for Evershade.
@@ -187,13 +187,16 @@ impl EventBus {
 
     pub async fn subscribe(&self, event_type: String, handler: EventHandler) {
         let mut handlers = self.handlers.lock().unwrap();
-        handlers.entry(event_type).or_insert_with(Vec::new).push(handler);
+        handlers
+            .entry(event_type)
+            .or_insert_with(Vec::new)
+            .push(handler);
     }
 
     pub async fn publish(&self, event: Event) {
         let handlers_map = self.handlers.lock().unwrap().clone();
         let event_type = event.r#type.clone();
-        
+
         for (pattern, handler_list) in handlers_map.iter() {
             if Self::matches(pattern, &event_type) {
                 for handler in handler_list {
@@ -242,7 +245,8 @@ impl HttpEventPublisher {
     }
 
     pub async fn publish(&self, event: &Event) -> Result<(), reqwest::Error> {
-        let _ = self.client
+        let _ = self
+            .client
             .post(format!("{}/api/events", self.collector_url))
             .header("Content-Type", "application/json")
             .body(event.to_json())

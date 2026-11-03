@@ -6,7 +6,7 @@ use axum::http::{Request, StatusCode};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use chrono::Utc;
-use jsonwebtoken::{decode, encode, Header, Validation, Algorithm, EncodingKey, DecodingKey};
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -75,11 +75,11 @@ pub struct ServiceAuthMiddleware {
 
 impl ServiceAuthMiddleware {
     pub fn new(secret: String) -> Self {
-        let public_paths: HashSet<String> = PUBLIC_PATHS
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
-        Self { secret, public_paths }
+        let public_paths: HashSet<String> = PUBLIC_PATHS.iter().map(|s| s.to_string()).collect();
+        Self {
+            secret,
+            public_paths,
+        }
     }
 
     pub fn with_public_paths(mut self, paths: HashSet<String>) -> Self {
@@ -158,7 +158,8 @@ mod tests {
 
     #[test]
     fn test_create_and_verify() {
-        let token = create_service_token("Greenie", "test-secret-key-12345678901234567890", 3600).unwrap();
+        let token =
+            create_service_token("Greenie", "test-secret-key-12345678901234567890", 3600).unwrap();
         let payload = verify_service_token(&token, "test-secret-key-12345678901234567890").unwrap();
         assert_eq!(payload.sub, "Greenie");
         assert_eq!(payload.token_type, "service");
@@ -166,7 +167,8 @@ mod tests {
 
     #[test]
     fn test_wrong_secret() {
-        let token = create_service_token("Greenie", "secret-1-1234567890123456789012", 3600).unwrap();
+        let token =
+            create_service_token("Greenie", "secret-1-1234567890123456789012", 3600).unwrap();
         let result = verify_service_token(&token, "wrong-secret-1234567890123456789012");
         assert!(result.is_err());
     }
@@ -185,14 +187,16 @@ mod tests {
             &Header::default(),
             &payload,
             &EncodingKey::from_secret(b"test-secret-key-12345678901234567890"),
-        ).unwrap();
+        )
+        .unwrap();
         let result = verify_service_token(&token, "test-secret-key-12345678901234567890");
         assert!(result.is_err());
     }
 
     #[test]
     fn test_custom_expiry() {
-        let token = create_service_token("Greenie", "test-secret-key-12345678901234567890", 7200).unwrap();
+        let token =
+            create_service_token("Greenie", "test-secret-key-12345678901234567890", 7200).unwrap();
         let payload = verify_service_token(&token, "test-secret-key-12345678901234567890").unwrap();
         assert_eq!(payload.expiration - payload.issued_at, 7200);
     }
@@ -228,7 +232,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_invalid_token() {
-        let result = verify_service_token("invalid.token.here", "test-secret-key-12345678901234567890");
+        let result =
+            verify_service_token("invalid.token.here", "test-secret-key-12345678901234567890");
         assert!(result.is_err());
     }
 }

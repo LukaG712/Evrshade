@@ -1,15 +1,15 @@
 //! Execution routes for Slinker — task CRUD and adapter operations.
 
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use axum::{extract::Path, extract::State, http::StatusCode, Json};
 use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
 use std::collections::HashMap;
 
 use crate::{
-    AppState,
     adapters::{
-        AdapterTrait, ExecutionRequest, JunieAdapter, SubprocessAdapter,
-        escape_sql, gen_id, now_iso,
+        escape_sql, gen_id, now_iso, AdapterTrait, ExecutionRequest, JunieAdapter,
+        SubprocessAdapter,
     },
+    AppState,
 };
 
 /// Validate workspace path is within allowed directories.
@@ -68,14 +68,11 @@ pub async fn create_task(
         .unwrap_or("/tmp/workspace")
         .to_string();
     let timeout = body.get("timeout").and_then(|v| v.as_u64()).unwrap_or(300);
-    let commands = body
-        .get("commands")
-        .and_then(|v| v.as_array())
-        .map(|arr| {
-            arr.iter()
-                .filter_map(|v| v.as_str().map(|s| s.to_string()))
-                .collect::<Vec<_>>()
-        });
+    let commands = body.get("commands").and_then(|v| v.as_array()).map(|arr| {
+        arr.iter()
+            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+            .collect::<Vec<_>>()
+    });
     let metadata = body
         .get("metadata")
         .cloned()
@@ -109,8 +106,7 @@ pub async fn create_task(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let metadata_str =
-        serde_json::to_string(&metadata).unwrap_or_else(|_| "{}".to_string());
+    let metadata_str = serde_json::to_string(&metadata).unwrap_or_else(|_| "{}".to_string());
     state
         .db
         .execute(Statement::from_string(
@@ -282,8 +278,11 @@ pub async fn get_task(
         );
         result.insert(
             "metadata".to_string(),
-            serde_json::from_str(&r.try_get_by_index::<String>(9).unwrap_or_else(|_| "{}".to_string()))
-                .unwrap_or_default(),
+            serde_json::from_str(
+                &r.try_get_by_index::<String>(9)
+                    .unwrap_or_else(|_| "{}".to_string()),
+            )
+            .unwrap_or_default(),
         );
         result.insert(
             "created_at".to_string(),
@@ -505,12 +504,11 @@ pub async fn run_tests_handler(
             match workspace {
                 Some(ws) => {
                     let path: String = ws.try_get_by_index(0).unwrap_or_default();
-                    let adapter: Box<dyn AdapterTrait + Send + Sync> =
-                        if adapter_name == "junie" {
-                            Box::new(JunieAdapter::new())
-                        } else {
-                            Box::new(SubprocessAdapter::new())
-                        };
+                    let adapter: Box<dyn AdapterTrait + Send + Sync> = if adapter_name == "junie" {
+                        Box::new(JunieAdapter::new())
+                    } else {
+                        Box::new(SubprocessAdapter::new())
+                    };
                     let result = adapter.run_tests(&path, None).await;
                     Ok(Json(serde_json::json!({
                         "task_id": task_id,
@@ -562,12 +560,11 @@ pub async fn run_lint_handler(
             match workspace {
                 Some(ws) => {
                     let path: String = ws.try_get_by_index(0).unwrap_or_default();
-                    let adapter: Box<dyn AdapterTrait + Send + Sync> =
-                        if adapter_name == "junie" {
-                            Box::new(JunieAdapter::new())
-                        } else {
-                            Box::new(SubprocessAdapter::new())
-                        };
+                    let adapter: Box<dyn AdapterTrait + Send + Sync> = if adapter_name == "junie" {
+                        Box::new(JunieAdapter::new())
+                    } else {
+                        Box::new(SubprocessAdapter::new())
+                    };
                     let result = adapter.run_lint(&path, None).await;
                     Ok(Json(serde_json::json!({
                         "task_id": task_id,
@@ -619,12 +616,11 @@ pub async fn run_build_handler(
             match workspace {
                 Some(ws) => {
                     let path: String = ws.try_get_by_index(0).unwrap_or_default();
-                    let adapter: Box<dyn AdapterTrait + Send + Sync> =
-                        if adapter_name == "junie" {
-                            Box::new(JunieAdapter::new())
-                        } else {
-                            Box::new(SubprocessAdapter::new())
-                        };
+                    let adapter: Box<dyn AdapterTrait + Send + Sync> = if adapter_name == "junie" {
+                        Box::new(JunieAdapter::new())
+                    } else {
+                        Box::new(SubprocessAdapter::new())
+                    };
                     let result = adapter.run_build(&path, None).await;
                     Ok(Json(serde_json::json!({
                         "task_id": task_id,

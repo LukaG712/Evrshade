@@ -4,16 +4,19 @@
 //! exposes Prometheus metrics and alerting rules.
 
 use axum::{
-    Router, routing::{get, post}, Json, middleware::from_fn,
-    http::StatusCode, response::IntoResponse,
+    http::StatusCode,
+    middleware::from_fn,
+    response::IntoResponse,
+    routing::{get, post},
+    Json, Router,
 };
-use sea_orm::{DatabaseConnection, Statement, ConnectionTrait};
+use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
 use tracing::info;
 use uuid::Uuid;
 
+mod alerting;
 mod models;
 mod otlp;
-mod alerting;
 
 use models::{LogEntry, MetricPoint, TraceSpan};
 
@@ -70,7 +73,14 @@ async fn auth_middleware(
     next: axum::middleware::Next,
 ) -> axum::response::Response {
     let path = req.uri().path().to_string();
-    let public_paths = ["/health", "/ready", "/metrics", "/api/status", "/docs", "/openapi.json"];
+    let public_paths = [
+        "/health",
+        "/ready",
+        "/metrics",
+        "/api/status",
+        "/docs",
+        "/openapi.json",
+    ];
     if public_paths.contains(&path.as_str()) {
         return next.run(req).await;
     }
@@ -93,12 +103,20 @@ async fn auth_middleware(
     let token = match token {
         Some(t) => t,
         None => {
-            return (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"detail": "Missing or invalid Authorization header"}))).into_response();
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({"detail": "Missing or invalid Authorization header"})),
+            )
+                .into_response();
         }
     };
 
     if !use_equal(&token, &state.api_key) {
-        return (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"detail": "Invalid API key"}))).into_response();
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"detail": "Invalid API key"})),
+        )
+            .into_response();
     }
 
     next.run(req).await
@@ -137,7 +155,8 @@ async fn metrics_handler() -> String {
      sneaker_uptime_seconds 0.0\n\
      # HELP sneaker_ready Service readiness.\n\
      # TYPE sneaker_ready gauge\n\
-     sneaker_ready 1\n".to_string()
+     sneaker_ready 1\n"
+        .to_string()
 }
 
 async fn capabilities_handler() -> Json<serde_json::Value> {
@@ -168,13 +187,18 @@ async fn main() {
         std::process::exit(1);
     }
 
-    let db_url = std::env::var("DB_URL").unwrap_or_else(|_| "sqlite:///./data/sneaker.db".to_string());
-    let db = evershade_db::init_db(&db_url).await.expect("Failed to connect to database");
+    let db_url =
+        std::env::var("DB_URL").unwrap_or_else(|_| "sqlite:///./data/sneaker.db".to_string());
+    let db = evershade_db::init_db(&db_url)
+        .await
+        .expect("Failed to connect to database");
 
     db.execute(Statement::from_string(
         db.get_database_backend(),
         SCHEMA_SQL.to_string(),
-    )).await.expect("Failed to create tables");
+    ))
+    .await
+    .expect("Failed to create tables");
 
     let state = AppState { db, api_key };
 
@@ -193,7 +217,9 @@ async fn main() {
         .route("/api/alerts", get(alerting::list_alerts))
         .route("/api/alerts/rules", get(alerting::list_rules))
         .with_state(state.clone())
-        .layer(from_fn(move |req, next| auth_middleware(axum::extract::State(state.clone()), req, next)));
+        .layer(from_fn(move |req, next| {
+            auth_middleware(axum::extract::State(state.clone()), req, next)
+        }));
 
     let addr = "0.0.0.0:8086";
     info!("Sneaker listening on {}", addr);

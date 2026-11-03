@@ -13,13 +13,12 @@ mod tasks;
 mod workstations;
 
 use axum::{
-    Router,
     body::Body,
     extract::State,
     http::{Request, StatusCode},
     middleware::Next,
     routing::{delete, get, patch, post},
-    Json,
+    Json, Router,
 };
 use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
 use tracing::info;
@@ -256,8 +255,8 @@ async fn main() {
         std::process::exit(1);
     }
 
-    let db_url = std::env::var("DB_URL")
-        .unwrap_or_else(|_| "sqlite:///./data/greenie.db".to_string());
+    let db_url =
+        std::env::var("DB_URL").unwrap_or_else(|_| "sqlite:///./data/greenie.db".to_string());
     let db = evershade_db::init_db(&db_url)
         .await
         .expect("Failed to connect to database");
@@ -283,10 +282,7 @@ async fn main() {
         .route("/api/agents/", post(agents::create_agent))
         .route("/api/agents/", get(agents::list_agents))
         .route("/api/agents/{agent_id}", get(agents::get_agent))
-        .route(
-            "/api/agents/{agent_id}",
-            delete(agents::delete_agent),
-        )
+        .route("/api/agents/{agent_id}", delete(agents::delete_agent))
         // Mission routes
         .route("/api/missions/", post(missions::create_mission))
         .route("/api/missions/", get(missions::list_missions))
@@ -321,18 +317,12 @@ async fn main() {
             delete(mcp::remove_mcp_server),
         )
         // Workstation routes
-        .route(
-            "/api/workstations/",
-            get(workstations::list_workstations),
-        )
+        .route("/api/workstations/", get(workstations::list_workstations))
         .route(
             "/api/workstations/stats",
             get(workstations::get_workstation_stats),
         )
-        .route(
-            "/api/workstations/",
-            post(workstations::create_workstation),
-        )
+        .route("/api/workstations/", post(workstations::create_workstation))
         .route(
             "/api/workstations/{ws_id}/start",
             post(workstations::start_workstation),

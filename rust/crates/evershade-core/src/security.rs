@@ -24,7 +24,7 @@ pub fn add_cors_middleware(app: Router) -> Router {
 /// Add CORS middleware with custom origins.
 pub fn add_cors_middleware_with_origins(app: Router, allowed_origins: Vec<String>) -> Router {
     let mut origins = allowed_origins;
-    
+
     // Reject wildcard origins when credentials are enabled
     if origins.iter().any(|o| o == "*") {
         warn!(
@@ -41,7 +41,12 @@ pub fn add_cors_middleware_with_origins(app: Router, allowed_origins: Vec<String
         .allow_methods(Any)
         .allow_headers(Any)
         .allow_credentials(true)
-        .allow_origin(origins.into_iter().map(|o| o.parse().unwrap()).collect::<Vec<_>>());
+        .allow_origin(
+            origins
+                .into_iter()
+                .map(|o| o.parse().unwrap())
+                .collect::<Vec<_>>(),
+        );
 
     app.layer(cors)
 }
@@ -74,8 +79,10 @@ impl RateLimitState {
         let window = std::time::Duration::from_secs(60);
 
         let mut requests = self.requests.lock().unwrap();
-        let entry = requests.entry(client_ip.to_string()).or_insert_with(Vec::new);
-        
+        let entry = requests
+            .entry(client_ip.to_string())
+            .or_insert_with(Vec::new);
+
         // Clean old entries
         entry.retain(|t| now.duration_since(*t) < window);
 
@@ -110,7 +117,10 @@ pub fn validate_webhook_url(url_str: &str) -> Result<(), String> {
     let host = parsed.host_str().unwrap_or("");
 
     // Block cloud metadata endpoints
-    if matches!(host, "169.254.169.254" | "metadata.google.internal" | "metadata.cloud.oracle.com") {
+    if matches!(
+        host,
+        "169.254.169.254" | "metadata.google.internal" | "metadata.cloud.oracle.com"
+    ) {
         return Err("Webhook URL points to a blocked host".to_string());
     }
 

@@ -4,7 +4,11 @@
 //! report their status. Other services can query the registry to discover
 //! available services and their endpoints.
 
-use axum::{Router, routing::{get, post, delete}, Json, extract::Path};
+use axum::{
+    extract::Path,
+    routing::{delete, get, post},
+    Json, Router,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -150,7 +154,10 @@ impl ServiceRegistry {
     pub fn summary(&self) -> serde_json::Value {
         let services = self.inner.lock().unwrap();
         let total = services.len();
-        let healthy = services.values().filter(|s| s.status == ServiceStatus::Healthy).count();
+        let healthy = services
+            .values()
+            .filter(|s| s.status == ServiceStatus::Healthy)
+            .count();
         serde_json::json!({
             "total": total,
             "healthy": healthy,
@@ -173,9 +180,7 @@ pub struct RegistryState {
 }
 
 // Route handlers
-async fn list_services(
-    state: axum::extract::State<RegistryState>,
-) -> Json<serde_json::Value> {
+async fn list_services(state: axum::extract::State<RegistryState>) -> Json<serde_json::Value> {
     Json(state.registry.summary())
 }
 
@@ -185,7 +190,10 @@ async fn get_service(
 ) -> Result<Json<serde_json::Value>, (axum::http::StatusCode, String)> {
     match state.registry.get(&name) {
         Some(info) => Ok(Json(info.to_dict())),
-        None => Err((axum::http::StatusCode::NOT_FOUND, format!("Service '{}' not found", name))),
+        None => Err((
+            axum::http::StatusCode::NOT_FOUND,
+            format!("Service '{}' not found", name),
+        )),
     }
 }
 
@@ -201,12 +209,9 @@ async fn register_service(
     Path(name): Path<String>,
     Json(req): Json<RegisterRequest>,
 ) -> Json<serde_json::Value> {
-    let info = state.registry.register(
-        name,
-        req.url,
-        req.version,
-        req.capabilities,
-    );
+    let info = state
+        .registry
+        .register(name, req.url, req.version, req.capabilities);
     Json(info.to_dict())
 }
 
@@ -220,7 +225,10 @@ async fn deregister_service(
             "message": format!("Service '{}' deregistered", name),
         })))
     } else {
-        Err((axum::http::StatusCode::NOT_FOUND, format!("Service '{}' not found", name)))
+        Err((
+            axum::http::StatusCode::NOT_FOUND,
+            format!("Service '{}' not found", name),
+        ))
     }
 }
 
@@ -231,7 +239,10 @@ async fn heartbeat(
     if state.registry.update_heartbeat(&name) {
         Ok(Json(serde_json::json!({"status": "ok"})))
     } else {
-        Err((axum::http::StatusCode::NOT_FOUND, format!("Service '{}' not found", name)))
+        Err((
+            axum::http::StatusCode::NOT_FOUND,
+            format!("Service '{}' not found", name),
+        ))
     }
 }
 
@@ -255,7 +266,10 @@ async fn update_status(
     if state.registry.update_status(&name, status) {
         Ok(Json(serde_json::json!({"status": "ok"})))
     } else {
-        Err((axum::http::StatusCode::NOT_FOUND, format!("Service '{}' not found", name)))
+        Err((
+            axum::http::StatusCode::NOT_FOUND,
+            format!("Service '{}' not found", name),
+        ))
     }
 }
 
@@ -301,7 +315,8 @@ impl ServiceDiscoveryClient {
             "version": version,
             "capabilities": capabilities.unwrap_or_default(),
         });
-        let resp = self.client
+        let resp = self
+            .client
             .post(format!("{}/api/registry/{}", self.registry_url, name))
             .json(&body)
             .send()
@@ -311,7 +326,8 @@ impl ServiceDiscoveryClient {
     }
 
     pub async fn deregister(&self, name: &str) -> Result<serde_json::Value, reqwest::Error> {
-        let resp = self.client
+        let resp = self
+            .client
             .delete(format!("{}/api/registry/{}", self.registry_url, name))
             .send()
             .await?;
@@ -320,16 +336,24 @@ impl ServiceDiscoveryClient {
     }
 
     pub async fn heartbeat(&self, name: &str) -> Result<serde_json::Value, reqwest::Error> {
-        let resp = self.client
-            .post(format!("{}/api/registry/{}/heartbeat", self.registry_url, name))
+        let resp = self
+            .client
+            .post(format!(
+                "{}/api/registry/{}/heartbeat",
+                self.registry_url, name
+            ))
             .send()
             .await?;
         let resp = resp.error_for_status()?;
         Ok(resp.json().await?)
     }
 
-    pub async fn get_service(&self, name: &str) -> Result<Option<serde_json::Value>, reqwest::Error> {
-        let resp = self.client
+    pub async fn get_service(
+        &self,
+        name: &str,
+    ) -> Result<Option<serde_json::Value>, reqwest::Error> {
+        let resp = self
+            .client
             .get(format!("{}/api/registry/{}", self.registry_url, name))
             .send()
             .await?;
@@ -341,7 +365,8 @@ impl ServiceDiscoveryClient {
     }
 
     pub async fn list_services(&self) -> Result<serde_json::Value, reqwest::Error> {
-        let resp = self.client
+        let resp = self
+            .client
             .get(format!("{}/api/registry/", self.registry_url))
             .send()
             .await?;
@@ -357,14 +382,24 @@ mod tests {
     #[test]
     fn test_register() {
         let registry = ServiceRegistry::new();
-        let info = registry.register("Test".to_string(), "http://localhost:8080".to_string(), "1.0.0".to_string(), None);
+        let info = registry.register(
+            "Test".to_string(),
+            "http://localhost:8080".to_string(),
+            "1.0.0".to_string(),
+            None,
+        );
         assert_eq!(info.name, "Test");
     }
 
     #[test]
     fn test_get() {
         let registry = ServiceRegistry::new();
-        registry.register("Test".to_string(), "http://localhost:8080".to_string(), "1.0.0".to_string(), None);
+        registry.register(
+            "Test".to_string(),
+            "http://localhost:8080".to_string(),
+            "1.0.0".to_string(),
+            None,
+        );
         let info = registry.get("Test").unwrap();
         assert_eq!(info.name, "Test");
     }
@@ -378,7 +413,12 @@ mod tests {
     #[test]
     fn test_deregister() {
         let registry = ServiceRegistry::new();
-        registry.register("Test".to_string(), "http://localhost:8080".to_string(), "1.0.0".to_string(), None);
+        registry.register(
+            "Test".to_string(),
+            "http://localhost:8080".to_string(),
+            "1.0.0".to_string(),
+            None,
+        );
         assert!(registry.deregister("Test"));
     }
 
@@ -391,16 +431,36 @@ mod tests {
     #[test]
     fn test_list_services() {
         let registry = ServiceRegistry::new();
-        registry.register("A".to_string(), "http://a".to_string(), "1.0".to_string(), None);
-        registry.register("B".to_string(), "http://b".to_string(), "1.0".to_string(), None);
+        registry.register(
+            "A".to_string(),
+            "http://a".to_string(),
+            "1.0".to_string(),
+            None,
+        );
+        registry.register(
+            "B".to_string(),
+            "http://b".to_string(),
+            "1.0".to_string(),
+            None,
+        );
         assert_eq!(registry.list_services(None).len(), 2);
     }
 
     #[test]
     fn test_list_services_filtered() {
         let registry = ServiceRegistry::new();
-        registry.register("A".to_string(), "http://a".to_string(), "1.0".to_string(), None);
-        let mut info = registry.register("B".to_string(), "http://b".to_string(), "1.0".to_string(), None);
+        registry.register(
+            "A".to_string(),
+            "http://a".to_string(),
+            "1.0".to_string(),
+            None,
+        );
+        let mut info = registry.register(
+            "B".to_string(),
+            "http://b".to_string(),
+            "1.0".to_string(),
+            None,
+        );
         info.status = ServiceStatus::Unhealthy;
         {
             let mut services = registry.inner.lock().unwrap();
@@ -413,28 +473,48 @@ mod tests {
     #[test]
     fn test_update_heartbeat() {
         let registry = ServiceRegistry::new();
-        registry.register("Test".to_string(), "http://localhost:8080".to_string(), "1.0.0".to_string(), None);
+        registry.register(
+            "Test".to_string(),
+            "http://localhost:8080".to_string(),
+            "1.0.0".to_string(),
+            None,
+        );
         assert!(registry.update_heartbeat("Test"));
     }
 
     #[test]
     fn test_update_status() {
         let registry = ServiceRegistry::new();
-        registry.register("Test".to_string(), "http://localhost:8080".to_string(), "1.0.0".to_string(), None);
+        registry.register(
+            "Test".to_string(),
+            "http://localhost:8080".to_string(),
+            "1.0.0".to_string(),
+            None,
+        );
         assert!(registry.update_status("Test", ServiceStatus::Unhealthy));
     }
 
     #[test]
     fn test_all_healthy() {
         let registry = ServiceRegistry::new();
-        registry.register("A".to_string(), "http://a".to_string(), "1.0".to_string(), None);
+        registry.register(
+            "A".to_string(),
+            "http://a".to_string(),
+            "1.0".to_string(),
+            None,
+        );
         assert!(registry.all_healthy());
     }
 
     #[test]
     fn test_summary() {
         let registry = ServiceRegistry::new();
-        registry.register("A".to_string(), "http://a".to_string(), "1.0".to_string(), None);
+        registry.register(
+            "A".to_string(),
+            "http://a".to_string(),
+            "1.0".to_string(),
+            None,
+        );
         let summary = registry.summary();
         assert_eq!(summary["total"], 1);
     }

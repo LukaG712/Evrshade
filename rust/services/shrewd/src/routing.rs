@@ -4,41 +4,152 @@
 //! tracks token usage and estimated costs, and classifies models as public
 //! or private (local-only) for data privacy compliance.
 
-use std::collections::HashMap;
 use chrono::Utc;
 use once_cell::sync::Lazy;
+use std::collections::HashMap;
 use std::sync::Mutex;
 use tracing::info;
 
 use crate::models::{
-    ChatMessage, ChatResponse, CostEntry, CostSummary, ModelCost, ModelInfo,
-    Provider, ProviderCost,
+    ChatMessage, ChatResponse, CostEntry, CostSummary, ModelCost, ModelInfo, Provider, ProviderCost,
 };
-use crate::providers::{LlmProvider, get_provider};
+use crate::providers::{get_provider, LlmProvider};
 
 /// Model registry: maps model names to provider and metadata.
 pub static MODEL_REGISTRY: Lazy<HashMap<&'static str, ModelMeta>> = Lazy::new(|| {
     let mut map = HashMap::new();
     // OpenAI
-    map.insert("gpt-4o", ModelMeta { provider: Provider::OpenAI, context_window: 128_000, is_private: false });
-    map.insert("gpt-4o-mini", ModelMeta { provider: Provider::OpenAI, context_window: 128_000, is_private: false });
-    map.insert("gpt-3.5-turbo", ModelMeta { provider: Provider::OpenAI, context_window: 16_385, is_private: false });
+    map.insert(
+        "gpt-4o",
+        ModelMeta {
+            provider: Provider::OpenAI,
+            context_window: 128_000,
+            is_private: false,
+        },
+    );
+    map.insert(
+        "gpt-4o-mini",
+        ModelMeta {
+            provider: Provider::OpenAI,
+            context_window: 128_000,
+            is_private: false,
+        },
+    );
+    map.insert(
+        "gpt-3.5-turbo",
+        ModelMeta {
+            provider: Provider::OpenAI,
+            context_window: 16_385,
+            is_private: false,
+        },
+    );
     // Anthropic
-    map.insert("claude-3-opus", ModelMeta { provider: Provider::Anthropic, context_window: 200_000, is_private: false });
-    map.insert("claude-3-sonnet", ModelMeta { provider: Provider::Anthropic, context_window: 200_000, is_private: false });
-    map.insert("claude-3-haiku", ModelMeta { provider: Provider::Anthropic, context_window: 200_000, is_private: false });
+    map.insert(
+        "claude-3-opus",
+        ModelMeta {
+            provider: Provider::Anthropic,
+            context_window: 200_000,
+            is_private: false,
+        },
+    );
+    map.insert(
+        "claude-3-sonnet",
+        ModelMeta {
+            provider: Provider::Anthropic,
+            context_window: 200_000,
+            is_private: false,
+        },
+    );
+    map.insert(
+        "claude-3-haiku",
+        ModelMeta {
+            provider: Provider::Anthropic,
+            context_window: 200_000,
+            is_private: false,
+        },
+    );
     // Google
-    map.insert("gemini-pro", ModelMeta { provider: Provider::Google, context_window: 32_768, is_private: false });
-    map.insert("gemini-1.5-pro", ModelMeta { provider: Provider::Google, context_window: 1_048_576, is_private: false });
-    map.insert("gemini-1.5-flash", ModelMeta { provider: Provider::Google, context_window: 1_048_576, is_private: false });
+    map.insert(
+        "gemini-pro",
+        ModelMeta {
+            provider: Provider::Google,
+            context_window: 32_768,
+            is_private: false,
+        },
+    );
+    map.insert(
+        "gemini-1.5-pro",
+        ModelMeta {
+            provider: Provider::Google,
+            context_window: 1_048_576,
+            is_private: false,
+        },
+    );
+    map.insert(
+        "gemini-1.5-flash",
+        ModelMeta {
+            provider: Provider::Google,
+            context_window: 1_048_576,
+            is_private: false,
+        },
+    );
     // Ollama (local/private)
-    map.insert("llama3", ModelMeta { provider: Provider::Ollama, context_window: 8_192, is_private: true });
-    map.insert("llama3.1", ModelMeta { provider: Provider::Ollama, context_window: 131_072, is_private: true });
-    map.insert("llama3.2", ModelMeta { provider: Provider::Ollama, context_window: 131_072, is_private: true });
-    map.insert("gemma2", ModelMeta { provider: Provider::Ollama, context_window: 8_192, is_private: true });
-    map.insert("gemma4:12b", ModelMeta { provider: Provider::Ollama, context_window: 8_192, is_private: true });
-    map.insert("mistral", ModelMeta { provider: Provider::Ollama, context_window: 8_192, is_private: true });
-    map.insert("phi3", ModelMeta { provider: Provider::Ollama, context_window: 4_096, is_private: true });
+    map.insert(
+        "llama3",
+        ModelMeta {
+            provider: Provider::Ollama,
+            context_window: 8_192,
+            is_private: true,
+        },
+    );
+    map.insert(
+        "llama3.1",
+        ModelMeta {
+            provider: Provider::Ollama,
+            context_window: 131_072,
+            is_private: true,
+        },
+    );
+    map.insert(
+        "llama3.2",
+        ModelMeta {
+            provider: Provider::Ollama,
+            context_window: 131_072,
+            is_private: true,
+        },
+    );
+    map.insert(
+        "gemma2",
+        ModelMeta {
+            provider: Provider::Ollama,
+            context_window: 8_192,
+            is_private: true,
+        },
+    );
+    map.insert(
+        "gemma4:12b",
+        ModelMeta {
+            provider: Provider::Ollama,
+            context_window: 8_192,
+            is_private: true,
+        },
+    );
+    map.insert(
+        "mistral",
+        ModelMeta {
+            provider: Provider::Ollama,
+            context_window: 8_192,
+            is_private: true,
+        },
+    );
+    map.insert(
+        "phi3",
+        ModelMeta {
+            provider: Provider::Ollama,
+            context_window: 4_096,
+            is_private: true,
+        },
+    );
     map
 });
 
@@ -94,7 +205,13 @@ pub fn estimate_cost(model: &str, prompt_tokens: usize, completion_tokens: usize
 }
 
 /// Record token usage and cost for tracking.
-fn record_usage(model: &str, provider: Provider, prompt_tokens: usize, completion_tokens: usize, cost: f64) {
+fn record_usage(
+    model: &str,
+    provider: Provider,
+    prompt_tokens: usize,
+    completion_tokens: usize,
+    cost: f64,
+) {
     let entry = CostEntry {
         timestamp: Utc::now(),
         model: model.to_string(),
@@ -140,14 +257,20 @@ pub fn get_cost_summary() -> CostSummary {
 
         let prov = by_provider
             .entry(entry.provider.clone())
-            .or_insert(ProviderCost { cost_usd: 0.0, tokens: 0, requests: 0 });
+            .or_insert(ProviderCost {
+                cost_usd: 0.0,
+                tokens: 0,
+                requests: 0,
+            });
         prov.cost_usd += entry.cost_usd;
         prov.tokens += entry.total_tokens;
         prov.requests += 1;
 
-        let m = by_model
-            .entry(entry.model.clone())
-            .or_insert(ModelCost { cost_usd: 0.0, tokens: 0, requests: 0 });
+        let m = by_model.entry(entry.model.clone()).or_insert(ModelCost {
+            cost_usd: 0.0,
+            tokens: 0,
+            requests: 0,
+        });
         m.cost_usd += entry.cost_usd;
         m.tokens += entry.total_tokens;
         m.requests += 1;
@@ -183,8 +306,8 @@ pub async fn route_chat(
         std::env::var("SHREWD_DEFAULT_MODEL").unwrap_or_else(|_| "llama3".to_string())
     });
 
-    let (resolved_provider, _context_window, is_private) = resolve_provider(&model)
-        .map_err(|e| format!("Model resolution failed: {}", e))?;
+    let (resolved_provider, _context_window, is_private) =
+        resolve_provider(&model).map_err(|e| format!("Model resolution failed: {}", e))?;
 
     // Privacy check
     if require_private && !is_private {
@@ -211,7 +334,13 @@ pub async fn route_chat(
 
     // Track cost
     let cost = estimate_cost(&model, response.prompt_tokens, response.completion_tokens);
-    record_usage(&model, resolved_provider, response.prompt_tokens, response.completion_tokens, cost);
+    record_usage(
+        &model,
+        resolved_provider,
+        response.prompt_tokens,
+        response.completion_tokens,
+        cost,
+    );
 
     // Return response with cost
     Ok(ChatResponse {

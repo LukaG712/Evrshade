@@ -2,7 +2,7 @@
 //!
 //! Provides standard liveness, readiness, status, and metrics endpoints.
 
-use axum::{Router, routing::get, Json};
+use axum::{routing::get, Json, Router};
 use chrono::Utc;
 use serde::Serialize;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -105,7 +105,11 @@ async fn status_handler(state: axum::extract::State<HealthState>) -> Json<Status
 async fn metrics_handler(state: axum::extract::State<HealthState>) -> String {
     state.request_count.fetch_add(1, Ordering::Relaxed);
     let uptime = state.start_time.elapsed().as_secs_f64();
-    let ready = if state.ready.load(Ordering::Relaxed) { 1 } else { 0 };
+    let ready = if state.ready.load(Ordering::Relaxed) {
+        1
+    } else {
+        0
+    };
     let requests = state.request_count.load(Ordering::Relaxed);
     let service = state.service_name.to_lowercase();
 
@@ -119,9 +123,18 @@ async fn metrics_handler(state: axum::extract::State<HealthState>) -> String {
          # HELP {}_ready Service readiness (1=ready, 0=not ready).\n\
          # TYPE {}_ready gauge\n\
          {}_ready {}\n",
-        service, service, service, uptime,
-        service, service, service, requests,
-        service, service, service, ready,
+        service,
+        service,
+        service,
+        uptime,
+        service,
+        service,
+        service,
+        requests,
+        service,
+        service,
+        service,
+        ready,
     )
 }
 
@@ -164,28 +177,60 @@ mod tests {
     #[tokio::test]
     async fn test_health_is_public() {
         let app = register_health_routes("TestService", "1.0.0");
-        let response = app.oneshot(Request::builder().uri("/health").body(Body::empty()).unwrap()).await.unwrap();
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/health")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
     }
 
     #[tokio::test]
     async fn test_metrics_is_public() {
         let app = register_health_routes("TestService", "1.0.0");
-        let response = app.oneshot(Request::builder().uri("/metrics").body(Body::empty()).unwrap()).await.unwrap();
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/metrics")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
     }
 
     #[tokio::test]
     async fn test_ready_endpoint() {
         let app = register_health_routes("TestService", "1.0.0");
-        let response = app.oneshot(Request::builder().uri("/ready").body(Body::empty()).unwrap()).await.unwrap();
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/ready")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
     }
 
     #[tokio::test]
     async fn test_status_endpoint() {
         let app = register_health_routes("TestService", "1.0.0");
-        let response = app.oneshot(Request::builder().uri("/api/status").body(Body::empty()).unwrap()).await.unwrap();
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/api/status")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
     }
 }

@@ -4,22 +4,23 @@
 //! for Obsidian-style markdown notes.
 
 use axum::{
-    Router, Json, routing::{get, post, delete},
+    extract::{Path as AxumPath, Query, State},
     http::StatusCode,
     response::IntoResponse,
-    extract::{Path as AxumPath, Query, State},
+    routing::{delete, get, post},
+    Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tracing::{info, warn, error};
+use tracing::{error, info, warn};
 
+mod knowledge_graph;
 mod models;
 mod storage;
-mod knowledge_graph;
 
+use knowledge_graph::KnowledgeGraph;
 use models::{Note, SearchResult};
 use storage::KnowledgeGraphStorage;
-use knowledge_graph::KnowledgeGraph;
 
 /// Application state.
 #[derive(Clone)]
@@ -98,7 +99,14 @@ async fn auth_middleware(
     next: axum::middleware::Next,
 ) -> axum::response::Response {
     let path = req.uri().path().to_string();
-    let public_paths = ["/health", "/ready", "/metrics", "/api/status", "/docs", "/openapi.json"];
+    let public_paths = [
+        "/health",
+        "/ready",
+        "/metrics",
+        "/api/status",
+        "/docs",
+        "/openapi.json",
+    ];
     if public_paths.contains(&path.as_str()) {
         return next.run(req).await;
     }
@@ -140,7 +148,8 @@ async fn metrics_handler() -> String {
      gobber_uptime_seconds 0.0\n\
      # HELP gobber_ready Service readiness.\n\
      # TYPE gobber_ready gauge\n\
-     gobber_ready 1\n".to_string()
+     gobber_ready 1\n"
+        .to_string()
 }
 
 async fn capabilities_handler() -> Json<serde_json::Value> {
@@ -206,7 +215,11 @@ async fn get_note_handler(
 ) -> impl IntoResponse {
     match state.kg.get_note(&note_id).await {
         Ok(Some(note)) => (StatusCode::OK, Json(note)).into_response(),
-        Ok(None) => (StatusCode::NOT_FOUND, Json(serde_json::json!({"detail": "Note not found"}))).into_response(),
+        Ok(None) => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"detail": "Note not found"})),
+        )
+            .into_response(),
         Err(e) => {
             error!("Get note error: {}", e);
             (
@@ -258,7 +271,11 @@ async fn delete_note_handler(
 ) -> impl IntoResponse {
     match state.kg.delete_note(&note_id).await {
         Ok(true) => (StatusCode::OK, Json(serde_json::json!({"deleted": true}))).into_response(),
-        Ok(false) => (StatusCode::NOT_FOUND, Json(serde_json::json!({"detail": "Note not found"}))).into_response(),
+        Ok(false) => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"detail": "Note not found"})),
+        )
+            .into_response(),
         Err(e) => {
             error!("Delete note error: {}", e);
             (
@@ -270,9 +287,7 @@ async fn delete_note_handler(
     }
 }
 
-async fn index_vault_handler(
-    State(state): State<AppState>,
-) -> impl IntoResponse {
+async fn index_vault_handler(State(state): State<AppState>) -> impl IntoResponse {
     match state.kg.index_vault().await {
         Ok(result) => (StatusCode::OK, Json(result)).into_response(),
         Err(e) => {
@@ -286,9 +301,7 @@ async fn index_vault_handler(
     }
 }
 
-async fn stats_handler(
-    State(state): State<AppState>,
-) -> impl IntoResponse {
+async fn stats_handler(State(state): State<AppState>) -> impl IntoResponse {
     match state.kg.get_stats().await {
         Ok(stats) => (StatusCode::OK, Json(stats)).into_response(),
         Err(e) => {
@@ -313,7 +326,10 @@ fn validate_webhook_url(url: &str) -> Result<(), String> {
     let host = parsed.host_str().unwrap_or("");
 
     // Block cloud metadata endpoints
-    if matches!(host, "169.254.169.254" | "metadata.google.internal" | "metadata.cloud.oracle.com") {
+    if matches!(
+        host,
+        "169.254.169.254" | "metadata.google.internal" | "metadata.cloud.oracle.com"
+    ) {
         return Err("Webhook URL points to a blocked host".to_string());
     }
 
@@ -337,7 +353,8 @@ async fn main() {
         std::process::exit(1);
     }
 
-    let db_url = std::env::var("DB_URL").unwrap_or_else(|_| "sqlite:///./data/gobber.db".to_string());
+    let db_url =
+        std::env::var("DB_URL").unwrap_or_else(|_| "sqlite:///./data/gobber.db".to_string());
     let db = evershade_db::init_db(&db_url)
         .await
         .expect("Failed to connect to database");
@@ -370,13 +387,25 @@ async fn main() {
         .route("/api/knowledge/search", get(search_handler))
         .route("/api/knowledge/notes", get(list_notes_handler))
         .route("/api/knowledge/notes/{note_id}", get(get_note_handler))
-        .route("/api/knowledge/notes/{note_id}", delete(delete_note_handler))
-        .route("/api/knowledge/notes/{note_id}/links", get(get_note_links_handler))
-        .route("/api/knowledge/notes/{note_id}/related", get(get_related_notes_handler))
+        .route(
+            "/api/knowledge/notes/{note_id}",
+            delete(delete_note_handler),
+        )
+        .route(
+            "/api/knowledge/notes/{note_id}/links",
+            get(get_note_links_handler),
+        )
+        .route(
+            "/api/knowledge/notes/{note_id}/related",
+            get(get_related_notes_handler),
+        )
         .route("/api/knowledge/index", post(index_vault_handler))
         .route("/api/knowledge/stats", get(stats_handler))
         .with_state(state.clone())
-        .layer(axum::middleware::from_fn_with_state(state.clone(), auth_middleware));
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            auth_middleware,
+        ));
 
     let addr = "0.0.0.0:8085";
     info!("Gobber listening on {}", addr);

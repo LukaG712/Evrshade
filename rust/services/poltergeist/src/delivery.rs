@@ -3,11 +3,16 @@
 //! Supports Slack (webhook), Email (stub), Telegram (HTTP), and generic webhooks.
 //! Includes SSRF protection for webhook URLs.
 
-use tracing::info;
 use regex::Regex;
+use tracing::info;
 
 /// Deliver a notification to the specified channel.
-pub async fn deliver(channel: &str, recipient: &str, title: &str, body: &str) -> Result<(), String> {
+pub async fn deliver(
+    channel: &str,
+    recipient: &str,
+    title: &str,
+    body: &str,
+) -> Result<(), String> {
     match channel {
         "slack" => deliver_slack(recipient, title, body).await,
         "email" => deliver_email(recipient, title, body).await,
@@ -65,7 +70,10 @@ async fn deliver_email(recipient: &str, title: &str, _body: &str) -> Result<(), 
     // Sanitize subject to prevent email header injection
     let _subject = title.replace('\n', " ").replace('\r', " ");
 
-    info!("Email notification queued for {} (SMTP not configured)", recipient);
+    info!(
+        "Email notification queued for {} (SMTP not configured)",
+        recipient
+    );
     Ok(())
 }
 
@@ -86,7 +94,8 @@ async fn deliver_telegram(chat_id: &str, title: &str, body: &str) -> Result<(), 
         return Err("TELEGRAM_BOT_TOKEN not configured".to_string());
     }
 
-    let base_url = std::env::var("TELEGRAM_BASE_URL").unwrap_or_else(|_| "https://api.telegram.org".to_string());
+    let base_url = std::env::var("TELEGRAM_BASE_URL")
+        .unwrap_or_else(|_| "https://api.telegram.org".to_string());
     let url = format!("{}/bot{}/sendMessage", base_url, bot_token);
 
     let message = if title.is_empty() {
@@ -98,7 +107,11 @@ async fn deliver_telegram(chat_id: &str, title: &str, body: &str) -> Result<(), 
     let client = reqwest::Client::new();
     let resp = client
         .post(&url)
-        .form(&[("chat_id", chat_id), ("text", &message), ("parse_mode", "Markdown")])
+        .form(&[
+            ("chat_id", chat_id),
+            ("text", &message),
+            ("parse_mode", "Markdown"),
+        ])
         .send()
         .await
         .map_err(|e| format!("Telegram request failed: {}", e))?;
@@ -148,7 +161,10 @@ fn validate_webhook_url(url_str: &str) -> Result<(), String> {
 
     let host = parsed.host_str().unwrap_or("");
 
-    if matches!(host, "169.254.169.254" | "metadata.google.internal" | "metadata.cloud.oracle.com") {
+    if matches!(
+        host,
+        "169.254.169.254" | "metadata.google.internal" | "metadata.cloud.oracle.com"
+    ) {
         return Err("Webhook URL points to a blocked host".to_string());
     }
 

@@ -11,7 +11,7 @@ use tracing::info;
 /// or when no OTLP endpoint is configured.
 pub fn setup_telemetry(service_name: &str) {
     let otlp_endpoint = std::env::var("SNEAKER_OTLP_ENDPOINT").unwrap_or_default();
-    
+
     if otlp_endpoint.is_empty() {
         info!("Telemetry disabled — no SNEAKER_OTLP_ENDPOINT configured");
         return;

@@ -1,9 +1,9 @@
 //! MCP server management routes for Greenie.
 
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use axum::{extract::Path, extract::State, http::StatusCode, Json};
 use sea_orm::{ConnectionTrait, Statement};
 
-use crate::{AppState, models::*};
+use crate::{models::*, AppState};
 
 /// List all MCP servers.
 pub async fn list_mcp_servers(
@@ -56,7 +56,10 @@ pub async fn add_mcp_server(
         .db
         .query_one(Statement::from_string(
             state.db.get_database_backend(),
-            format!("SELECT id FROM mcp_servers WHERE name = '{}'", escape_sql(&name)),
+            format!(
+                "SELECT id FROM mcp_servers WHERE name = '{}'",
+                escape_sql(&name)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -105,7 +108,10 @@ pub async fn remove_mcp_server(
         .db
         .query_one(Statement::from_string(
             state.db.get_database_backend(),
-            format!("SELECT id FROM mcp_servers WHERE name = '{}'", escape_sql(&server_name)),
+            format!(
+                "SELECT id FROM mcp_servers WHERE name = '{}'",
+                escape_sql(&server_name)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -118,7 +124,10 @@ pub async fn remove_mcp_server(
         .db
         .execute(Statement::from_string(
             state.db.get_database_backend(),
-            format!("DELETE FROM mcp_servers WHERE name = '{}'", escape_sql(&server_name)),
+            format!(
+                "DELETE FROM mcp_servers WHERE name = '{}'",
+                escape_sql(&server_name)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

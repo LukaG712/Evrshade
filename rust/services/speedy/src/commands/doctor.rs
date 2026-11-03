@@ -19,7 +19,10 @@ pub fn run() {
     }
 
     println!("\n  Docker Compose:");
-    match Command::new("docker").args(&["compose", "version"]).output() {
+    match Command::new("docker")
+        .args(&["compose", "version"])
+        .output()
+    {
         Ok(output) if output.status.success() => {
             let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
             println!("    ✅ {}", version);
@@ -29,10 +32,7 @@ pub fn run() {
 
     println!("\n  Configuration:");
     match find_compose_file() {
-        Some(path) => println!(
-            "    ✅ docker-compose.yml found at {}",
-            path.display()
-        ),
+        Some(path) => println!("    ✅ docker-compose.yml found at {}", path.display()),
         None => println!("    ⚠️  docker-compose.yml not found"),
     }
 
@@ -58,7 +58,12 @@ pub fn run() {
     }
 
     println!("\n  Ports:");
-    let ports = [(8080, "Greenie"), (8000, "Slinker"), (8087, "Hider"), (8085, "Sneaker")];
+    let ports = [
+        (8080, "Greenie"),
+        (8000, "Slinker"),
+        (8087, "Hider"),
+        (8085, "Sneaker"),
+    ];
     for (port, name) in &ports {
         let listener = std::net::TcpListener::bind(format!("127.0.0.1:{}", port));
         match listener {

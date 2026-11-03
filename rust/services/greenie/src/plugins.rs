@@ -1,9 +1,9 @@
 //! Plugin management routes for Greenie.
 
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use axum::{extract::Path, extract::State, http::StatusCode, Json};
 use sea_orm::{ConnectionTrait, Statement};
 
-use crate::{AppState, models::*};
+use crate::{models::*, AppState};
 
 /// List all plugins.
 pub async fn list_plugins(
@@ -88,7 +88,10 @@ pub async fn update_plugin(
         .db
         .query_one(Statement::from_string(
             state.db.get_database_backend(),
-            format!("SELECT id FROM plugins WHERE id = '{}'", escape_sql(&plugin_id)),
+            format!(
+                "SELECT id FROM plugins WHERE id = '{}'",
+                escape_sql(&plugin_id)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -112,8 +115,7 @@ pub async fn update_plugin(
             .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     }
     if let Some(config) = body.config {
-        let config_str =
-            serde_json::to_string(&config).unwrap_or_else(|_| "{}".to_string());
+        let config_str = serde_json::to_string(&config).unwrap_or_else(|_| "{}".to_string());
         state
             .db
             .execute(Statement::from_string(
@@ -143,7 +145,10 @@ pub async fn uninstall_plugin(
         .db
         .query_one(Statement::from_string(
             state.db.get_database_backend(),
-            format!("SELECT id FROM plugins WHERE id = '{}'", escape_sql(&plugin_id)),
+            format!(
+                "SELECT id FROM plugins WHERE id = '{}'",
+                escape_sql(&plugin_id)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -156,7 +161,10 @@ pub async fn uninstall_plugin(
         .db
         .execute(Statement::from_string(
             state.db.get_database_backend(),
-            format!("DELETE FROM plugins WHERE id = '{}'", escape_sql(&plugin_id)),
+            format!(
+                "DELETE FROM plugins WHERE id = '{}'",
+                escape_sql(&plugin_id)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

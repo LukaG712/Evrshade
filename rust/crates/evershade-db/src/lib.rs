@@ -3,7 +3,7 @@
 //! Provides SQLite connection pool initialization with WAL mode
 //! and migration helpers using SeaORM.
 
-use sea_orm::{Database, DatabaseConnection, ConnectionTrait, Statement};
+use sea_orm::{ConnectionTrait, Database, DatabaseConnection, Statement};
 use tracing::info;
 
 /// Initialize a SeaORM database connection with SQLite WAL mode.

@@ -3,11 +3,11 @@
 //! Uses PBKDF2-HMAC-SHA256 key derivation with a configurable salt,
 //! then AES-256-GCM for authenticated encryption.
 
-use aes_gcm::{Aes256Gcm, Key, Nonce};
 use aes_gcm::aead::{Aead, KeyInit};
+use aes_gcm::{Aes256Gcm, Key, Nonce};
 use hmac::{Hmac, Mac};
-use sha2::Sha256;
 use rand::Rng;
+use sha2::Sha256;
 use std::env;
 
 type HmacSha256 = Hmac<Sha256>;
@@ -31,7 +31,13 @@ impl Encryption {
         }
 
         // Reject known default salts
-        let known_defaults = ["evershade-hider-salt-v1", "change-me", "default", "test", "salt"];
+        let known_defaults = [
+            "evershade-hider-salt-v1",
+            "change-me",
+            "default",
+            "test",
+            "salt",
+        ];
         if known_defaults.contains(&salt_raw.to_lowercase().as_str()) {
             return Err("ENCRYPTION_SALT is using a known default value. Generate a random salt: openssl rand -hex 16".to_string());
         }
@@ -53,17 +59,18 @@ impl Encryption {
     pub fn encrypt(&self, plaintext: &str) -> Result<(String, String), String> {
         let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(&self.key));
         let mut rng = rand::thread_rng();
-        let nonce: [u8; 12] = (0..12).map(|_| rng.gen()).collect::<Vec<u8>>().try_into().unwrap();
+        let nonce: [u8; 12] = (0..12)
+            .map(|_| rng.gen())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap();
         let nonce = Nonce::from_slice(&nonce);
 
         let ciphertext = cipher
             .encrypt(nonce, plaintext.as_bytes())
             .map_err(|e| format!("Encryption failed: {}", e))?;
 
-        Ok((
-            base64_encode(&ciphertext),
-            base64_encode(&nonce),
-        ))
+        Ok((base64_encode(&ciphertext), base64_encode(&nonce)))
     }
 
     /// Decrypt an encrypted value.
@@ -80,8 +87,7 @@ impl Encryption {
             .decrypt(nonce, &*ciphertext)
             .map_err(|e| format!("Decryption failed: {}", e))?;
 
-        String::from_utf8(plaintext)
-            .map_err(|e| format!("Invalid UTF-8 in decrypted value: {}", e))
+        String::from_utf8(plaintext).map_err(|e| format!("Invalid UTF-8 in decrypted value: {}", e))
     }
 }
 

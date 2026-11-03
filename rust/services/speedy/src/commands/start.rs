@@ -9,10 +9,7 @@ pub fn run(dir: Option<PathBuf>, profiles: Vec<String>) {
 
     let project_dir = dir
         .as_ref()
-        .or_else(|| {
-            find_compose_file()
-                .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-        });
+        .or_else(|| find_compose_file().and_then(|p| p.parent().map(|p| p.to_path_buf())));
 
     let mut args = vec!["up", "-d"];
     for profile in &profiles {

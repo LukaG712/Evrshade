@@ -2,11 +2,11 @@
 //!
 //! Handles workstation CRUD and Docker container lifecycle (start/stop/destroy).
 
-use axum::{Json, extract::Path, extract::Query, extract::State, http::StatusCode};
+use axum::{extract::Path, extract::Query, extract::State, http::StatusCode, Json};
 use sea_orm::{ConnectionTrait, Statement};
 use serde::Deserialize;
 
-use crate::{AppState, models::*};
+use crate::{models::*, AppState};
 
 /// Validate container name matches the expected pattern.
 fn validate_container_name(name: &str) -> Result<(), String> {
@@ -27,13 +27,10 @@ fn validate_container_name(name: &str) -> Result<(), String> {
 async fn run_docker(args: &[&str], timeout_secs: u64) -> Result<(i32, String, String), String> {
     let mut cmd = tokio::process::Command::new("docker");
     cmd.args(args);
-    let output = tokio::time::timeout(
-        std::time::Duration::from_secs(timeout_secs),
-        cmd.output(),
-    )
-    .await
-    .map_err(|_| "Timeout".to_string())?
-    .map_err(|e| format!("Docker not found: {}", e))?;
+    let output = tokio::time::timeout(std::time::Duration::from_secs(timeout_secs), cmd.output())
+        .await
+        .map_err(|_| "Timeout".to_string())?
+        .map_err(|e| format!("Docker not found: {}", e))?;
 
     Ok((
         output.status.code().unwrap_or(-1),
@@ -42,10 +39,7 @@ async fn run_docker(args: &[&str], timeout_secs: u64) -> Result<(i32, String, St
     ))
 }
 
-async fn count_query(
-    db: &sea_orm::DatabaseConnection,
-    sql: String,
-) -> Result<i64, sea_orm::DbErr> {
+async fn count_query(db: &sea_orm::DatabaseConnection, sql: String) -> Result<i64, sea_orm::DbErr> {
     let row = db
         .query_one(Statement::from_string(db.get_database_backend(), sql))
         .await?;
@@ -144,8 +138,7 @@ pub async fn create_workstation(
     }
 
     let id = gen_id();
-    let tags_json =
-        serde_json::to_string(&body.tags).unwrap_or_else(|_| "[]".to_string());
+    let tags_json = serde_json::to_string(&body.tags).unwrap_or_else(|_| "[]".to_string());
     let sql = format!(
         "INSERT INTO workstations (id, name, description, agent_name, tags) \
          VALUES ('{}', '{}', '{}', '{}', '{}')",
@@ -177,7 +170,10 @@ pub async fn start_workstation(
         .db
         .query_one(Statement::from_string(
             state.db.get_database_backend(),
-            format!("SELECT id FROM workstations WHERE id = '{}'", escape_sql(&ws_id)),
+            format!(
+                "SELECT id FROM workstations WHERE id = '{}'",
+                escape_sql(&ws_id)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -241,11 +237,7 @@ pub async fn start_workstation(
             })))
         }
         Ok((_code, _stdout, stderr)) => {
-            tracing::error!(
-                "Failed to start workstation {}: {}",
-                ws_id,
-                stderr
-            );
+            tracing::error!("Failed to start workstation {}: {}", ws_id, stderr);
             state
                 .db
                 .execute(Statement::from_string(
@@ -261,11 +253,7 @@ pub async fn start_workstation(
             Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
         Err(e) => {
-            tracing::error!(
-                "Failed to start workstation {}: {}",
-                ws_id,
-                e
-            );
+            tracing::error!("Failed to start workstation {}: {}", ws_id, e);
             state
                 .db
                 .execute(Statement::from_string(
@@ -414,19 +402,14 @@ pub async fn get_workstation_logs(
                 return Err(StatusCode::BAD_REQUEST);
             }
             match run_docker(
-                &[
-                    "logs",
-                    "--tail",
-                    &params.tail.to_string(),
-                    &container_name,
-                ],
+                &["logs", "--tail", &params.tail.to_string(), &container_name],
                 10,
             )
             .await
             {
-                Ok((_code, stdout, stderr)) => {
-                    Ok(Json(serde_json::json!({"logs": format!("{}{}", stdout, stderr)})))
-                }
+                Ok((_code, stdout, stderr)) => Ok(Json(
+                    serde_json::json!({"logs": format!("{}{}", stdout, stderr)}),
+                )),
                 Err(_) => Ok(Json(serde_json::json!({"logs": "Docker not available"}))),
             }
         }

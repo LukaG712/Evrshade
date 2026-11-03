@@ -25,7 +25,9 @@ pub fn validate_command(command: &str) -> Result<(), String> {
         return Err("Empty command is not allowed".to_string());
     }
 
-    let dangerous_chars = [';', '&', '|', '`', '$', '(', ')', '{', '}', '!', '\\', '\n', '\r'];
+    let dangerous_chars = [
+        ';', '&', '|', '`', '$', '(', ')', '{', '}', '!', '\\', '\n', '\r',
+    ];
     for ch in command.chars() {
         if dangerous_chars.contains(&ch) {
             return Err(format!("Command contains dangerous character: {}", ch));
@@ -58,8 +60,8 @@ async fn run_command(
     workspace: &str,
     timeout_secs: u64,
 ) -> Result<CommandResult, String> {
-    let args: Vec<String> = shell_words::split(command)
-        .map_err(|e| format!("Failed to parse command: {}", e))?;
+    let args: Vec<String> =
+        shell_words::split(command).map_err(|e| format!("Failed to parse command: {}", e))?;
 
     if args.is_empty() {
         return Err("Empty command".to_string());
@@ -68,13 +70,10 @@ async fn run_command(
     let mut cmd = tokio::process::Command::new(&args[0]);
     cmd.args(&args[1..]).current_dir(workspace);
 
-    let output = tokio::time::timeout(
-        std::time::Duration::from_secs(timeout_secs),
-        cmd.output(),
-    )
-    .await
-    .map_err(|_| format!("Command timed out after {}s", timeout_secs))?
-    .map_err(|e| format!("Failed to execute: {}", e))?;
+    let output = tokio::time::timeout(std::time::Duration::from_secs(timeout_secs), cmd.output())
+        .await
+        .map_err(|_| format!("Command timed out after {}s", timeout_secs))?
+        .map_err(|e| format!("Failed to execute: {}", e))?;
 
     Ok(CommandResult {
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
@@ -160,11 +159,7 @@ impl AdapterTrait for SubprocessAdapter {
         }
     }
 
-    async fn run_tests(
-        &self,
-        workspace: &str,
-        test_command: Option<&str>,
-    ) -> serde_json::Value {
+    async fn run_tests(&self, workspace: &str, test_command: Option<&str>) -> serde_json::Value {
         let cmd = match test_command {
             Some(c) => c.to_string(),
             None => "python -m pytest -x --tb=short".to_string(),
@@ -184,11 +179,7 @@ impl AdapterTrait for SubprocessAdapter {
         }
     }
 
-    async fn run_lint(
-        &self,
-        workspace: &str,
-        lint_command: Option<&str>,
-    ) -> serde_json::Value {
+    async fn run_lint(&self, workspace: &str, lint_command: Option<&str>) -> serde_json::Value {
         let cmd = match lint_command {
             Some(c) => c.to_string(),
             None => "python -m ruff check .".to_string(),
@@ -208,11 +199,7 @@ impl AdapterTrait for SubprocessAdapter {
         }
     }
 
-    async fn run_build(
-        &self,
-        workspace: &str,
-        build_command: Option<&str>,
-    ) -> serde_json::Value {
+    async fn run_build(&self, workspace: &str, build_command: Option<&str>) -> serde_json::Value {
         let cmd = match build_command {
             Some(c) => c.to_string(),
             None => "make".to_string(),

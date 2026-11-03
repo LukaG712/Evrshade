@@ -4,21 +4,22 @@
 //! with cost tracking and privacy classification.
 
 use axum::{
-    Router, Json, routing::{get, post},
+    extract::{Query, State},
     http::StatusCode,
     response::IntoResponse,
-    extract::{Query, State},
+    routing::{get, post},
+    Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tracing::{info, warn, error};
+use tracing::{error, info, warn};
 
 mod models;
 mod providers;
 mod routing;
 
 use models::{ChatMessage, ChatRequest, ChatResponse, Provider};
-use routing::{route_chat, get_cost_summary, list_models, list_providers};
+use routing::{get_cost_summary, list_models, list_providers, route_chat};
 
 /// Application state.
 #[derive(Clone)]
@@ -75,7 +76,14 @@ async fn auth_middleware(
     next: axum::middleware::Next,
 ) -> axum::response::Response {
     let path = req.uri().path().to_string();
-    let public_paths = ["/health", "/ready", "/metrics", "/api/status", "/docs", "/openapi.json"];
+    let public_paths = [
+        "/health",
+        "/ready",
+        "/metrics",
+        "/api/status",
+        "/docs",
+        "/openapi.json",
+    ];
     if public_paths.contains(&path.as_str()) {
         return next.run(req).await;
     }
@@ -117,7 +125,8 @@ async fn metrics_handler() -> String {
      shrewd_uptime_seconds 0.0\n\
      # HELP shrewd_ready Service readiness.\n\
      # TYPE shrewd_ready gauge\n\
-     shrewd_ready 1\n".to_string()
+     shrewd_ready 1\n"
+        .to_string()
 }
 
 async fn capabilities_handler() -> Json<serde_json::Value> {
@@ -140,7 +149,9 @@ async fn capabilities_handler() -> Json<serde_json::Value> {
 
 async fn chat_handler(
     State(state): State<AppState>,
-    authorization: Option<axum::extract::TypedHeader<axum::http::header::Authorization<axum::http::header::Bearer>>>,
+    authorization: Option<
+        axum::extract::TypedHeader<axum::http::header::Authorization<axum::http::header::Bearer>>,
+    >,
     Json(request): Json<ChatRequest>,
 ) -> impl IntoResponse {
     let _ = state; // auth already checked by middleware
@@ -151,10 +162,16 @@ async fn chat_handler(
     let max_tokens = request.max_tokens;
     let require_private = request.require_private;
 
-    match route_chat(&request.messages, model, temperature, max_tokens, require_private).await {
-        Ok(response) => {
-            (StatusCode::OK, Json(response)).into_response()
-        }
+    match route_chat(
+        &request.messages,
+        model,
+        temperature,
+        max_tokens,
+        require_private,
+    )
+    .await
+    {
+        Ok(response) => (StatusCode::OK, Json(response)).into_response(),
         Err(e) => {
             warn!("Provider error, falling back to simulation: {}", e);
             // Fallback response
@@ -170,16 +187,17 @@ async fn chat_handler(
     }
 }
 
-async fn list_models_handler(
-    Query(query): Query<ListModelsQuery>,
-) -> Json<Vec<serde_json::Value>> {
-    let provider_filter = query.provider.as_deref().and_then(|p| match p.to_lowercase().as_str() {
-        "openai" => Some(Provider::OpenAI),
-        "anthropic" => Some(Provider::Anthropic),
-        "google" => Some(Provider::Google),
-        "ollama" => Some(Provider::Ollama),
-        _ => None,
-    });
+async fn list_models_handler(Query(query): Query<ListModelsQuery>) -> Json<Vec<serde_json::Value>> {
+    let provider_filter = query
+        .provider
+        .as_deref()
+        .and_then(|p| match p.to_lowercase().as_str() {
+            "openai" => Some(Provider::OpenAI),
+            "anthropic" => Some(Provider::Anthropic),
+            "google" => Some(Provider::Google),
+            "ollama" => Some(Provider::Ollama),
+            _ => None,
+        });
 
     let models = list_models(provider_filter);
     let result: Vec<serde_json::Value> = models
@@ -246,7 +264,10 @@ async fn main() {
         // Cost tracking
         .route("/api/cost/summary", get(cost_summary_handler))
         .with_state(state.clone())
-        .layer(axum::middleware::from_fn_with_state(state.clone(), auth_middleware));
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            auth_middleware,
+        ));
 
     let addr = "0.0.0.0:8089";
     info!("Shrewd listening on {}", addr);

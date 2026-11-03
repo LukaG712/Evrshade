@@ -11,19 +11,14 @@ pub fn run(dir: Option<PathBuf>) {
 
     let project_dir = dir
         .as_ref()
-        .or_else(|| {
-            find_compose_file()
-                .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-        });
+        .or_else(|| find_compose_file().and_then(|p| p.parent().map(|p| p.to_path_buf())));
 
     match run_compose(&["ps", "--format", "json"], project_dir.as_ref()) {
         Ok(output) if output.status == 0 => {
             let stdout = output.stdout.trim().to_string();
             if stdout.is_empty() {
                 println!("  No running containers found.");
-            } else if let Ok(containers): Result<Vec<serde_json::Value>, _> =
-                serde_json::from_str(&stdout)
-            {
+            } else if let Ok(containers) = serde_json::from_str::<Vec<serde_json::Value>>(&stdout) {
                 for container in &containers {
                     let name = container
                         .get("Name")

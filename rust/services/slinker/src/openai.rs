@@ -1,9 +1,9 @@
 //! OpenAI-compatible routes for Slinker — delegates to Shrewd service.
 
-use axum::{Json, extract::State, http::StatusCode, response::Response};
+use axum::{extract::State, http::StatusCode, response::Response, Json};
 use serde::Deserialize;
 
-use crate::{AppState, adapters::gen_id};
+use crate::{adapters::gen_id, AppState};
 
 #[derive(Deserialize)]
 pub struct ChatCompletionRequest {
@@ -49,10 +49,7 @@ pub async fn chat_completions(
     let shrewd_url = std::env::var("SHREWD_URL").unwrap_or_default();
 
     if shrewd_url.is_empty() {
-        let completion_id = format!(
-            "chatcmpl-{}",
-            gen_id().chars().take(12).collect::<String>()
-        );
+        let completion_id = format!("chatcmpl-{}", gen_id().chars().take(12).collect::<String>());
         let response = serde_json::json!({
             "id": completion_id,
             "object": "chat.completion",
@@ -68,10 +65,7 @@ pub async fn chat_completions(
     }
 
     if request.stream {
-        let completion_id = format!(
-            "chatcmpl-{}",
-            gen_id().chars().take(12).collect::<String>()
-        );
+        let completion_id = format!("chatcmpl-{}", gen_id().chars().take(12).collect::<String>());
         let response = serde_json::json!({
             "id": completion_id,
             "object": "chat.completion",
@@ -111,10 +105,8 @@ pub async fn chat_completions(
         Ok(_) => Err(StatusCode::BAD_GATEWAY),
         Err(e) => {
             tracing::error!("Chat completion error: {}", e);
-            let completion_id = format!(
-                "chatcmpl-{}",
-                gen_id().chars().take(12).collect::<String>()
-            );
+            let completion_id =
+                format!("chatcmpl-{}", gen_id().chars().take(12).collect::<String>());
             let response = serde_json::json!({
                 "id": completion_id,
                 "object": "chat.completion",

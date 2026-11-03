@@ -11,8 +11,7 @@ pub struct JunieAdapter {
 impl JunieAdapter {
     pub fn new() -> Self {
         Self {
-            junie_path: std::env::var("JUNIE_PATH")
-                .unwrap_or_else(|_| "junie".to_string()),
+            junie_path: std::env::var("JUNIE_PATH").unwrap_or_else(|_| "junie".to_string()),
         }
     }
 }
@@ -51,12 +50,7 @@ impl AdapterTrait for JunieAdapter {
 
                 ExecutionResult {
                     task_id,
-                    status: if success {
-                        "completed"
-                    } else {
-                        "failed"
-                    }
-                    .to_string(),
+                    status: if success { "completed" } else { "failed" }.to_string(),
                     output: stdout,
                     error: if !success && !stderr.is_empty() {
                         Some(stderr)
@@ -98,27 +92,15 @@ impl AdapterTrait for JunieAdapter {
         }
     }
 
-    async fn run_tests(
-        &self,
-        _workspace: &str,
-        _test_command: Option<&str>,
-    ) -> serde_json::Value {
+    async fn run_tests(&self, _workspace: &str, _test_command: Option<&str>) -> serde_json::Value {
         serde_json::json!({"error": "Junie adapter does not support run_tests directly"})
     }
 
-    async fn run_lint(
-        &self,
-        _workspace: &str,
-        _lint_command: Option<&str>,
-    ) -> serde_json::Value {
+    async fn run_lint(&self, _workspace: &str, _lint_command: Option<&str>) -> serde_json::Value {
         serde_json::json!({"error": "Junie adapter does not support run_lint directly"})
     }
 
-    async fn run_build(
-        &self,
-        _workspace: &str,
-        _build_command: Option<&str>,
-    ) -> serde_json::Value {
+    async fn run_build(&self, _workspace: &str, _build_command: Option<&str>) -> serde_json::Value {
         serde_json::json!({"error": "Junie adapter does not support run_build directly"})
     }
 }

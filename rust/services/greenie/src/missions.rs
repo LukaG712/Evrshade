@@ -1,9 +1,9 @@
 //! Mission management routes for Greenie.
 
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use axum::{extract::Path, extract::State, http::StatusCode, Json};
 use sea_orm::{ConnectionTrait, Statement};
 
-use crate::{AppState, models::*};
+use crate::{models::*, AppState};
 
 /// Create a new mission.
 pub async fn create_mission(
@@ -42,20 +42,22 @@ pub async fn create_mission(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(MissionResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        name: r.try_get_by_index(1).unwrap_or_default(),
-        description: r.try_get_by_index(2).unwrap_or_default(),
-        agent_id: r.try_get_by_index(3).unwrap_or_default(),
-        status: r.try_get_by_index(4).unwrap_or_default(),
-        progress: r.try_get_by_index(5).unwrap_or_default(),
-        result: r.try_get_by_index(6).unwrap_or_default(),
-        error: r.try_get_by_index(7).unwrap_or_default(),
-        started_at: r.try_get_by_index(8).ok(),
-        completed_at: r.try_get_by_index(9).ok(),
-        created_at: r.try_get_by_index(10).unwrap_or_default(),
-        updated_at: r.try_get_by_index(11).unwrap_or_default(),
-    }))
+    row.map(|r| {
+        Json(MissionResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            name: r.try_get_by_index(1).unwrap_or_default(),
+            description: r.try_get_by_index(2).unwrap_or_default(),
+            agent_id: r.try_get_by_index(3).unwrap_or_default(),
+            status: r.try_get_by_index(4).unwrap_or_default(),
+            progress: r.try_get_by_index(5).unwrap_or_default(),
+            result: r.try_get_by_index(6).unwrap_or_default(),
+            error: r.try_get_by_index(7).unwrap_or_default(),
+            started_at: r.try_get_by_index(8).ok(),
+            completed_at: r.try_get_by_index(9).ok(),
+            created_at: r.try_get_by_index(10).unwrap_or_default(),
+            updated_at: r.try_get_by_index(11).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 
@@ -117,20 +119,22 @@ pub async fn get_mission(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(MissionResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        name: r.try_get_by_index(1).unwrap_or_default(),
-        description: r.try_get_by_index(2).unwrap_or_default(),
-        agent_id: r.try_get_by_index(3).unwrap_or_default(),
-        status: r.try_get_by_index(4).unwrap_or_default(),
-        progress: r.try_get_by_index(5).unwrap_or_default(),
-        result: r.try_get_by_index(6).unwrap_or_default(),
-        error: r.try_get_by_index(7).unwrap_or_default(),
-        started_at: r.try_get_by_index(8).ok(),
-        completed_at: r.try_get_by_index(9).ok(),
-        created_at: r.try_get_by_index(10).unwrap_or_default(),
-        updated_at: r.try_get_by_index(11).unwrap_or_default(),
-    }))
+    row.map(|r| {
+        Json(MissionResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            name: r.try_get_by_index(1).unwrap_or_default(),
+            description: r.try_get_by_index(2).unwrap_or_default(),
+            agent_id: r.try_get_by_index(3).unwrap_or_default(),
+            status: r.try_get_by_index(4).unwrap_or_default(),
+            progress: r.try_get_by_index(5).unwrap_or_default(),
+            result: r.try_get_by_index(6).unwrap_or_default(),
+            error: r.try_get_by_index(7).unwrap_or_default(),
+            started_at: r.try_get_by_index(8).ok(),
+            completed_at: r.try_get_by_index(9).ok(),
+            created_at: r.try_get_by_index(10).unwrap_or_default(),
+            updated_at: r.try_get_by_index(11).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 
@@ -169,20 +173,22 @@ pub async fn start_mission(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(MissionResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        name: r.try_get_by_index(1).unwrap_or_default(),
-        description: r.try_get_by_index(2).unwrap_or_default(),
-        agent_id: r.try_get_by_index(3).unwrap_or_default(),
-        status: r.try_get_by_index(4).unwrap_or_default(),
-        progress: r.try_get_by_index(5).unwrap_or_default(),
-        result: r.try_get_by_index(6).unwrap_or_default(),
-        error: r.try_get_by_index(7).unwrap_or_default(),
-        started_at: r.try_get_by_index(8).ok(),
-        completed_at: r.try_get_by_index(9).ok(),
-        created_at: r.try_get_by_index(10).unwrap_or_default(),
-        updated_at: r.try_get_by_index(11).unwrap_or_default(),
-    }))
+    row.map(|r| {
+        Json(MissionResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            name: r.try_get_by_index(1).unwrap_or_default(),
+            description: r.try_get_by_index(2).unwrap_or_default(),
+            agent_id: r.try_get_by_index(3).unwrap_or_default(),
+            status: r.try_get_by_index(4).unwrap_or_default(),
+            progress: r.try_get_by_index(5).unwrap_or_default(),
+            result: r.try_get_by_index(6).unwrap_or_default(),
+            error: r.try_get_by_index(7).unwrap_or_default(),
+            started_at: r.try_get_by_index(8).ok(),
+            completed_at: r.try_get_by_index(9).ok(),
+            created_at: r.try_get_by_index(10).unwrap_or_default(),
+            updated_at: r.try_get_by_index(11).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 
@@ -195,7 +201,10 @@ pub async fn delete_mission(
         .db
         .execute(Statement::from_string(
             state.db.get_database_backend(),
-            format!("DELETE FROM missions WHERE id = '{}'", escape_sql(&mission_id)),
+            format!(
+                "DELETE FROM missions WHERE id = '{}'",
+                escape_sql(&mission_id)
+            ),
         ))
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

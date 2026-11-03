@@ -3,8 +3,8 @@
 //! Each provider handles authentication, request formatting, and response
 //! parsing for a specific LLM API using reqwest for async HTTP calls.
 
-use anyhow::{Result, bail};
-use reqwest::{Client, header};
+use anyhow::{bail, Result};
+use reqwest::{header, Client};
 use serde_json::Value;
 use tracing::warn;
 
@@ -86,7 +86,13 @@ impl LlmProvider for OpenAIProvider {
         );
         headers.insert("Content-Type", "application/json".parse().unwrap());
 
-        let resp = self.client.post(&url).headers(headers).json(&payload).send().await?;
+        let resp = self
+            .client
+            .post(&url)
+            .headers(headers)
+            .json(&payload)
+            .send()
+            .await?;
         if !resp.status().is_success() {
             let status = resp.status();
             let body = resp.text().await.unwrap_or_default();
@@ -96,7 +102,10 @@ impl LlmProvider for OpenAIProvider {
         let data: Value = resp.json().await?;
         let choice = &data["choices"][0];
         let usage = &data["usage"];
-        let content = choice["message"]["content"].as_str().unwrap_or("").to_string();
+        let content = choice["message"]["content"]
+            .as_str()
+            .unwrap_or("")
+            .to_string();
         let prompt_tokens = usage["prompt_tokens"].as_u64().unwrap_or(0) as usize;
         let completion_tokens = usage["completion_tokens"].as_u64().unwrap_or(0) as usize;
 
@@ -172,7 +181,13 @@ impl LlmProvider for AnthropicProvider {
         headers.insert("anthropic-version", "2023-06-01".parse().unwrap());
         headers.insert("Content-Type", "application/json".parse().unwrap());
 
-        let resp = self.client.post(&url).headers(headers).json(&payload).send().await?;
+        let resp = self
+            .client
+            .post(&url)
+            .headers(headers)
+            .json(&payload)
+            .send()
+            .await?;
         if !resp.status().is_success() {
             let status = resp.status();
             let body = resp.text().await.unwrap_or_default();
@@ -238,7 +253,10 @@ impl LlmProvider for GoogleProvider {
         temperature: f64,
         max_tokens: usize,
     ) -> Result<ChatResponse> {
-        let url = format!("{}/models/{}:generateContent?key={}", self.base_url, model, self.api_key);
+        let url = format!(
+            "{}/models/{}:generateContent?key={}",
+            self.base_url, model, self.api_key
+        );
 
         let mut system_msg: Option<String> = None;
         let mut other_messages = Vec::new();
@@ -351,7 +369,10 @@ impl LlmProvider for OllamaProvider {
         }
 
         let data: Value = resp.json().await?;
-        let content = data["message"]["content"].as_str().unwrap_or("").to_string();
+        let content = data["message"]["content"]
+            .as_str()
+            .unwrap_or("")
+            .to_string();
         let prompt_tokens = data["prompt_eval_count"].as_u64().unwrap_or(0) as usize;
         let completion_tokens = data["eval_count"].as_u64().unwrap_or(0) as usize;
 
@@ -383,7 +404,9 @@ impl LlmProvider for Arc<dyn LlmProvider> {
         temperature: f64,
         max_tokens: usize,
     ) -> Result<ChatResponse> {
-        self.as_ref().chat(messages, model, temperature, max_tokens).await
+        self.as_ref()
+            .chat(messages, model, temperature, max_tokens)
+            .await
     }
 
     fn check_available(&self) -> bool {

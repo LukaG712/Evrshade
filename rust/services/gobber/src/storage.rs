@@ -1,8 +1,8 @@
 //! SQLite storage backend for the Knowledge Graph module in Gobber.
 
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use chrono::{DateTime, Utc};
-use sea_orm::{DatabaseConnection, Statement, ConnectionTrait};
+use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
 use serde_json;
 use std::collections::HashMap;
 use tracing::warn;
@@ -69,7 +69,9 @@ pub fn extract_relevant_context(content: &str, max_length: usize) -> Option<Stri
     if content.trim().is_empty() {
         return None;
     }
-    let sentences: Vec<&str> = content.split(|c: char| c == '.' || c == '!' || c == '?').collect();
+    let sentences: Vec<&str> = content
+        .split(|c: char| c == '.' || c == '!' || c == '?')
+        .collect();
     for sentence in sentences {
         let trimmed = sentence.trim();
         if trimmed.len() > 10 {
@@ -118,7 +120,8 @@ impl KnowledgeGraphStorage {
             note.created_at.format("%Y-%m-%dT%H:%M:%SZ"),
             note.updated_at.format("%Y-%m-%dT%H:%M:%SZ"),
         );
-        self.db.execute(Statement::from_string(self.db.get_database_backend(), sql))
+        self.db
+            .execute(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         Ok(())
     }
@@ -126,7 +129,9 @@ impl KnowledgeGraphStorage {
     /// Get a note by ID.
     pub async fn get_note(&self, note_id: &str) -> Result<Option<Note>> {
         let sql = format!("SELECT * FROM notes WHERE id = '{}'", escape_sql(note_id));
-        let rows = self.db.query_all(Statement::from_string(self.db.get_database_backend(), sql))
+        let rows = self
+            .db
+            .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         if rows.is_empty() {
             return Ok(None);
@@ -137,8 +142,13 @@ impl KnowledgeGraphStorage {
 
     /// Get a note by file path.
     pub async fn get_note_by_path(&self, file_path: &str) -> Result<Option<Note>> {
-        let sql = format!("SELECT * FROM notes WHERE file_path = '{}'", escape_sql(file_path));
-        let rows = self.db.query_all(Statement::from_string(self.db.get_database_backend(), sql))
+        let sql = format!(
+            "SELECT * FROM notes WHERE file_path = '{}'",
+            escape_sql(file_path)
+        );
+        let rows = self
+            .db
+            .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         if rows.is_empty() {
             return Ok(None);
@@ -153,7 +163,9 @@ impl KnowledgeGraphStorage {
             "SELECT * FROM notes ORDER BY updated_at DESC LIMIT {} OFFSET {}",
             limit, offset
         );
-        let rows = self.db.query_all(Statement::from_string(self.db.get_database_backend(), sql))
+        let rows = self
+            .db
+            .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         Ok(rows.into_iter().map(row_to_note).collect())
     }
@@ -161,27 +173,40 @@ impl KnowledgeGraphStorage {
     /// Delete a note and its associated data.
     pub async fn delete_note(&self, note_id: &str) -> Result<bool> {
         let id = escape_sql(note_id);
-        self.db.execute(Statement::from_string(
-            self.db.get_database_backend(),
-            format!("DELETE FROM note_links WHERE source_note_id = '{}' OR target_note_id = '{}'", id, id),
-        )).await?;
-        self.db.execute(Statement::from_string(
-            self.db.get_database_backend(),
-            format!("DELETE FROM note_embeddings WHERE note_id = '{}'", id),
-        )).await?;
-        let result = self.db.execute(Statement::from_string(
-            self.db.get_database_backend(),
-            format!("DELETE FROM notes WHERE id = '{}'", id),
-        )).await?;
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                format!(
+                    "DELETE FROM note_links WHERE source_note_id = '{}' OR target_note_id = '{}'",
+                    id, id
+                ),
+            ))
+            .await?;
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                format!("DELETE FROM note_embeddings WHERE note_id = '{}'", id),
+            ))
+            .await?;
+        let result = self
+            .db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                format!("DELETE FROM notes WHERE id = '{}'", id),
+            ))
+            .await?;
         Ok(result.rows_affected() > 0)
     }
 
     /// Count total notes.
     pub async fn count_notes(&self) -> Result<usize> {
-        let rows = self.db.query_all(Statement::from_string(
-            self.db.get_database_backend(),
-            "SELECT COUNT(*) as cnt FROM notes".to_string(),
-        )).await?;
+        let rows = self
+            .db
+            .query_all(Statement::from_string(
+                self.db.get_database_backend(),
+                "SELECT COUNT(*) as cnt FROM notes".to_string(),
+            ))
+            .await?;
         if let Some(row) = rows.first() {
             if let Some(cnt) = row.try_get::<i64>("", "cnt").ok() {
                 return Ok(cnt as usize);
@@ -191,12 +216,18 @@ impl KnowledgeGraphStorage {
     }
 
     /// Update links for a note.
-    pub async fn upsert_links(&self, source_note_id: &str, target_note_ids: &[String]) -> Result<()> {
+    pub async fn upsert_links(
+        &self,
+        source_note_id: &str,
+        target_note_ids: &[String],
+    ) -> Result<()> {
         let source = escape_sql(source_note_id);
-        self.db.execute(Statement::from_string(
-            self.db.get_database_backend(),
-            format!("DELETE FROM note_links WHERE source_note_id = '{}'", source),
-        )).await?;
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                format!("DELETE FROM note_links WHERE source_note_id = '{}'", source),
+            ))
+            .await?;
         for target_id in target_note_ids {
             let target = escape_sql(target_id);
             self.db.execute(Statement::from_string(
@@ -218,7 +249,9 @@ impl KnowledgeGraphStorage {
              WHERE nl.source_note_id = '{}'",
             escape_sql(note_id)
         );
-        let rows = self.db.query_all(Statement::from_string(self.db.get_database_backend(), sql))
+        let rows = self
+            .db
+            .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         Ok(rows.into_iter().map(row_to_note).collect())
     }
@@ -231,17 +264,22 @@ impl KnowledgeGraphStorage {
              WHERE nl.target_note_id = '{}'",
             escape_sql(note_id)
         );
-        let rows = self.db.query_all(Statement::from_string(self.db.get_database_backend(), sql))
+        let rows = self
+            .db
+            .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         Ok(rows.into_iter().map(row_to_note).collect())
     }
 
     /// Count total links.
     pub async fn count_links(&self) -> Result<usize> {
-        let rows = self.db.query_all(Statement::from_string(
-            self.db.get_database_backend(),
-            "SELECT COUNT(*) as cnt FROM note_links".to_string(),
-        )).await?;
+        let rows = self
+            .db
+            .query_all(Statement::from_string(
+                self.db.get_database_backend(),
+                "SELECT COUNT(*) as cnt FROM note_links".to_string(),
+            ))
+            .await?;
         if let Some(row) = rows.first() {
             if let Some(cnt) = row.try_get::<i64>("", "cnt").ok() {
                 return Ok(cnt as usize);
@@ -265,7 +303,8 @@ impl KnowledgeGraphStorage {
             embedding.len(),
             Utc::now().format("%Y-%m-%dT%H:%M:%SZ"),
         );
-        self.db.execute(Statement::from_string(self.db.get_database_backend(), sql))
+        self.db
+            .execute(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         Ok(())
     }
@@ -276,7 +315,9 @@ impl KnowledgeGraphStorage {
             "SELECT embedding FROM note_embeddings WHERE note_id = '{}'",
             escape_sql(note_id)
         );
-        let rows = self.db.query_all(Statement::from_string(self.db.get_database_backend(), sql))
+        let rows = self
+            .db
+            .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
         if rows.is_empty() {
             return Ok(None);
@@ -300,10 +341,13 @@ impl KnowledgeGraphStorage {
             return Ok(Vec::new());
         }
 
-        let rows = self.db.query_all(Statement::from_string(
-            self.db.get_database_backend(),
-            "SELECT id, title, content FROM notes".to_string(),
-        )).await?;
+        let rows = self
+            .db
+            .query_all(Statement::from_string(
+                self.db.get_database_backend(),
+                "SELECT id, title, content FROM notes".to_string(),
+            ))
+            .await?;
 
         let mut results: HashMap<String, f64> = HashMap::new();
         for row in &rows {
@@ -336,11 +380,13 @@ impl KnowledgeGraphStorage {
         }
 
         // Normalize scores
-        if let Some(&max_score) = results.values().fold(Some(&0.0f64), |max, &v| Some(if v > *max.unwrap_or(&0.0)) { &v } else { max.unwrap_or(&v) })) {
-            if max_score > 0.0 {
-                for v in results.values_mut() {
-                    *v /= max_score;
-                }
+        let max_score = results
+            .values()
+            .cloned()
+            .fold(0.0f64, |max, v| if v > max { v } else { max });
+        if max_score > 0.0 {
+            for v in results.values_mut() {
+                *v /= max_score;
             }
         }
 
@@ -355,10 +401,13 @@ impl KnowledgeGraphStorage {
         query_embedding: &[f64],
         limit: usize,
     ) -> Result<Vec<SearchResult>> {
-        let rows = self.db.query_all(Statement::from_string(
-            self.db.get_database_backend(),
-            "SELECT note_id, embedding FROM note_embeddings".to_string(),
-        )).await?;
+        let rows = self
+            .db
+            .query_all(Statement::from_string(
+                self.db.get_database_backend(),
+                "SELECT note_id, embedding FROM note_embeddings".to_string(),
+            ))
+            .await?;
 
         let mut results: Vec<(String, f64)> = Vec::new();
         for row in &rows {
@@ -405,10 +454,13 @@ impl KnowledgeGraphStorage {
         keyword_weight: f64,
     ) -> Result<Vec<SearchResult>> {
         // Semantic results
-        let semantic_rows = self.db.query_all(Statement::from_string(
-            self.db.get_database_backend(),
-            "SELECT note_id, embedding FROM note_embeddings".to_string(),
-        )).await?;
+        let semantic_rows = self
+            .db
+            .query_all(Statement::from_string(
+                self.db.get_database_backend(),
+                "SELECT note_id, embedding FROM note_embeddings".to_string(),
+            ))
+            .await?;
 
         let mut semantic_results: HashMap<String, f64> = HashMap::new();
         for row in &semantic_rows {
@@ -468,7 +520,11 @@ impl KnowledgeGraphStorage {
     }
 
     /// Get related notes to a given note.
-    pub async fn get_related_notes(&self, note_id: &str, limit: usize) -> Result<Vec<SearchResult>> {
+    pub async fn get_related_notes(
+        &self,
+        note_id: &str,
+        limit: usize,
+    ) -> Result<Vec<SearchResult>> {
         let embedding = match self.get_embedding(note_id).await? {
             Some(e) => e,
             None => return Ok(Vec::new()),
@@ -486,17 +542,26 @@ impl KnowledgeGraphStorage {
         let note_count = self.count_notes().await?;
         let link_count = self.count_links().await?;
 
-        let rows = self.db.query_all(Statement::from_string(
-            self.db.get_database_backend(),
-            "SELECT MAX(updated_at) as last_updated FROM notes".to_string(),
-        )).await?;
-        let last_updated = rows.first().and_then(|r| r.try_get::<String>("", "last_updated").ok());
+        let rows = self
+            .db
+            .query_all(Statement::from_string(
+                self.db.get_database_backend(),
+                "SELECT MAX(updated_at) as last_updated FROM notes".to_string(),
+            ))
+            .await?;
+        let last_updated = rows
+            .first()
+            .and_then(|r| r.try_get::<String>("", "last_updated").ok());
 
-        let emb_rows = self.db.query_all(Statement::from_string(
-            self.db.get_database_backend(),
-            "SELECT COUNT(*) as cnt FROM note_embeddings".to_string(),
-        )).await?;
-        let embedded_count = emb_rows.first()
+        let emb_rows = self
+            .db
+            .query_all(Statement::from_string(
+                self.db.get_database_backend(),
+                "SELECT COUNT(*) as cnt FROM note_embeddings".to_string(),
+            ))
+            .await?;
+        let embedded_count = emb_rows
+            .first()
             .and_then(|r| r.try_get::<i64>("", "cnt").ok())
             .unwrap_or(0) as usize;
 
@@ -518,7 +583,9 @@ fn row_to_note(row: &sea_orm::CommonSqlRow) -> Note {
     let file_path: String = row.try_get("", "file_path").unwrap_or_default();
     let title: String = row.try_get("", "title").unwrap_or_default();
     let content: String = row.try_get("", "content").unwrap_or_default();
-    let links_str: String = row.try_get("", "links").unwrap_or_else(|_| "[]".to_string());
+    let links_str: String = row
+        .try_get("", "links")
+        .unwrap_or_else(|_| "[]".to_string());
     let links: Vec<String> = serde_json::from_str(&links_str).unwrap_or_default();
     let created_at_str: String = row.try_get("", "created_at").unwrap_or_default();
     let updated_at_str: String = row.try_get("", "updated_at").unwrap_or_default();

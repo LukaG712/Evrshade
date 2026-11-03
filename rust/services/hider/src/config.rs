@@ -1,11 +1,11 @@
 //! Versioned configuration routes.
 
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
-use sea_orm::{Statement, ConnectionTrait};
-use serde_json::json;
+use axum::{extract::Path, extract::State, http::StatusCode, Json};
+use sea_orm::{ConnectionTrait, Statement};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
-use crate::{AppState, gen_id};
+use crate::{gen_id, AppState};
 
 #[derive(Deserialize)]
 pub struct ConfigCreate {
@@ -64,18 +64,21 @@ pub async fn list_config(
         "SELECT id, key, value, is_encrypted, description, version, created_at, updated_at FROM config_entries ORDER BY key".to_string(),
     )).await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"detail": e.to_string()}))))?;
 
-    let configs: Vec<serde_json::Value> = rows.iter().map(|row| {
-        json!({
-            "id": row.try_get::<String>("", "id").unwrap_or_default(),
-            "key": row.try_get::<String>("", "key").unwrap_or_default(),
-            "value": row.try_get::<String>("", "value").unwrap_or_default(),
-            "is_encrypted": row.try_get::<i32>("", "is_encrypted").unwrap_or(0) == 1,
-            "description": row.try_get::<String>("", "description").unwrap_or_default(),
-            "version": row.try_get::<i32>("", "version").unwrap_or(0),
-            "created_at": row.try_get::<String>("", "created_at").unwrap_or_default(),
-            "updated_at": row.try_get::<String>("", "updated_at").unwrap_or_default(),
+    let configs: Vec<serde_json::Value> = rows
+        .iter()
+        .map(|row| {
+            json!({
+                "id": row.try_get::<String>("", "id").unwrap_or_default(),
+                "key": row.try_get::<String>("", "key").unwrap_or_default(),
+                "value": row.try_get::<String>("", "value").unwrap_or_default(),
+                "is_encrypted": row.try_get::<i32>("", "is_encrypted").unwrap_or(0) == 1,
+                "description": row.try_get::<String>("", "description").unwrap_or_default(),
+                "version": row.try_get::<i32>("", "version").unwrap_or(0),
+                "created_at": row.try_get::<String>("", "created_at").unwrap_or_default(),
+                "updated_at": row.try_get::<String>("", "updated_at").unwrap_or_default(),
+            })
         })
-    }).collect();
+        .collect();
 
     Ok(Json(configs))
 }
@@ -85,12 +88,26 @@ pub async fn get_config(
     state: State<AppState>,
     Path(config_key): Path<String>,
 ) -> Result<Json<serde_json::Value>, (StatusCode, Json<serde_json::Value>)> {
-    let row = state.db.query_one(Statement::from_string(
-        state.db.get_database_backend(),
-        format!("SELECT * FROM config_entries WHERE key = '{}'", config_key),
-    )).await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"detail": e.to_string()}))))?;
+    let row = state
+        .db
+        .query_one(Statement::from_string(
+            state.db.get_database_backend(),
+            format!("SELECT * FROM config_entries WHERE key = '{}'", config_key),
+        ))
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"detail": e.to_string()})),
+            )
+        })?;
 
-    let row = row.ok_or_else(|| (StatusCode::NOT_FOUND, Json(json!({"detail": "Config not found"}))))?;
+    let row = row.ok_or_else(|| {
+        (
+            StatusCode::NOT_FOUND,
+            Json(json!({"detail": "Config not found"})),
+        )
+    })?;
 
     Ok(Json(json!({
         "id": row.try_get::<String>("", "id").unwrap_or_default(),
@@ -110,12 +127,26 @@ pub async fn update_config(
     Path(config_key): Path<String>,
     Json(body): Json<ConfigUpdate>,
 ) -> Result<Json<serde_json::Value>, (StatusCode, Json<serde_json::Value>)> {
-    let row = state.db.query_one(Statement::from_string(
-        state.db.get_database_backend(),
-        format!("SELECT * FROM config_entries WHERE key = '{}'", config_key),
-    )).await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"detail": e.to_string()}))))?;
+    let row = state
+        .db
+        .query_one(Statement::from_string(
+            state.db.get_database_backend(),
+            format!("SELECT * FROM config_entries WHERE key = '{}'", config_key),
+        ))
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"detail": e.to_string()})),
+            )
+        })?;
 
-    let row = row.ok_or_else(|| (StatusCode::NOT_FOUND, Json(json!({"detail": "Config not found"}))))?;
+    let row = row.ok_or_else(|| {
+        (
+            StatusCode::NOT_FOUND,
+            Json(json!({"detail": "Config not found"})),
+        )
+    })?;
 
     let new_version = row.try_get::<i32>("", "version").unwrap_or(0) + 1;
     let now = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
@@ -146,19 +177,40 @@ pub async fn delete_config(
     state: State<AppState>,
     Path(config_key): Path<String>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
-    let row = state.db.query_one(Statement::from_string(
-        state.db.get_database_backend(),
-        format!("SELECT * FROM config_entries WHERE key = '{}'", config_key),
-    )).await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"detail": e.to_string()}))))?;
+    let row = state
+        .db
+        .query_one(Statement::from_string(
+            state.db.get_database_backend(),
+            format!("SELECT * FROM config_entries WHERE key = '{}'", config_key),
+        ))
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"detail": e.to_string()})),
+            )
+        })?;
 
     if row.is_none() {
-        return Err((StatusCode::NOT_FOUND, Json(json!({"detail": "Config not found"}))));
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({"detail": "Config not found"})),
+        ));
     }
 
-    state.db.execute(Statement::from_string(
-        state.db.get_database_backend(),
-        format!("DELETE FROM config_entries WHERE key = '{}'", config_key),
-    )).await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"detail": e.to_string()}))))?;
+    state
+        .db
+        .execute(Statement::from_string(
+            state.db.get_database_backend(),
+            format!("DELETE FROM config_entries WHERE key = '{}'", config_key),
+        ))
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"detail": e.to_string()})),
+            )
+        })?;
 
     Ok(StatusCode::NO_CONTENT)
 }

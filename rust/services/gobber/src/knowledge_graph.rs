@@ -1,6 +1,6 @@
 //! Core knowledge graph logic: vault scanning, embedding generation, and index management.
 
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use chrono::Utc;
 use regex::Regex;
 use reqwest::Client;
@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::fs;
-use tracing::{info, warn, error};
+use tracing::{error, info, warn};
 use uuid::Uuid;
 
 use crate::models::{Note, SearchResult};
@@ -78,11 +78,19 @@ impl KnowledgeGraph {
             }
         }
 
-        info!("Scanned {} notes from {} .md files", notes.len(), md_files.len());
+        info!(
+            "Scanned {} notes from {} .md files",
+            notes.len(),
+            md_files.len()
+        );
         Ok(notes)
     }
 
-    async fn collect_md_files(&self, dir: &Path, files: &mut Vec<std::path::PathBuf>) -> Result<()> {
+    async fn collect_md_files(
+        &self,
+        dir: &Path,
+        files: &mut Vec<std::path::PathBuf>,
+    ) -> Result<()> {
         let mut entries = fs::read_dir(dir).await?;
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
@@ -115,7 +123,11 @@ impl KnowledgeGraph {
             if let Some(frontmatter) = captures.get(1) {
                 for line in frontmatter.as_str().lines() {
                     if let Some(after_colon) = line.strip_prefix("title:") {
-                        title = after_colon.trim().trim_matches('"').trim_matches('\'').to_string();
+                        title = after_colon
+                            .trim()
+                            .trim_matches('"')
+                            .trim_matches('\'')
+                            .to_string();
                         break;
                     }
                 }
@@ -158,10 +170,7 @@ impl KnowledgeGraph {
 
         let mut headers = reqwest::header::HeaderMap::new();
         if !self.shrewd_api_key.is_empty() {
-            headers.insert(
-                "X-API-Key",
-                self.shrewd_api_key.parse().unwrap_or_default(),
-            );
+            headers.insert("X-API-Key", self.shrewd_api_key.parse().unwrap_or_default());
         }
 
         let url = format!("{}/api/embed", self.shrewd_url);
@@ -184,11 +193,7 @@ impl KnowledgeGraph {
                     .get("embedding")
                     .or_else(|| data.get("vector"))
                     .and_then(|v| v.as_array())
-                    .map(|arr| {
-                        arr.iter()
-                            .filter_map(|v| v.as_f64())
-                            .collect::<Vec<f64>>()
-                    });
+                    .map(|arr| arr.iter().filter_map(|v| v.as_f64()).collect::<Vec<f64>>());
                 Ok(embedding)
             }
             Ok(resp) => {
@@ -249,7 +254,9 @@ impl KnowledgeGraph {
 
         let notes = self.scan_vault().await?;
         if notes.is_empty() {
-            return Ok(serde_json::json!({ "success": true, "notes_indexed": 0, "embeddings_generated": 0, "links_resolved": 0, "errors": 0 }));
+            return Ok(
+                serde_json::json!({ "success": true, "notes_indexed": 0, "embeddings_generated": 0, "links_resolved": 0, "errors": 0 }),
+            );
         }
 
         // Build title map for link resolution
@@ -278,7 +285,12 @@ impl KnowledgeGraph {
                 .links
                 .iter()
                 .filter_map(|link_title| {
-                    let actual_title = link_title.split('|').next().unwrap_or(link_title).trim().to_lowercase();
+                    let actual_title = link_title
+                        .split('|')
+                        .next()
+                        .unwrap_or(link_title)
+                        .trim()
+                        .to_lowercase();
                     title_map.get(&actual_title).cloned()
                 })
                 .collect();
@@ -309,7 +321,9 @@ impl KnowledgeGraph {
             }
         }
 
-        Ok(serde_json::json!({ "success": true, "notes_indexed": stats["notes_indexed"], "embeddings_generated": stats["embeddings_generated"], "links_resolved": stats["links_resolved"], "errors": stats["errors"] }))
+        Ok(
+            serde_json::json!({ "success": true, "notes_indexed": stats["notes_indexed"], "embeddings_generated": stats["embeddings_generated"], "links_resolved": stats["links_resolved"], "errors": stats["errors"] }),
+        )
     }
 
     /// Search notes using hybrid semantic + keyword matching.
@@ -340,7 +354,11 @@ impl KnowledgeGraph {
     }
 
     /// Get semantically related notes.
-    pub async fn get_related_notes(&self, note_id: &str, limit: usize) -> Result<Vec<SearchResult>> {
+    pub async fn get_related_notes(
+        &self,
+        note_id: &str,
+        limit: usize,
+    ) -> Result<Vec<SearchResult>> {
         self.storage.get_related_notes(note_id, limit).await
     }
 

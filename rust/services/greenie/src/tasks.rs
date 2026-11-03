@@ -1,9 +1,9 @@
 //! Task management routes for Greenie.
 
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use axum::{extract::Path, extract::State, http::StatusCode, Json};
 use sea_orm::{ConnectionTrait, Statement};
 
-use crate::{AppState, models::*};
+use crate::{models::*, AppState};
 
 /// Create a new task.
 pub async fn create_task(
@@ -12,8 +12,7 @@ pub async fn create_task(
 ) -> Result<Json<TaskResponse>, StatusCode> {
     let id = gen_id();
     let now = now_iso();
-    let payload_json =
-        serde_json::to_string(&body.payload).unwrap_or_else(|_| "{}".to_string());
+    let payload_json = serde_json::to_string(&body.payload).unwrap_or_else(|_| "{}".to_string());
     let sql = format!(
         "INSERT INTO tasks (id, mission_id, name, description, type, payload, created_at, updated_at) \
          VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')",
@@ -46,23 +45,28 @@ pub async fn create_task(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(TaskResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        mission_id: r.try_get_by_index(1).unwrap_or_default(),
-        name: r.try_get_by_index(2).unwrap_or_default(),
-        description: r.try_get_by_index(3).unwrap_or_default(),
-        task_type: r.try_get_by_index(4).unwrap_or_default(),
-        status: r.try_get_by_index(5).unwrap_or_default(),
-        payload: serde_json::from_str(&r.try_get_by_index::<String>(6).unwrap_or_else(|_| "{}".to_string()))
+    row.map(|r| {
+        Json(TaskResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            mission_id: r.try_get_by_index(1).unwrap_or_default(),
+            name: r.try_get_by_index(2).unwrap_or_default(),
+            description: r.try_get_by_index(3).unwrap_or_default(),
+            task_type: r.try_get_by_index(4).unwrap_or_default(),
+            status: r.try_get_by_index(5).unwrap_or_default(),
+            payload: serde_json::from_str(
+                &r.try_get_by_index::<String>(6)
+                    .unwrap_or_else(|_| "{}".to_string()),
+            )
             .unwrap_or_default(),
-        result: r.try_get_by_index(7).unwrap_or_default(),
-        error: r.try_get_by_index(8).unwrap_or_default(),
-        assigned_to: r.try_get_by_index(9).unwrap_or_default(),
-        started_at: r.try_get_by_index(10).ok(),
-        completed_at: r.try_get_by_index(11).ok(),
-        created_at: r.try_get_by_index(12).unwrap_or_default(),
-        updated_at: r.try_get_by_index(13).unwrap_or_default(),
-    }))
+            result: r.try_get_by_index(7).unwrap_or_default(),
+            error: r.try_get_by_index(8).unwrap_or_default(),
+            assigned_to: r.try_get_by_index(9).unwrap_or_default(),
+            started_at: r.try_get_by_index(10).ok(),
+            completed_at: r.try_get_by_index(11).ok(),
+            created_at: r.try_get_by_index(12).unwrap_or_default(),
+            updated_at: r.try_get_by_index(13).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 
@@ -92,8 +96,11 @@ pub async fn list_tasks(
                 description: r.try_get_by_index(3).ok()?,
                 task_type: r.try_get_by_index(4).ok()?,
                 status: r.try_get_by_index(5).ok()?,
-                payload: serde_json::from_str(&r.try_get_by_index::<String>(6).unwrap_or_else(|_| "{}".to_string()))
-                    .unwrap_or_default(),
+                payload: serde_json::from_str(
+                    &r.try_get_by_index::<String>(6)
+                        .unwrap_or_else(|_| "{}".to_string()),
+                )
+                .unwrap_or_default(),
                 result: r.try_get_by_index(7).ok()?,
                 error: r.try_get_by_index(8).ok()?,
                 assigned_to: r.try_get_by_index(9).ok()?,
@@ -127,23 +134,28 @@ pub async fn get_task(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(TaskResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        mission_id: r.try_get_by_index(1).unwrap_or_default(),
-        name: r.try_get_by_index(2).unwrap_or_default(),
-        description: r.try_get_by_index(3).unwrap_or_default(),
-        task_type: r.try_get_by_index(4).unwrap_or_default(),
-        status: r.try_get_by_index(5).unwrap_or_default(),
-        payload: serde_json::from_str(&r.try_get_by_index::<String>(6).unwrap_or_else(|_| "{}".to_string()))
+    row.map(|r| {
+        Json(TaskResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            mission_id: r.try_get_by_index(1).unwrap_or_default(),
+            name: r.try_get_by_index(2).unwrap_or_default(),
+            description: r.try_get_by_index(3).unwrap_or_default(),
+            task_type: r.try_get_by_index(4).unwrap_or_default(),
+            status: r.try_get_by_index(5).unwrap_or_default(),
+            payload: serde_json::from_str(
+                &r.try_get_by_index::<String>(6)
+                    .unwrap_or_else(|_| "{}".to_string()),
+            )
             .unwrap_or_default(),
-        result: r.try_get_by_index(7).unwrap_or_default(),
-        error: r.try_get_by_index(8).unwrap_or_default(),
-        assigned_to: r.try_get_by_index(9).unwrap_or_default(),
-        started_at: r.try_get_by_index(10).ok(),
-        completed_at: r.try_get_by_index(11).ok(),
-        created_at: r.try_get_by_index(12).unwrap_or_default(),
-        updated_at: r.try_get_by_index(13).unwrap_or_default(),
-    }))
+            result: r.try_get_by_index(7).unwrap_or_default(),
+            error: r.try_get_by_index(8).unwrap_or_default(),
+            assigned_to: r.try_get_by_index(9).unwrap_or_default(),
+            started_at: r.try_get_by_index(10).ok(),
+            completed_at: r.try_get_by_index(11).ok(),
+            created_at: r.try_get_by_index(12).unwrap_or_default(),
+            updated_at: r.try_get_by_index(13).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 
@@ -182,23 +194,28 @@ pub async fn start_task(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(TaskResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        mission_id: r.try_get_by_index(1).unwrap_or_default(),
-        name: r.try_get_by_index(2).unwrap_or_default(),
-        description: r.try_get_by_index(3).unwrap_or_default(),
-        task_type: r.try_get_by_index(4).unwrap_or_default(),
-        status: r.try_get_by_index(5).unwrap_or_default(),
-        payload: serde_json::from_str(&r.try_get_by_index::<String>(6).unwrap_or_else(|_| "{}".to_string()))
+    row.map(|r| {
+        Json(TaskResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            mission_id: r.try_get_by_index(1).unwrap_or_default(),
+            name: r.try_get_by_index(2).unwrap_or_default(),
+            description: r.try_get_by_index(3).unwrap_or_default(),
+            task_type: r.try_get_by_index(4).unwrap_or_default(),
+            status: r.try_get_by_index(5).unwrap_or_default(),
+            payload: serde_json::from_str(
+                &r.try_get_by_index::<String>(6)
+                    .unwrap_or_else(|_| "{}".to_string()),
+            )
             .unwrap_or_default(),
-        result: r.try_get_by_index(7).unwrap_or_default(),
-        error: r.try_get_by_index(8).unwrap_or_default(),
-        assigned_to: r.try_get_by_index(9).unwrap_or_default(),
-        started_at: r.try_get_by_index(10).ok(),
-        completed_at: r.try_get_by_index(11).ok(),
-        created_at: r.try_get_by_index(12).unwrap_or_default(),
-        updated_at: r.try_get_by_index(13).unwrap_or_default(),
-    }))
+            result: r.try_get_by_index(7).unwrap_or_default(),
+            error: r.try_get_by_index(8).unwrap_or_default(),
+            assigned_to: r.try_get_by_index(9).unwrap_or_default(),
+            started_at: r.try_get_by_index(10).ok(),
+            completed_at: r.try_get_by_index(11).ok(),
+            created_at: r.try_get_by_index(12).unwrap_or_default(),
+            updated_at: r.try_get_by_index(13).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 

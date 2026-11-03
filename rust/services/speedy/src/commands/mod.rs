@@ -34,10 +34,7 @@ pub fn find_compose_file() -> Option<PathBuf> {
     None
 }
 
-pub fn run_compose(
-    args: &[&str],
-    project_dir: Option<&PathBuf>,
-) -> Result<CommandOutput, String> {
+pub fn run_compose(args: &[&str], project_dir: Option<&PathBuf>) -> Result<CommandOutput, String> {
     let mut cmd = Command::new("docker");
     cmd.arg("compose");
     if let Some(dir) = project_dir {
@@ -46,7 +43,9 @@ pub fn run_compose(
     }
     cmd.args(args);
 
-    let output = cmd.output().map_err(|e| format!("Failed to run docker: {}", e))?;
+    let output = cmd
+        .output()
+        .map_err(|e| format!("Failed to run docker: {}", e))?;
 
     Ok(CommandOutput {
         status: output.status.code().unwrap_or(-1),

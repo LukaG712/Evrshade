@@ -3,13 +3,16 @@
 //! Accepts JSON-encoded OTLP data, redacts secrets in attributes,
 //! stores in SQLite, and tracks statistics.
 
-use axum::{Json, extract::State};
-use sea_orm::{Statement, ConnectionTrait};
+use axum::{extract::State, Json};
+use regex::Regex;
+use sea_orm::{ConnectionTrait, Statement};
 use std::sync::atomic::{AtomicU64, Ordering};
 use tracing::info;
-use regex::Regex;
 
-use crate::{AppState, models::{TraceSpan, MetricPoint, LogEntry, OtlpStats}};
+use crate::{
+    models::{LogEntry, MetricPoint, OtlpStats, TraceSpan},
+    AppState,
+};
 
 /// Max entries per OTLP call to prevent memory exhaustion.
 const MAX_OTLP_ENTRIES_PER_CALL: usize = 1000;
@@ -51,26 +54,37 @@ fn redact_secrets_in_attributes(attributes: Option<&serde_json::Value>) -> serde
     let attrs = attributes.unwrap_or(&serde_json::json!([])).clone();
     match attrs {
         serde_json::Value::Array(attrs) => {
-            let redacted: Vec<serde_json::Value> = attrs.iter().map(|attr| {
-                if let Some(obj) = attr.as_object() {
-                    let mut new_obj = obj.clone();
-                    let key = new_obj.get("key").and_then(|k| k.as_str()).map(|s| s.to_string());
-                    if let Some(key_str) = key {
-                        if let Some(value) = new_obj.get_mut("value") {
-                            if let Some(vobj) = value.as_object_mut() {
-                                if let Some(str_val) = vobj.get("stringValue").and_then(|s| s.as_str()) {
-                                    if is_secret_key(&key_str) || should_redact_value(str_val) {
-                                        vobj.insert("stringValue".to_string(), serde_json::json!("**REDACTED**"));
+            let redacted: Vec<serde_json::Value> = attrs
+                .iter()
+                .map(|attr| {
+                    if let Some(obj) = attr.as_object() {
+                        let mut new_obj = obj.clone();
+                        let key = new_obj
+                            .get("key")
+                            .and_then(|k| k.as_str())
+                            .map(|s| s.to_string());
+                        if let Some(key_str) = key {
+                            if let Some(value) = new_obj.get_mut("value") {
+                                if let Some(vobj) = value.as_object_mut() {
+                                    if let Some(str_val) =
+                                        vobj.get("stringValue").and_then(|s| s.as_str())
+                                    {
+                                        if is_secret_key(&key_str) || should_redact_value(str_val) {
+                                            vobj.insert(
+                                                "stringValue".to_string(),
+                                                serde_json::json!("**REDACTED**"),
+                                            );
+                                        }
                                     }
                                 }
                             }
                         }
+                        serde_json::Value::Object(new_obj)
+                    } else {
+                        attr.clone()
                     }
-                    serde_json::Value::Object(new_obj)
-                } else {
-                    attr.clone()
-                }
-            }).collect();
+                })
+                .collect();
             serde_json::Value::Array(redacted)
         }
         _ => attrs,
@@ -91,17 +105,36 @@ pub async fn receive_traces(
             Ok(json_val) => {
                 // Parse OTLP JSON format
                 let mut spans = Vec::new();
-                if let Some(resource_spans) = json_val.get("resourceSpans").and_then(|v| v.as_array()) {
+                if let Some(resource_spans) =
+                    json_val.get("resourceSpans").and_then(|v| v.as_array())
+                {
                     for rs in resource_spans {
                         if let Some(scope_spans) = rs.get("scopeSpans").and_then(|v| v.as_array()) {
                             for ss in scope_spans {
-                                if let Some(spans_arr) = ss.get("spans").and_then(|v| v.as_array()) {
+                                if let Some(spans_arr) = ss.get("spans").and_then(|v| v.as_array())
+                                {
                                     for span in spans_arr {
-                                        let trace_id = span.get("traceId").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                                        let span_id = span.get("spanId").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                                        let parent_span_id = span.get("parentSpanId").and_then(|v| v.as_str()).map(|s| s.to_string());
-                                        let name = span.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                                        let attributes = redact_secrets_in_attributes(span.get("attributes"));
+                                        let trace_id = span
+                                            .get("traceId")
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("")
+                                            .to_string();
+                                        let span_id = span
+                                            .get("spanId")
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("")
+                                            .to_string();
+                                        let parent_span_id = span
+                                            .get("parentSpanId")
+                                            .and_then(|v| v.as_str())
+                                            .map(|s| s.to_string());
+                                        let name = span
+                                            .get("name")
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("")
+                                            .to_string();
+                                        let attributes =
+                                            redact_secrets_in_attributes(span.get("attributes"));
                                         let timestamp = chrono::Utc::now().to_rfc3339();
 
                                         spans.push(TraceSpan {
@@ -152,7 +185,15 @@ pub async fn receive_traces(
         )).await.ok();
     }
 
-    info!("Received {} spans via OTLP{}", limited.len(), if dropped > 0 { format!(" (dropped {} due to limit)", dropped) } else { String::new() });
+    info!(
+        "Received {} spans via OTLP{}",
+        limited.len(),
+        if dropped > 0 {
+            format!(" (dropped {} due to limit)", dropped)
+        } else {
+            String::new()
+        }
+    );
 
     axum::response::Response::new(axum::body::Body::empty())
 }
@@ -170,24 +211,44 @@ pub async fn receive_metrics(
         match serde_json::from_slice::<serde_json::Value>(&data) {
             Ok(json_val) => {
                 let mut metrics = Vec::new();
-                if let Some(resource_metrics) = json_val.get("resourceMetrics").and_then(|v| v.as_array()) {
+                if let Some(resource_metrics) =
+                    json_val.get("resourceMetrics").and_then(|v| v.as_array())
+                {
                     for rm in resource_metrics {
-                        if let Some(scope_metrics) = rm.get("scopeMetrics").and_then(|v| v.as_array()) {
+                        if let Some(scope_metrics) =
+                            rm.get("scopeMetrics").and_then(|v| v.as_array())
+                        {
                             for sm in scope_metrics {
-                                if let Some(metrics_arr) = sm.get("metrics").and_then(|v| v.as_array()) {
+                                if let Some(metrics_arr) =
+                                    sm.get("metrics").and_then(|v| v.as_array())
+                                {
                                     for metric in metrics_arr {
-                                        let name = metric.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                                        let name = metric
+                                            .get("name")
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("")
+                                            .to_string();
                                         let timestamp = chrono::Utc::now().to_rfc3339();
 
                                         // Extract value from various OTLP metric types
-                                        let value = metric.get("gauge").and_then(|g| g.get("dataPoints"))
-                                            .or_else(|| metric.get("sum").and_then(|s| s.get("dataPoints")))
+                                        let value = metric
+                                            .get("gauge")
+                                            .and_then(|g| g.get("dataPoints"))
+                                            .or_else(|| {
+                                                metric.get("sum").and_then(|s| s.get("dataPoints"))
+                                            })
                                             .and_then(|dp| dp.as_array())
                                             .and_then(|dp| dp.first())
                                             .and_then(|dp| dp.get("asDouble"))
                                             .or_else(|| {
-                                                metric.get("gauge").and_then(|g| g.get("dataPoints"))
-                                                    .or_else(|| metric.get("sum").and_then(|s| s.get("dataPoints")))
+                                                metric
+                                                    .get("gauge")
+                                                    .and_then(|g| g.get("dataPoints"))
+                                                    .or_else(|| {
+                                                        metric
+                                                            .get("sum")
+                                                            .and_then(|s| s.get("dataPoints"))
+                                                    })
                                                     .and_then(|dp| dp.as_array())
                                                     .and_then(|dp| dp.first())
                                                     .and_then(|dp| dp.get("asInt"))
@@ -195,9 +256,15 @@ pub async fn receive_metrics(
                                             .map(|v| v.as_f64().unwrap_or(0.0))
                                             .unwrap_or(0.0);
 
-                                        let labels = redact_secrets_in_attributes(metric.get("attributes"));
+                                        let labels =
+                                            redact_secrets_in_attributes(metric.get("attributes"));
 
-                                        metrics.push(MetricPoint { name, value, labels, timestamp });
+                                        metrics.push(MetricPoint {
+                                            name,
+                                            value,
+                                            labels,
+                                            timestamp,
+                                        });
                                     }
                                 }
                             }
@@ -214,7 +281,10 @@ pub async fn receive_metrics(
     };
 
     let total = metrics.len();
-    let limited: Vec<MetricPoint> = metrics.into_iter().take(MAX_OTLP_ENTRIES_PER_CALL).collect();
+    let limited: Vec<MetricPoint> = metrics
+        .into_iter()
+        .take(MAX_OTLP_ENTRIES_PER_CALL)
+        .collect();
     let dropped = total.saturating_sub(MAX_OTLP_ENTRIES_PER_CALL);
     METRICS_RECEIVED.fetch_add(limited.len() as u64, Ordering::Relaxed);
     if dropped > 0 {
@@ -232,7 +302,15 @@ pub async fn receive_metrics(
         )).await.ok();
     }
 
-    info!("Received {} metrics via OTLP{}", limited.len(), if dropped > 0 { format!(" (dropped {} due to limit)", dropped) } else { String::new() });
+    info!(
+        "Received {} metrics via OTLP{}",
+        limited.len(),
+        if dropped > 0 {
+            format!(" (dropped {} due to limit)", dropped)
+        } else {
+            String::new()
+        }
+    );
 
     axum::response::Response::new(axum::body::Body::empty())
 }
@@ -250,23 +328,47 @@ pub async fn receive_logs(
         match serde_json::from_slice::<serde_json::Value>(&data) {
             Ok(json_val) => {
                 let mut logs = Vec::new();
-                if let Some(resource_logs) = json_val.get("resourceLogs").and_then(|v| v.as_array()) {
+                if let Some(resource_logs) = json_val.get("resourceLogs").and_then(|v| v.as_array())
+                {
                     for rl in resource_logs {
                         if let Some(scope_logs) = rl.get("scopeLogs").and_then(|v| v.as_array()) {
                             for sl in scope_logs {
-                                if let Some(logs_arr) = sl.get("logRecords").and_then(|v| v.as_array()) {
+                                if let Some(logs_arr) =
+                                    sl.get("logRecords").and_then(|v| v.as_array())
+                                {
                                     for log in logs_arr {
-                                        let body_val = log.get("body").cloned().unwrap_or(serde_json::json!(""));
-                                        let message = body_val.get("stringValue").and_then(|v| v.as_str()).unwrap_or(&body_val.to_string()).to_string();
-                                        let severity = log.get("severityText").and_then(|v| v.as_str()).unwrap_or("INFO").to_string();
+                                        let body_val = log
+                                            .get("body")
+                                            .cloned()
+                                            .unwrap_or(serde_json::json!(""));
+                                        let message = body_val
+                                            .get("stringValue")
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or(&body_val.to_string())
+                                            .to_string();
+                                        let severity = log
+                                            .get("severityText")
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("INFO")
+                                            .to_string();
                                         let service = log.get("attributes").and_then(|attrs| {
                                             if let Some(arr) = attrs.as_array() {
                                                 for attr in arr {
                                                     if let Some(obj) = attr.as_object() {
-                                                        if let Some(key) = obj.get("key").and_then(|k| k.as_str()) {
+                                                        if let Some(key) =
+                                                            obj.get("key").and_then(|k| k.as_str())
+                                                        {
                                                             if key == "service.name" {
-                                                                if let Some(val) = obj.get("value").and_then(|v| v.get("stringValue")) {
-                                                                    return Some(val.as_str().unwrap_or("").to_string());
+                                                                if let Some(val) =
+                                                                    obj.get("value").and_then(|v| {
+                                                                        v.get("stringValue")
+                                                                    })
+                                                                {
+                                                                    return Some(
+                                                                        val.as_str()
+                                                                            .unwrap_or("")
+                                                                            .to_string(),
+                                                                    );
                                                                 }
                                                             }
                                                         }
@@ -275,7 +377,8 @@ pub async fn receive_logs(
                                             }
                                             None
                                         });
-                                        let attributes = redact_secrets_in_attributes(log.get("attributes"));
+                                        let attributes =
+                                            redact_secrets_in_attributes(log.get("attributes"));
                                         let timestamp = chrono::Utc::now().to_rfc3339();
 
                                         logs.push(LogEntry {
@@ -320,7 +423,15 @@ pub async fn receive_logs(
         )).await.ok();
     }
 
-    info!("Received {} logs via OTLP{}", limited.len(), if dropped > 0 { format!(" (dropped {} due to limit)", dropped) } else { String::new() });
+    info!(
+        "Received {} logs via OTLP{}",
+        limited.len(),
+        if dropped > 0 {
+            format!(" (dropped {} due to limit)", dropped)
+        } else {
+            String::new()
+        }
+    );
 
     axum::response::Response::new(axum::body::Body::empty())
 }

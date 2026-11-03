@@ -42,18 +42,16 @@ pub fn run(service: Option<String>) {
             .send()
         {
             Ok(resp) if resp.status().is_success() => {
-                let data: serde_json::Value = resp.json().unwrap_or_else(|_| {
-                    serde_json::json!({"error": "Failed to parse response"})
-                });
+                let data: serde_json::Value = resp
+                    .json()
+                    .unwrap_or_else(|_| serde_json::json!({"error": "Failed to parse response"}));
                 println!("{}", serde_json::to_string_pretty(&data).unwrap());
             }
             Ok(resp) => {
                 eprintln!(
                     "Error: {} {}",
                     resp.status(),
-                    resp.status()
-                        .canonical_reason()
-                        .unwrap_or("Unknown")
+                    resp.status().canonical_reason().unwrap_or("Unknown")
                 );
                 std::process::exit(1);
             }

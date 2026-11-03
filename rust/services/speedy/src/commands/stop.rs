@@ -9,10 +9,7 @@ pub fn run(dir: Option<PathBuf>) {
 
     let project_dir = dir
         .as_ref()
-        .or_else(|| {
-            find_compose_file()
-                .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-        });
+        .or_else(|| find_compose_file().and_then(|p| p.parent().map(|p| p.to_path_buf())));
 
     match run_compose(&["down"], project_dir.as_ref()) {
         Ok(_) => println!("✅ Services stopped successfully"),

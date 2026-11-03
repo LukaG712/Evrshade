@@ -1,9 +1,9 @@
 //! Agent management routes for Greenie.
 
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use axum::{extract::Path, extract::State, http::StatusCode, Json};
 use sea_orm::{ConnectionTrait, Statement};
 
-use crate::{AppState, models::*};
+use crate::{models::*, AppState};
 
 /// Create a new agent.
 pub async fn create_agent(
@@ -42,18 +42,23 @@ pub async fn create_agent(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(AgentResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        name: r.try_get_by_index(1).unwrap_or_default(),
-        description: r.try_get_by_index(2).unwrap_or_default(),
-        model: r.try_get_by_index(3).unwrap_or_default(),
-        system_prompt: r.try_get_by_index(4).unwrap_or_default(),
-        status: r.try_get_by_index(5).unwrap_or_default(),
-        metadata: serde_json::from_str(&r.try_get_by_index::<String>(6).unwrap_or_else(|_| "{}".to_string()))
+    row.map(|r| {
+        Json(AgentResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            name: r.try_get_by_index(1).unwrap_or_default(),
+            description: r.try_get_by_index(2).unwrap_or_default(),
+            model: r.try_get_by_index(3).unwrap_or_default(),
+            system_prompt: r.try_get_by_index(4).unwrap_or_default(),
+            status: r.try_get_by_index(5).unwrap_or_default(),
+            metadata: serde_json::from_str(
+                &r.try_get_by_index::<String>(6)
+                    .unwrap_or_else(|_| "{}".to_string()),
+            )
             .unwrap_or_default(),
-        created_at: r.try_get_by_index(7).unwrap_or_default(),
-        updated_at: r.try_get_by_index(8).unwrap_or_default(),
-    }))
+            created_at: r.try_get_by_index(7).unwrap_or_default(),
+            updated_at: r.try_get_by_index(8).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 
@@ -82,8 +87,11 @@ pub async fn list_agents(
                 model: r.try_get_by_index(3).ok()?,
                 system_prompt: r.try_get_by_index(4).ok()?,
                 status: r.try_get_by_index(5).ok()?,
-                metadata: serde_json::from_str(&r.try_get_by_index::<String>(6).unwrap_or_else(|_| "{}".to_string()))
-                    .unwrap_or_default(),
+                metadata: serde_json::from_str(
+                    &r.try_get_by_index::<String>(6)
+                        .unwrap_or_else(|_| "{}".to_string()),
+                )
+                .unwrap_or_default(),
                 created_at: r.try_get_by_index(7).ok()?,
                 updated_at: r.try_get_by_index(8).ok()?,
             })
@@ -111,18 +119,23 @@ pub async fn get_agent(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    row.map(|r| Json(AgentResponse {
-        id: r.try_get_by_index(0).unwrap_or_default(),
-        name: r.try_get_by_index(1).unwrap_or_default(),
-        description: r.try_get_by_index(2).unwrap_or_default(),
-        model: r.try_get_by_index(3).unwrap_or_default(),
-        system_prompt: r.try_get_by_index(4).unwrap_or_default(),
-        status: r.try_get_by_index(5).unwrap_or_default(),
-        metadata: serde_json::from_str(&r.try_get_by_index::<String>(6).unwrap_or_else(|_| "{}".to_string()))
+    row.map(|r| {
+        Json(AgentResponse {
+            id: r.try_get_by_index(0).unwrap_or_default(),
+            name: r.try_get_by_index(1).unwrap_or_default(),
+            description: r.try_get_by_index(2).unwrap_or_default(),
+            model: r.try_get_by_index(3).unwrap_or_default(),
+            system_prompt: r.try_get_by_index(4).unwrap_or_default(),
+            status: r.try_get_by_index(5).unwrap_or_default(),
+            metadata: serde_json::from_str(
+                &r.try_get_by_index::<String>(6)
+                    .unwrap_or_else(|_| "{}".to_string()),
+            )
             .unwrap_or_default(),
-        created_at: r.try_get_by_index(7).unwrap_or_default(),
-        updated_at: r.try_get_by_index(8).unwrap_or_default(),
-    }))
+            created_at: r.try_get_by_index(7).unwrap_or_default(),
+            updated_at: r.try_get_by_index(8).unwrap_or_default(),
+        })
+    })
     .ok_or(StatusCode::NOT_FOUND)
 }
 
