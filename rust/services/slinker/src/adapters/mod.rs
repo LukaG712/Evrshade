@@ -2,7 +2,6 @@
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use std::time::Instant;
 use uuid::Uuid;
 
 pub mod junie;
@@ -48,7 +47,7 @@ pub struct ExecutionResult {
     pub duration_ms: i64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ExecutionRequest {
     #[serde(default)]
     pub title: String,

@@ -1,11 +1,11 @@
 //! OpenAI-compatible routes for Slinker — delegates to Shrewd service.
 
-use axum::{extract::State, http::StatusCode, response::Response, Json};
-use serde::Deserialize;
+use axum::{extract::State, http::StatusCode, response::IntoResponse, response::Response, Json};
+use serde::{Deserialize, Serialize};
 
 use crate::{adapters::gen_id, AppState};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct ChatCompletionRequest {
     #[serde(default = "default_model")]
     pub model: String,
@@ -25,7 +25,7 @@ fn default_temperature() -> f64 {
     0.7
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct ChatMessage {
     pub role: String,
     pub content: String,
@@ -94,7 +94,7 @@ pub async fn chat_completions(
         .json(&request);
 
     if !shrewd_api_key.is_empty() {
-        req_builder = req_builder.bearer(&shrewd_api_key);
+        req_builder = req_builder.bearer_auth(&shrewd_api_key);
     }
 
     match req_builder.send().await {

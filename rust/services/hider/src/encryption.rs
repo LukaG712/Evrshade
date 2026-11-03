@@ -46,7 +46,7 @@ impl Encryption {
         let salt_bytes = hex::decode(&salt_raw).unwrap_or_else(|_| salt_raw.as_bytes().to_vec());
 
         // Derive 32-byte key using PBKDF2-HMAC-SHA256 with 100k iterations
-        let mut mac: HmacSha256 = hmac::Mac::new_from_slice(&salt_bytes)
+        let mac: HmacSha256 = hmac::Mac::new_from_slice(&salt_bytes)
             .map_err(|e| format!("Failed to create HMAC: {}", e))?;
         let derived = mac.finalize().into_bytes();
         let mut key = [0u8; 32];
@@ -70,7 +70,7 @@ impl Encryption {
             .encrypt(nonce, plaintext.as_bytes())
             .map_err(|e| format!("Encryption failed: {}", e))?;
 
-        Ok((base64_encode(&ciphertext), base64_encode(&nonce)))
+        Ok((base64_encode(&ciphertext), base64_encode(nonce)))
     }
 
     /// Decrypt an encrypted value.
@@ -92,7 +92,6 @@ impl Encryption {
 }
 
 fn base64_encode(data: &[u8]) -> String {
-    use std::fmt::Write;
     let mut result = String::new();
     const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     for chunk in data.chunks(3) {

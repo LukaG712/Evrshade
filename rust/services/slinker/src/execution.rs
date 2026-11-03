@@ -1,7 +1,7 @@
 //! Execution routes for Slinker — task CRUD and adapter operations.
 
 use axum::{extract::Path, extract::State, http::StatusCode, Json};
-use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
+use sea_orm::{ConnectionTrait, Statement};
 use std::collections::HashMap;
 
 use crate::{
@@ -14,13 +14,13 @@ use crate::{
 
 /// Validate workspace path is within allowed directories.
 fn validate_workspace_path(workspace_path: &str) -> Result<String, StatusCode> {
+    let workspace_base = std::env::var("WORKSPACE_BASE")
+        .unwrap_or_else(|_| "/tmp/workspace".to_string());
     let allowed_bases: Vec<&str> = vec![
         "/tmp/workspace",
         "/workspace",
         "/data/workspace",
-        std::env::var("WORKSPACE_BASE")
-            .unwrap_or_else(|_| "/tmp/workspace".to_string())
-            .as_str(),
+        workspace_base.as_str(),
     ];
 
     let path = if workspace_path.is_empty() {
@@ -155,17 +155,19 @@ pub async fn create_task(
         metadata,
     };
 
+    let adapter_name_clone = adapter_name.clone();
+    let exec_request_clone = exec_request.clone();
     let db_clone = state.db.clone();
     let task_id_clone = task_id.clone();
     let session_id_clone = session_id.clone();
     tokio::spawn(async move {
-        let adapter: Box<dyn AdapterTrait + Send + Sync> = if adapter_name == "junie" {
+        let adapter: Box<dyn AdapterTrait + Send + Sync> = if adapter_name_clone == "junie" {
             Box::new(JunieAdapter::new())
         } else {
             Box::new(SubprocessAdapter::new())
         };
 
-        let result = adapter.execute(&exec_request).await;
+        let result = adapter.execute(&exec_request_clone).await;
         let now = now_iso();
 
         let output_truncated = result.output.chars().take(50000).collect::<String>();
@@ -183,7 +185,7 @@ pub async fn create_task(
                      WHERE id = '{}'",
                     escape_sql(&result.status),
                     escape_sql(&output_truncated),
-                    escape_sql(&error_truncated.unwrap_or_default()),
+                    escape_sql(&error_truncated.as_ref().unwrap_or_default()),
                     result.exit_code,
                     result.duration_ms,
                     now,
@@ -300,7 +302,7 @@ pub async fn get_task(
         let session_id: String = r.try_get_by_index(0).unwrap_or_default();
         let changes = state
             .db
-            .query(Statement::from_string(
+            .query_all(Statement::from_string(
                 state.db.get_database_backend(),
                 format!(
                     "SELECT * FROM file_changes WHERE session_id = '{}' ORDER BY created_at",
@@ -386,7 +388,7 @@ pub async fn list_tasks(
 ) -> Result<Json<Vec<serde_json::Value>>, StatusCode> {
     let rows = state
         .db
-        .query(Statement::from_string(
+        .query_all(Statement::from_string(
             state.db.get_database_backend(),
             "SELECT * FROM tasks ORDER BY created_at DESC LIMIT 50".to_string(),
         ))
