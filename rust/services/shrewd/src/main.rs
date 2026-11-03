@@ -171,7 +171,8 @@ async fn chat_handler(
             warn!("Provider error, falling back to simulation: {}", e);
             // Fallback response
             let fallback = ChatResponse::new(
-                "[Simulated response] Provider unavailable. Please check configuration.".to_string(),
+                "[Simulated response] Provider unavailable. Please check configuration."
+                    .to_string(),
                 Provider::Ollama,
                 model.unwrap_or("llama3").to_string(),
                 0,
