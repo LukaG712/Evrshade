@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 import uuid
 from typing import AsyncIterator
@@ -55,8 +56,6 @@ async def chat_completions(request: ChatCompletionRequest):
     This endpoint delegates to the configured LLM provider via Shrewd.
     If Shrewd is not available, it returns a placeholder response.
     """
-    import os
-
     shrewd_url = os.getenv("SHREWD_URL", "")
 
     if not shrewd_url:
