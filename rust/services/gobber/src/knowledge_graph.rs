@@ -211,7 +211,8 @@ impl KnowledgeGraph {
 
     /// Generate a simple hash-based fallback embedding.
     pub fn generate_fallback_embedding(&self, text: &str, dimensions: usize) -> Vec<f64> {
-        let words: Vec<&str> = text.to_lowercase().split_whitespace().collect();
+        let text_lower = text.to_lowercase();
+        let words: Vec<&str> = text_lower.split_whitespace().collect();
         let mut embedding = vec![0.0f64; dimensions];
 
         for word in &words {

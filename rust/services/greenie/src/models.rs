@@ -122,6 +122,7 @@ pub struct TaskResponse {
 
 // ─── Plugins ───────────────────────────────────────────────────────
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PluginResponse {
     pub id: String,
@@ -137,6 +138,7 @@ pub struct PluginResponse {
     pub installed_at: String,
 }
 
+#[allow(dead_code)]
 fn default_true() -> bool {
     true
 }
@@ -166,6 +168,7 @@ pub struct PluginUpdate {
 
 // ─── MCP Servers ───────────────────────────────────────────────────
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct McpServerResponse {
     pub id: String,
@@ -189,6 +192,7 @@ pub struct McpServerAdd {
 
 // ─── Workstations ──────────────────────────────────────────────────
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WorkstationResponse {
     pub id: String,
@@ -219,6 +223,7 @@ pub struct WorkstationCreate {
     pub tags: Vec<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WorkstationStats {
     pub total: i64,

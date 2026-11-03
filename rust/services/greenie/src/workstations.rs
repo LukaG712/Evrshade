@@ -291,10 +291,8 @@ pub async fn stop_workstation(
     match existing {
         Some(r) => {
             let container_name: String = r.try_get_by_index(0).unwrap_or_default();
-            if !container_name.is_empty() {
-                if validate_container_name(&container_name).is_ok() {
-                    let _ = run_docker(&["stop", &container_name], 30).await;
-                }
+            if !container_name.is_empty() && validate_container_name(&container_name).is_ok() {
+                let _ = run_docker(&["stop", &container_name], 30).await;
             }
         }
         None => return Err(StatusCode::NOT_FOUND),
@@ -338,10 +336,8 @@ pub async fn destroy_workstation(
     match existing {
         Some(r) => {
             let container_name: String = r.try_get_by_index(0).unwrap_or_default();
-            if !container_name.is_empty() {
-                if validate_container_name(&container_name).is_ok() {
-                    let _ = run_docker(&["rm", "-f", &container_name], 30).await;
-                }
+            if !container_name.is_empty() && validate_container_name(&container_name).is_ok() {
+                let _ = run_docker(&["rm", "-f", &container_name], 30).await;
             }
         }
         None => return Err(StatusCode::NOT_FOUND),
@@ -366,7 +362,7 @@ pub async fn destroy_workstation(
 }
 
 #[derive(Deserialize)]
-struct WorkstationLogsQuery {
+pub struct WorkstationLogsQuery {
     #[serde(default = "default_tail")]
     tail: i64,
 }
