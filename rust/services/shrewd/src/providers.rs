@@ -6,7 +6,6 @@
 use anyhow::{bail, Result};
 use reqwest::{header, Client};
 use serde_json::Value;
-use tracing::warn;
 
 use crate::models::{ChatMessage, ChatResponse, Provider};
 

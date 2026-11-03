@@ -68,7 +68,7 @@ pub fn extract_relevant_context(content: &str, max_length: usize) -> Option<Stri
         return None;
     }
     let sentences: Vec<&str> = content
-        .split(|c: char| c == '.' || c == '!' || c == '?')
+        .split(['.', '!', '?'])
         .collect();
     for sentence in sentences {
         let trimmed = sentence.trim();
@@ -206,7 +206,7 @@ impl KnowledgeGraphStorage {
             ))
             .await?;
         if let Some(row) = rows.first() {
-            if let Some(cnt) = row.try_get::<i64>("", "cnt").ok() {
+            if let Ok(cnt) = row.try_get::<i64>("", "cnt") {
                 return Ok(cnt as usize);
             }
         }
@@ -255,6 +255,7 @@ impl KnowledgeGraphStorage {
     }
 
     /// Get incoming links to a note.
+    #[allow(dead_code)]
     pub async fn get_incoming_links(&self, note_id: &str) -> Result<Vec<Note>> {
         let sql = format!(
             "SELECT n.* FROM notes n
@@ -279,7 +280,7 @@ impl KnowledgeGraphStorage {
             ))
             .await?;
         if let Some(row) = rows.first() {
-            if let Some(cnt) = row.try_get::<i64>("", "cnt").ok() {
+            if let Ok(cnt) = row.try_get::<i64>("", "cnt") {
                 return Ok(cnt as usize);
             }
         }
@@ -428,7 +429,7 @@ impl KnowledgeGraphStorage {
         let mut search_results = Vec::new();
         for (note_id, score) in results {
             if let Some(note) = self.get_note(&note_id).await? {
-                let context = if let Some(_) = self.get_embedding(&note_id).await? {
+                let context = if self.get_embedding(&note_id).await?.is_some() {
                     extract_relevant_context(&note.content, 200)
                 } else {
                     None
@@ -503,7 +504,7 @@ impl KnowledgeGraphStorage {
         let mut search_results = Vec::new();
         for (note_id, score) in sorted {
             if let Some(note) = self.get_note(&note_id).await? {
-                let context = if let Some(_) = self.get_embedding(&note_id).await? {
+                let context = if self.get_embedding(&note_id).await?.is_some() {
                     extract_relevant_context(&note.content, 200)
                 } else {
                     None

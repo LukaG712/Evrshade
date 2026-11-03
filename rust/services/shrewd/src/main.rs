@@ -10,15 +10,14 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use tracing::{error, info, warn};
+use serde::Deserialize;
+use tracing::{info, warn};
 
 mod models;
 mod providers;
 mod routing;
 
-use models::{ChatMessage, ChatRequest, ChatResponse, Provider};
+use models::{ChatRequest, ChatResponse, Provider};
 use routing::{get_cost_summary, list_models, list_providers, route_chat};
 
 /// Application state.
@@ -149,13 +148,9 @@ async fn capabilities_handler() -> Json<serde_json::Value> {
 
 async fn chat_handler(
     State(state): State<AppState>,
-    authorization: Option<
-        axum::extract::TypedHeader<axum::http::header::Authorization<axum::http::header::Bearer>>,
-    >,
     Json(request): Json<ChatRequest>,
 ) -> impl IntoResponse {
     let _ = state; // auth already checked by middleware
-    let _ = authorization;
 
     let model = request.model.as_deref();
     let temperature = request.temperature;

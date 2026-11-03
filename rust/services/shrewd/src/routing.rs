@@ -303,7 +303,7 @@ pub async fn route_chat(
 ) -> Result<ChatResponse, String> {
     // Determine model
     let model = model.unwrap_or_else(|| {
-        std::env::var("SHREWD_DEFAULT_MODEL").unwrap_or_else(|_| "llama3".to_string())
+        std::env::var("SHREWD_DEFAULT_MODEL").unwrap_or_else(|_| "llama3".to_string()).leak()
     });
 
     let (resolved_provider, _context_window, is_private) =

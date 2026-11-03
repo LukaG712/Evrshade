@@ -36,6 +36,7 @@ struct SearchQuery {
     #[serde(default = "default_limit")]
     limit: usize,
     #[serde(default)]
+    #[allow(dead_code)]
     offset: usize,
 }
 
@@ -47,6 +48,7 @@ struct ListQuery {
     offset: usize,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct IndexQuery {
     #[serde(default)]
@@ -315,6 +317,7 @@ async fn stats_handler(State(state): State<AppState>) -> impl IntoResponse {
 }
 
 /// Validate webhook URL to prevent SSRF.
+#[allow(dead_code)]
 fn validate_webhook_url(url: &str) -> Result<(), String> {
     let parsed = url::Url::parse(url).map_err(|e| format!("Invalid URL: {}", e))?;
 
