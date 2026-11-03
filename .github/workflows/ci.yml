@@ -26,6 +26,69 @@ jobs:
         run: |
           ruff format . --exclude .junie --config ruff.toml --check --diff
 
+  rust-lint:
+    name: Rust Lint & Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Rust formatting check (rustfmt)
+        run: |
+          cd rust && cargo fmt --all -- --check
+
+      - name: Rust linting (clippy)
+        run: |
+          cd rust && cargo clippy --workspace -- -D warnings
+
+  rust-test:
+    name: Rust Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-test-
+
+      - name: Install SQLite dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+
+      - name: Run Rust tests
+        run: |
+          cd rust && cargo test --workspace -- --test-threads=1
+
   docker-compose:
     name: Validate Docker Compose
     runs-on: ubuntu-latest

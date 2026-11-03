@@ -1,0 +1,27 @@
+[package]
+name = "poltergeist"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "poltergeist"
+path = "src/main.rs"
+
+[dependencies]
+evershade-core = { path = "../../crates/evershade-core" }
+evershade-db = { path = "../../crates/evershade-db" }
+evershade-events = { path = "../../crates/evershade-events" }
+axum = { workspace = true }
+tower-http = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+sea-orm = { workspace = true }
+reqwest = { workspace = true }
+url = { workspace = true }
+ipnetwork = { workspace = true }
+regex = { workspace = true }
