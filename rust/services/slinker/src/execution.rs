@@ -14,8 +14,8 @@ use crate::{
 
 /// Validate workspace path is within allowed directories.
 fn validate_workspace_path(workspace_path: &str) -> Result<String, StatusCode> {
-    let workspace_base = std::env::var("WORKSPACE_BASE")
-        .unwrap_or_else(|_| "/tmp/workspace".to_string());
+    let workspace_base =
+        std::env::var("WORKSPACE_BASE").unwrap_or_else(|_| "/tmp/workspace".to_string());
     let allowed_bases: Vec<&str> = vec![
         "/tmp/workspace",
         "/workspace",
