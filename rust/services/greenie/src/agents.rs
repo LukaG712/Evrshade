@@ -68,7 +68,7 @@ pub async fn list_agents(
 ) -> Result<Json<Vec<AgentResponse>>, StatusCode> {
     let rows = state
         .db
-        .query(Statement::from_string(
+        .query_all(Statement::from_string(
             state.db.get_database_backend(),
             "SELECT id, name, description, model, system_prompt, status, metadata, created_at, updated_at \
              FROM agents ORDER BY created_at DESC"

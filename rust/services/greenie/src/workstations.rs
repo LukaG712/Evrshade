@@ -55,7 +55,7 @@ pub async fn list_workstations(
 ) -> Result<Json<serde_json::Value>, StatusCode> {
     let rows = state
         .db
-        .query(Statement::from_string(
+        .query_all(Statement::from_string(
             state.db.get_database_backend(),
             "SELECT id, name, description, agent_name, status, container_id, container_name, \
              started_at, image, tags, error, created_at, updated_at \

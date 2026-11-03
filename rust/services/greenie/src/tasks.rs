@@ -76,7 +76,7 @@ pub async fn list_tasks(
 ) -> Result<Json<Vec<TaskResponse>>, StatusCode> {
     let rows = state
         .db
-        .query(Statement::from_string(
+        .query_all(Statement::from_string(
             state.db.get_database_backend(),
             "SELECT id, mission_id, name, description, type, status, payload, result, error, \
              assigned_to, started_at, completed_at, created_at, updated_at \
