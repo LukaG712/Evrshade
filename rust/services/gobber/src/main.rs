@@ -10,16 +10,16 @@ use axum::{
     routing::{delete, get, post},
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::sync::Arc;
-use tracing::{error, info, warn};
+use tracing::{error, info};
 
 mod knowledge_graph;
 mod models;
 mod storage;
 
 use knowledge_graph::KnowledgeGraph;
-use models::{Note, SearchResult};
+use models::SearchResult;
 use storage::KnowledgeGraphStorage;
 
 /// Application state.
@@ -335,7 +335,11 @@ fn validate_webhook_url(url: &str) -> Result<(), String> {
 
     // Block private IP ranges
     if let Ok(ip) = host.parse::<std::net::IpAddr>() {
-        if ip.is_private() || ip.is_loopback() || ip.is_link_local() {
+        let is_private = match ip {
+            std::net::IpAddr::V4(v4) => v4.is_private() || v4.is_loopback() || v4.is_link_local(),
+            std::net::IpAddr::V6(v6) => v6.is_loopback(),
+        };
+        if is_private {
             return Err("Webhook URL must not point to a private IP address".to_string());
         }
     }

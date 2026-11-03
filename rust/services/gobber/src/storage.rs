@@ -1,11 +1,9 @@
 //! SQLite storage backend for the Knowledge Graph module in Gobber.
 
-use anyhow::{bail, Result};
-use chrono::{DateTime, Utc};
-use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
-use serde_json;
+use anyhow::Result;
+use chrono::Utc;
+use sea_orm::{ConnectionTrait, DatabaseConnection, QueryResult, Statement};
 use std::collections::HashMap;
-use tracing::warn;
 
 use crate::models::{Note, SearchResult};
 
@@ -333,8 +331,9 @@ impl KnowledgeGraphStorage {
         if query.trim().is_empty() {
             return Ok(Vec::new());
         }
+        let query_lower = query.to_lowercase();
         let terms: Vec<&str> = regex::Regex::new(r"\w[\w-]*")?
-            .find_iter(&query.to_lowercase())
+            .find_iter(&query_lower)
             .map(|m| m.as_str())
             .collect();
         if terms.is_empty() {
@@ -578,7 +577,7 @@ fn escape_sql(s: &str) -> String {
     s.replace('\'', "''")
 }
 
-fn row_to_note(row: &sea_orm::CommonSqlRow) -> Note {
+fn row_to_note(row: &QueryResult) -> Note {
     let id: String = row.try_get("", "id").unwrap_or_default();
     let file_path: String = row.try_get("", "file_path").unwrap_or_default();
     let title: String = row.try_get("", "title").unwrap_or_default();

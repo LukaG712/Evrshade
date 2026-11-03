@@ -1,20 +1,17 @@
 //! Core knowledge graph logic: vault scanning, embedding generation, and index management.
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use chrono::Utc;
 use regex::Regex;
 use reqwest::Client;
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::Arc;
 use tokio::fs;
 use tracing::{error, info, warn};
-use uuid::Uuid;
 
 use crate::models::{Note, SearchResult};
 use crate::storage::KnowledgeGraphStorage;
 
-/// Regex to extract [[links]] from Obsidian markdown.
 lazy_static::lazy_static! {
     static ref LINK_PATTERN: Regex = Regex::new(r"\[\[([^\]]+)\]\]").unwrap();
     static ref FRONTMATTER_PATTERN: Regex = Regex::new(r"^---\s*\n(.*?)\n---\s*\n").unwrap();
@@ -95,7 +92,7 @@ impl KnowledgeGraph {
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
             if path.is_dir() {
-                self.collect_md_files(&path, files).await?;
+                Box::pin(self.collect_md_files(&path, files)).await?;
             } else if path.extension().and_then(|s| s.to_str()) == Some("md") {
                 files.push(path);
             }
@@ -146,7 +143,6 @@ impl KnowledgeGraph {
 
         // Check if note already exists
         let existing = self.storage.get_note_by_path(&relative_path).await?;
-        let now = Utc::now();
 
         if let Some(existing) = existing {
             Ok(Note::with_id(
@@ -170,7 +166,9 @@ impl KnowledgeGraph {
 
         let mut headers = reqwest::header::HeaderMap::new();
         if !self.shrewd_api_key.is_empty() {
-            headers.insert("X-API-Key", self.shrewd_api_key.parse().unwrap_or_default());
+            if let Ok(val) = self.shrewd_api_key.parse() {
+                headers.insert("X-API-Key", val);
+            }
         }
 
         let url = format!("{}/api/embed", self.shrewd_url);
@@ -217,8 +215,9 @@ impl KnowledgeGraph {
         let mut embedding = vec![0.0f64; dimensions];
 
         for word in &words {
-            let hash = std::collections::hash_map::DefaultHasher::default();
-            let hash_value = std::hash::Hash::hash(word, &hash);
+            let mut hasher = std::collections::hash_map::DefaultHasher::default();
+            word.hash(&mut hasher);
+            let hash_value = hasher.finish();
             let hash_bytes = hash_value.to_le_bytes();
             for i in 0..dimensions {
                 embedding[i] += (hash_bytes[i % hash_bytes.len()] as f64) / 255.0 - 0.5;
@@ -245,12 +244,10 @@ impl KnowledgeGraph {
             }));
         }
 
-        let mut stats = serde_json::json!({
-            "notes_indexed": 0,
-            "embeddings_generated": 0,
-            "links_resolved": 0,
-            "errors": 0,
-        });
+        let mut notes_indexed: i64 = 0;
+        let mut embeddings_generated: i64 = 0;
+        let mut links_resolved: i64 = 0;
+        let mut errors: i64 = 0;
 
         let notes = self.scan_vault().await?;
         if notes.is_empty() {
@@ -271,11 +268,11 @@ impl KnowledgeGraph {
         for note in &notes {
             match self.storage.upsert_note(note).await {
                 Ok(()) => {
-                    stats["notes_indexed"] += 1;
+                    notes_indexed += 1;
                 }
                 Err(e) => {
                     error!("Failed to index note {}: {}", note.title, e);
-                    stats["errors"] += 1;
+                    errors += 1;
                     continue;
                 }
             }
@@ -299,7 +296,7 @@ impl KnowledgeGraph {
                 if let Err(e) = self.storage.upsert_links(&note.id, &resolved_links).await {
                     error!("Failed to resolve links for {}: {}", note.title, e);
                 } else {
-                    stats["links_resolved"] += resolved_links.len() as i64;
+                    links_resolved += resolved_links.len() as i64;
                 }
             }
         }
@@ -317,12 +314,12 @@ impl KnowledgeGraph {
             if let Err(e) = self.storage.store_embedding(&note.id, &embedding).await {
                 error!("Failed to store embedding for {}: {}", note.title, e);
             } else {
-                stats["embeddings_generated"] += 1;
+                embeddings_generated += 1;
             }
         }
 
         Ok(
-            serde_json::json!({ "success": true, "notes_indexed": stats["notes_indexed"], "embeddings_generated": stats["embeddings_generated"], "links_resolved": stats["links_resolved"], "errors": stats["errors"] }),
+            serde_json::json!({ "success": true, "notes_indexed": notes_indexed, "embeddings_generated": embeddings_generated, "links_resolved": links_resolved, "errors": errors }),
         )
     }
 
