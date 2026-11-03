@@ -45,6 +45,7 @@ pub struct ChatRequest {
     #[serde(default)]
     pub messages: Vec<ChatMessage>,
     pub model: Option<String>,
+    #[allow(dead_code)]
     pub provider: Option<Provider>,
     #[serde(default = "default_temperature")]
     pub temperature: f64,

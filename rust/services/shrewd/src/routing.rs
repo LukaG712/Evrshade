@@ -154,7 +154,7 @@ pub static MODEL_REGISTRY: Lazy<HashMap<&'static str, ModelMeta>> = Lazy::new(||
 });
 
 #[derive(Clone)]
-struct ModelMeta {
+pub struct ModelMeta {
     provider: Provider,
     context_window: usize,
     is_private: bool,
@@ -309,7 +309,7 @@ pub async fn route_chat(
     });
 
     let (resolved_provider, _context_window, is_private) =
-        resolve_provider(&model).map_err(|e| format!("Model resolution failed: {}", e))?;
+        resolve_provider(model).map_err(|e| format!("Model resolution failed: {}", e))?;
 
     // Privacy check
     if require_private && !is_private {
@@ -330,14 +330,14 @@ pub async fn route_chat(
 
     // Execute the chat request
     let response = provider
-        .chat(messages, &model, temperature, max_tokens)
+        .chat(messages, model, temperature, max_tokens)
         .await
         .map_err(|e| format!("Provider error: {}", e))?;
 
     // Track cost
-    let cost = estimate_cost(&model, response.prompt_tokens, response.completion_tokens);
+    let cost = estimate_cost(model, response.prompt_tokens, response.completion_tokens);
     record_usage(
-        &model,
+        model,
         resolved_provider,
         response.prompt_tokens,
         response.completion_tokens,
