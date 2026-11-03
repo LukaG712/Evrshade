@@ -339,6 +339,7 @@ class CodingAgentAdapter(ABC):
             # then use create_subprocess_exec to avoid shell interpretation entirely.
             # This prevents command injection even if validation is bypassed.
             import shlex
+
             args = shlex.split(command)
             process = await asyncio.create_subprocess_exec(
                 *args,

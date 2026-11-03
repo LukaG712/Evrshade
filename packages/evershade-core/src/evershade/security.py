@@ -34,7 +34,11 @@ def add_cors_middleware(
     from starlette.middleware.cors import CORSMiddleware
 
     if allowed_origins is None:
-        allowed_origins = ["http://localhost", "http://localhost:8080", "http://localhost:3000"]
+        allowed_origins = [
+            "http://localhost",
+            "http://localhost:8080",
+            "http://localhost:3000",
+        ]
     if allowed_methods is None:
         allowed_methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
     if allowed_headers is None:
@@ -43,6 +47,7 @@ def add_cors_middleware(
     # Reject wildcard origins when credentials are enabled — this is a security risk
     if "*" in allowed_origins:
         import logging
+
         logging.getLogger("evershade.security").warning(
             "CORS wildcard origin '*' is not allowed with credentials enabled. "
             "Specify explicit origins instead."

@@ -95,7 +95,9 @@ async def chat_completions(request: ChatCompletionRequest):
             headers = {}
             if shrewd_api_key:
                 headers["Authorization"] = f"Bearer {shrewd_api_key}"
-            resp = await client.post("/v1/chat/completions", json=request.model_dump(), headers=headers)
+            resp = await client.post(
+                "/v1/chat/completions", json=request.model_dump(), headers=headers
+            )
             resp.raise_for_status()
             data = resp.json()
             return data
@@ -136,7 +138,10 @@ async def _stream_completion(
             base_url=shrewd_url, timeout=120.0
         ) as client:
             async with client.stream(
-                "POST", "/v1/chat/completions", json=request.model_dump(), headers=headers
+                "POST",
+                "/v1/chat/completions",
+                json=request.model_dump(),
+                headers=headers,
             ) as resp:
                 async for line in resp.aiter_lines():
                     if line.startswith("data: "):

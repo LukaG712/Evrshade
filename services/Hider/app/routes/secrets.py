@@ -32,7 +32,13 @@ if not _ENCRYPTION_SALT_RAW:
         "Generate one: openssl rand -hex 16"
     )
 # Reject known default salts
-if _ENCRYPTION_SALT_RAW.lower() in ("evershade-hider-salt-v1", "change-me", "default", "test", "salt"):
+if _ENCRYPTION_SALT_RAW.lower() in (
+    "evershade-hider-salt-v1",
+    "change-me",
+    "default",
+    "test",
+    "salt",
+):
     raise RuntimeError(
         "ENCRYPTION_SALT is using a known default value. Generate a random salt: openssl rand -hex 16"
     )
@@ -65,15 +71,19 @@ def _validate_secret_name(name: str) -> None:
     if not name:
         raise HTTPException(status_code=400, detail="Secret name cannot be empty")
     if len(name) > 255:
-        raise HTTPException(status_code=400, detail="Secret name is too long (max 255 characters)")
+        raise HTTPException(
+            status_code=400, detail="Secret name is too long (max 255 characters)"
+        )
     # Reject path traversal, null bytes, and control characters
     if ".." in name or "\x00" in name:
-        raise HTTPException(status_code=400, detail="Secret name contains invalid characters")
+        raise HTTPException(
+            status_code=400, detail="Secret name contains invalid characters"
+        )
     # Only allow alphanumeric, hyphens, underscores, dots, and slashes (for namespacing)
-    if not re.match(r'^[a-zA-Z0-9._/-]+$', name):
+    if not re.match(r"^[a-zA-Z0-9._/-]+$", name):
         raise HTTPException(
             status_code=400,
-            detail="Secret name can only contain alphanumeric characters, hyphens, underscores, dots, and slashes"
+            detail="Secret name can only contain alphanumeric characters, hyphens, underscores, dots, and slashes",
         )
 
 

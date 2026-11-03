@@ -53,7 +53,7 @@ def _validate_workspace_path(workspace_path: str) -> str:
     raise HTTPException(
         status_code=400,
         detail=f"Workspace path '{workspace_path}' is not allowed. "
-               f"Must be within one of: {_ALLOWED_WORKSPACE_BASES}"
+        f"Must be within one of: {_ALLOWED_WORKSPACE_BASES}",
     )
 
 
@@ -139,7 +139,9 @@ async def create_task(data: dict[str, Any]):
     )
 
     # Execute asynchronously — keep a reference to prevent garbage collection
-    task = asyncio.create_task(_execute_task_async(task_id, session_id, adapter_name, request))
+    task = asyncio.create_task(
+        _execute_task_async(task_id, session_id, adapter_name, request)
+    )
     task.add_done_callback(lambda t: None)  # Suppress unhandled exception warnings
 
     return {

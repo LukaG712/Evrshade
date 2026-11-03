@@ -99,7 +99,9 @@ class SlackDelivery(BaseDelivery):
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": (notification.title or "Notification")[:150],  # Slack limit
+                        "text": (notification.title or "Notification")[
+                            :150
+                        ],  # Slack limit
                     },
                 },
                 {
@@ -169,7 +171,11 @@ class EmailDelivery(BaseDelivery):
             raise ValueError("Email recipient must contain '@'")
 
         # Sanitize subject to prevent email header injection
-        subject = (notification.title or "Evershade Notification").replace("\n", " ").replace("\r", " ")
+        subject = (
+            (notification.title or "Evershade Notification")
+            .replace("\n", " ")
+            .replace("\r", " ")
+        )
 
         msg = MIMEMultipart()
         msg["From"] = self.smtp_from
@@ -226,7 +232,7 @@ class TelegramDelivery(BaseDelivery):
             raise ValueError("Telegram chat_id (recipient) is required")
 
         # Validate chat_id is numeric to prevent injection
-        if not re.match(r'^-?\d+$', chat_id):
+        if not re.match(r"^-?\d+$", chat_id):
             raise ValueError("Telegram chat_id must be numeric")
 
         url = f"{self.base_url}{self.bot_token}/sendMessage"
@@ -265,11 +271,16 @@ class WebhookDelivery(BaseDelivery):
 
         host = parsed.hostname or ""
         # Block cloud metadata endpoints
-        if host in ("169.254.169.254", "metadata.google.internal", "metadata.cloud.oracle.com"):
+        if host in (
+            "169.254.169.254",
+            "metadata.google.internal",
+            "metadata.cloud.oracle.com",
+        ):
             raise ValueError("Webhook URL points to a blocked host")
 
         # Block private IP ranges to prevent SSRF via internal network access
         import ipaddress
+
         try:
             addr = ipaddress.ip_address(host)
             if addr.is_private or addr.is_loopback or addr.is_link_local:

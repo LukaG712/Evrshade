@@ -54,10 +54,10 @@ def _validate_container_name(container_name: str) -> str:
     """
     if not container_name:
         raise HTTPException(status_code=400, detail="Container name is empty")
-    if not re.match(r'^evershade-ws-[a-f0-9]{8}$', container_name):
+    if not re.match(r"^evershade-ws-[a-f0-9]{8}$", container_name):
         raise HTTPException(
             status_code=400,
-            detail=f"Container name '{container_name}' does not match expected pattern 'evershade-ws-*'"
+            detail=f"Container name '{container_name}' does not match expected pattern 'evershade-ws-*'",
         )
     return container_name
 

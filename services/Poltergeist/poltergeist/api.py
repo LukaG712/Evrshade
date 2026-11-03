@@ -36,6 +36,7 @@ from poltergeist.storage import Storage
 
 logger = logging.getLogger("poltergeist")
 
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Simple in-memory rate limiting middleware for Poltergeist."""
 

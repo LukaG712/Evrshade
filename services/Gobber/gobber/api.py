@@ -62,7 +62,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", "http://localhost:8080", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:8080",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
@@ -188,22 +192,31 @@ def _validate_webhook_url(url: str) -> str:
 
     # Only allow http and https schemes
     if parsed.scheme not in ("http", "https"):
-        raise HTTPException(status_code=400, detail="Webhook URL must use http or https scheme")
+        raise HTTPException(
+            status_code=400, detail="Webhook URL must use http or https scheme"
+        )
 
     host = parsed.hostname or ""
 
     # Block cloud metadata endpoints
-    if host in ("169.254.169.254", "metadata.google.internal", "metadata.cloud.oracle.com"):
-        raise HTTPException(status_code=400, detail="Webhook URL points to a blocked host")
+    if host in (
+        "169.254.169.254",
+        "metadata.google.internal",
+        "metadata.cloud.oracle.com",
+    ):
+        raise HTTPException(
+            status_code=400, detail="Webhook URL points to a blocked host"
+        )
 
     # Block private IP ranges to prevent SSRF via internal network access
     import ipaddress
+
     try:
         addr = ipaddress.ip_address(host)
         if addr.is_private or addr.is_loopback or addr.is_link_local:
             raise HTTPException(
                 status_code=400,
-                detail="Webhook URL must not point to a private IP address"
+                detail="Webhook URL must not point to a private IP address",
             )
     except ValueError:
         pass  # Not an IP address, it's a hostname
