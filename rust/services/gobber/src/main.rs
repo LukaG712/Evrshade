@@ -19,7 +19,6 @@ mod models;
 mod storage;
 
 use knowledge_graph::KnowledgeGraph;
-use models::SearchResult;
 use storage::KnowledgeGraphStorage;
 
 /// Application state.

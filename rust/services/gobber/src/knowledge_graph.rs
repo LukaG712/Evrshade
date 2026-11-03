@@ -1,10 +1,10 @@
 //! Core knowledge graph logic: vault scanning, embedding generation, and index management.
 
 use anyhow::Result;
-use chrono::Utc;
 use regex::Regex;
 use reqwest::Client;
 use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 use std::path::Path;
 use tokio::fs;
 use tracing::{error, info, warn};
@@ -216,8 +216,8 @@ impl KnowledgeGraph {
 
         for word in &words {
             let mut hasher = std::collections::hash_map::DefaultHasher::default();
-            word.hash(&mut hasher);
-            let hash_value = hasher.finish();
+            Hash::hash(word, &mut hasher);
+            let hash_value = Hasher::finish(&hasher);
             let hash_bytes = hash_value.to_le_bytes();
             for i in 0..dimensions {
                 embedding[i] += (hash_bytes[i % hash_bytes.len()] as f64) / 255.0 - 0.5;

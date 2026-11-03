@@ -165,7 +165,7 @@ impl KnowledgeGraphStorage {
             .db
             .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
-        Ok(rows.into_iter().map(row_to_note).collect())
+        Ok(rows.into_iter().map(|row| row_to_note(&row)).collect())
     }
 
     /// Delete a note and its associated data.
@@ -251,7 +251,7 @@ impl KnowledgeGraphStorage {
             .db
             .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
-        Ok(rows.into_iter().map(row_to_note).collect())
+        Ok(rows.into_iter().map(|row| row_to_note(&row)).collect())
     }
 
     /// Get incoming links to a note.
@@ -266,7 +266,7 @@ impl KnowledgeGraphStorage {
             .db
             .query_all(Statement::from_string(self.db.get_database_backend(), sql))
             .await?;
-        Ok(rows.into_iter().map(row_to_note).collect())
+        Ok(rows.into_iter().map(|row| row_to_note(&row)).collect())
     }
 
     /// Count total links.
@@ -428,7 +428,7 @@ impl KnowledgeGraphStorage {
         let mut search_results = Vec::new();
         for (note_id, score) in results {
             if let Some(note) = self.get_note(&note_id).await? {
-                let context = if let Some(note_emb) = self.get_embedding(&note_id).await? {
+                let context = if let Some(_) = self.get_embedding(&note_id).await? {
                     extract_relevant_context(&note.content, 200)
                 } else {
                     None

@@ -29,7 +29,7 @@ impl AdapterTrait for JunieAdapter {
         let prompt = format!("{}\n{}", request.title, request.description);
 
         let mut cmd = tokio::process::Command::new(&self.junie_path);
-        cmd.args(&[
+        cmd.args([
             "--non-interactive",
             &format!("--workspace={}", request.workspace_path),
             "--prompt",

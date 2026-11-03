@@ -56,14 +56,17 @@ pub struct ExecutionRequest {
     #[serde(default = "default_workspace")]
     pub workspace_path: String,
     #[serde(default)]
+    #[allow(dead_code)]
     pub files: Option<Vec<String>>,
     #[serde(default)]
     pub commands: Option<Vec<String>>,
     #[serde(default = "default_timeout")]
     pub timeout: u64,
     #[serde(default)]
+    #[allow(dead_code)]
     pub permissions: serde_json::Value,
     #[serde(default)]
+    #[allow(dead_code)]
     pub metadata: serde_json::Value,
 }
 
@@ -79,6 +82,7 @@ fn default_timeout() -> u64 {
 
 #[async_trait]
 pub trait AdapterTrait: Send + Sync {
+    #[allow(dead_code)]
     fn name(&self) -> &str;
     async fn execute(&self, request: &ExecutionRequest) -> ExecutionResult;
     async fn run_tests(&self, workspace: &str, test_command: Option<&str>) -> serde_json::Value;
