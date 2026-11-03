@@ -67,9 +67,7 @@ pub fn extract_relevant_context(content: &str, max_length: usize) -> Option<Stri
     if content.trim().is_empty() {
         return None;
     }
-    let sentences: Vec<&str> = content
-        .split(['.', '!', '?'])
-        .collect();
+    let sentences: Vec<&str> = content.split(['.', '!', '?']).collect();
     for sentence in sentences {
         let trimmed = sentence.trim();
         if trimmed.len() > 10 {
